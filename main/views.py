@@ -26,3 +26,5 @@ def get_crud(request):
 
 # Projects______________________________________________
 
+# def weather_app(request):
+#     return render(request, "weather_app.html")

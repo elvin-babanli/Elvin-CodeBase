@@ -19,6 +19,7 @@ from django.urls import path
 from main.views import *
 from main.weather_app import weather_project_view
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="Mainpage"),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('git/',get_git,name="git"),
     path('crud/',get_crud,name="crud"),
     path("weather-app/", weather_project_view, name="weather_app"),
+    
 ]

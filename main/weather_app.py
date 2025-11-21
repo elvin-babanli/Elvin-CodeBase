@@ -4,7 +4,10 @@ from django.shortcuts import render
 
 
 def fetch_weather(city: str):
-    api_key = api_key = settings.OPENWEATHER_API_KEY
+    """
+    OpenWeatherMap API-dən hava məlumatı gətirən funksiya.
+    """
+    api_key = getattr(settings, "OPENWEATHER_API_KEY", "")
     if not api_key:
         return None, "Error: API key not configured in settings.py"
 
@@ -18,12 +21,17 @@ def fetch_weather(city: str):
 
     if resp.status_code == 200:
         data = resp.json()
-        city_name = data["name"]
+        city_name = data.get("name", city)
         temp = data["main"]["temp"]
         weather_desc = data["weather"][0]["description"]
-        return f"Weather in {city_name}: {temp}°C, {weather_desc}", None
+        text = f"Weather in {city_name}: {temp}°C, {weather_desc}"
+        return text, None
     else:
-        return None, f"Error: {resp.status_code} – {resp.text}"
+        try:
+            err_msg = resp.json().get("message", resp.text)
+        except Exception:
+            err_msg = resp.text
+        return None, f"Error: {resp.status_code} {err_msg}"
 
 
 def weather_project_view(request):
