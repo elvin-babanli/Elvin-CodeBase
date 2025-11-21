@@ -2,20 +2,136 @@
 
 {% block title %}Flask Quick Start{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* Sidebar */
+  .git-sidebar {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .git-sidebar .list-group-item.active {
+    background: linear-gradient(135deg, #0d6efd, #22c55e);
+    border-color: transparent;
+  }
+
+  .git-sidebar .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+  }
+
+  /* Intro badge row */
+  .git-intro-pill {
+    display: inline-flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .git-intro-pill span {
+    background: #e5f0ff;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+  }
+
+  /* Code "window" (VS Code / PowerShell look) */
+  .code-window {
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #020617;
+    color: #e5e7eb;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+  }
+
+  .code-window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.9rem;
+    background: linear-gradient(135deg, #111827, #0f172a);
+    font-size: 0.78rem;
+  }
+
+  .code-dots {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .code-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+  }
+
+  .code-dot.red { background: #f87171; }
+  .code-dot.yellow { background: #facc15; }
+  .code-dot.green { background: #4ade80; }
+
+  .code-window-title {
+    color: #9ca3af;
+  }
+
+  .code-window-path {
+    font-size: 0.7rem;
+    color: #6b7280;
+  }
+
+  .code-window-body {
+    padding: 0.75rem 1rem;
+  }
+
+  .code-window pre {
+    margin-bottom: 0;
+    background: transparent;
+    color: inherit;
+    border-radius: 0;
+    padding: 0;
+    white-space: pre;
+  }
+
+  .code-window code {
+    color: #e5e7eb;
+    font-size: 0.85rem;
+  }
+
+  /* Lighter window for config / templates / structure */
+  .code-window.light {
+    background: #0b1220;
+  }
+
+  /* Small label over sections */
+  .section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b7280;
+  }
+
+  .accordion-button:not(.collapsed) {
+    background-color: #eef2ff;
+    color: #111827;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="row">
   <!-- LEFT SIDEBAR -->
   <div class="col-lg-3 mb-4">
-    <div class="list-group shadow-sm sticky-top" style="top: 80px;">
-      <div class="list-group-item list-group-item-action active">
+    <div class="list-group shadow-sm sticky-top git-sidebar" style="top: 80px;">
+      <div class="list-group-item list-group-item-action active fw-semibold">
         Flask Quick Start
       </div>
-      <a href="#setup" class="list-group-item list-group-item-action">1) Environment & Install</a>
+      <a href="#setup" class="list-group-item list-group-item-action">1) Environment &amp; Install</a>
       <a href="#structure" class="list-group-item list-group-item-action">2) Project Structure</a>
       <a href="#init" class="list-group-item list-group-item-action">3) app/__init__.py</a>
-      <a href="#views" class="list-group-item list-group-item-action">4) app/views.py & Routes</a>
-      <a href="#templates" class="list-group-item list-group-item-action">5) Templates & Variables</a>
+      <a href="#views" class="list-group-item list-group-item-action">4) app/views.py &amp; Routes</a>
+      <a href="#templates" class="list-group-item list-group-item-action">5) Templates &amp; Variables</a>
       <a href="#run" class="list-group-item list-group-item-action">6) Run the App</a>
     </div>
   </div>
@@ -23,12 +139,24 @@
   <!-- MAIN CONTENT -->
   <div class="col-lg-9">
     <div class="mb-4">
-      <span class="badge text-bg-warning rounded-pill px-3 py-2">Flask</span>
-      <h1 class="mt-3">Flask Basic Web App</h1>
-      <p class="lead">
-        This page shows a simple Flask project: how to install Flask, create routes, 
-        use templates, and pass data from Python to HTML.
+      <span class="badge text-bg-dark px-3 py-2">FLASK</span>
+      <h1 class="mt-3 mb-2">Flask Basic Web App</h1>
+      <p class="lead mb-2">
+        Bu səhifə sadə Flask layihəsini göstərir: Flask-ın quraşdırılması, route-ların yazılması,
+        template istifadəsi və Python-dan HTML-ə data ötürülməsi.
       </p>
+
+      <div class="git-intro-pill mb-3">
+        <span>virtual environment &amp; install</span>
+        <span>project structure</span>
+        <span>routes &amp; templates</span>
+        <span>dynamic URLs &amp; variables</span>
+      </div>
+
+      <div class="alert alert-info border-0 shadow-sm">
+        <strong>Tip:</strong> Eyni strukturu sonradan böyük proyektlərdə də istifadə edə bilərsən — sadəcə
+        route-ları və template-ləri artırırsan.
+      </div>
     </div>
 
     <div class="accordion" id="flaskAccordion">
@@ -36,17 +164,30 @@
       <!-- 1) ENV & INSTALL -->
       <div class="accordion-item" id="setup">
         <h2 class="accordion-header" id="headingSetup">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSetup" aria-expanded="true" aria-controls="collapseSetup">
-            1) Create virtual environment & install Flask
+          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseSetup" aria-expanded="true" aria-controls="collapseSetup">
+            1) Create virtual environment &amp; install Flask
           </button>
         </h2>
-        <div id="collapseSetup" class="accordion-collapse collapse show" aria-labelledby="headingSetup" data-bs-parent="#flaskAccordion">
+        <div id="collapseSetup" class="accordion-collapse collapse show"
+             aria-labelledby="headingSetup" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Environment</p>
             <p>Create and activate a virtual environment, then install Flask:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-header">Terminal commands</div>
-              <div class="card-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Flask Setup</span>
+                </div>
+                <span class="code-window-path">project_root&gt;</span>
+              </div>
+              <div class="code-window-body">
 <pre class="mb-0"><code>python -m venv env
 env\Scripts\activate
 
@@ -68,16 +209,30 @@ flask run</code></pre>
       <!-- 2) PROJECT STRUCTURE -->
       <div class="accordion-item" id="structure">
         <h2 class="accordion-header" id="headingStructure">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStructure" aria-expanded="false" aria-controls="collapseStructure">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStructure" aria-expanded="false" aria-controls="collapseStructure">
             2) Project structure
           </button>
         </h2>
-        <div id="collapseStructure" class="accordion-collapse collapse" aria-labelledby="headingStructure" data-bs-parent="#flaskAccordion">
+        <div id="collapseStructure" class="accordion-collapse collapse"
+             aria-labelledby="headingStructure" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Folders</p>
             <p>A simple folder structure:</p>
 
-            <div class="card bg-light mb-3">
-              <div class="card-body">
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Explorer — Project Structure</span>
+                </div>
+                <span class="code-window-path">project_root/</span>
+              </div>
+              <div class="code-window-body">
 <pre class="mb-0"><code>project_root/
 │
 ├─ app/
@@ -105,17 +260,30 @@ flask run</code></pre>
       <!-- 3) __init__.py -->
       <div class="accordion-item" id="init">
         <h2 class="accordion-header" id="headingInit">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInit" aria-expanded="false" aria-controls="collapseInit">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseInit" aria-expanded="false" aria-controls="collapseInit">
             3) app/__init__.py
           </button>
         </h2>
-        <div id="collapseInit" class="accordion-collapse collapse" aria-labelledby="headingInit" data-bs-parent="#flaskAccordion">
+        <div id="collapseInit" class="accordion-collapse collapse"
+             aria-labelledby="headingInit" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Package init</p>
             <p>Import the Flask app from <code>views.py</code> so it can be used by the runner:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-header">app/__init__.py</div>
-              <div class="card-body">
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — app/__init__.py</span>
+                </div>
+                <span class="code-window-path">app/__init__.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre class="mb-0"><code>from .views import app</code></pre>
 {% endverbatim %}
@@ -123,7 +291,7 @@ flask run</code></pre>
             </div>
 
             <p class="mb-0">
-              This file tells Python that <code>app</code> is a package and exposes the <code>app</code> object 
+              This file tells Python that <code>app</code> is a package and exposes the <code>app</code> object
               created inside <code>views.py</code>.
             </p>
           </div>
@@ -133,17 +301,30 @@ flask run</code></pre>
       <!-- 4) VIEWS & ROUTES -->
       <div class="accordion-item" id="views">
         <h2 class="accordion-header" id="headingViews">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseViews" aria-expanded="false" aria-controls="collapseViews">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseViews" aria-expanded="false" aria-controls="collapseViews">
             4) app/views.py – routes and logic
           </button>
         </h2>
-        <div id="collapseViews" class="accordion-collapse collapse" aria-labelledby="headingViews" data-bs-parent="#flaskAccordion">
+        <div id="collapseViews" class="accordion-collapse collapse"
+             aria-labelledby="headingViews" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Views</p>
             <p>Main imports and app object:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-header">app/views.py</div>
-              <div class="card-body">
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — app/views.py</span>
+                </div>
+                <span class="code-window-path">app/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>from flask import Flask, render_template, redirect, url_for
 
@@ -163,25 +344,70 @@ app = Flask(__name__)</code></pre>
             <hr>
 
             <h5 class="mt-3">Route: Homepage <code>/</code></h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Route — /</span>
+                </div>
+                <span class="code-window-path">app/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>@app.route("/")
 def index():
     return render_template("index.html")</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
+
             <ul>
               <li><code>@app.route("/")</code> – URL path for the homepage.</li>
               <li><code>index()</code> – view function that returns <code>index.html</code>.</li>
             </ul>
 
             <h5 class="mt-4">Route: Admin page <code>/admin</code></h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Route — /admin</span>
+                </div>
+                <span class="code-window-path">app/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>@app.route("/admin")
 def admin():
     return render_template("admin.html")</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
+
             <p>When user goes to <code>/admin</code>, Flask will render <code>admin.html</code>.</p>
 
             <h5 class="mt-4">Route with parameter: <code>/user/&lt;name&gt;</code></h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Route — /user/&lt;name&gt;</span>
+                </div>
+                <span class="code-window-path">app/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>@app.route("/user/&lt;name&gt;")
 def hello_user(name):
@@ -189,6 +415,9 @@ def hello_user(name):
         return redirect(url_for("admin"))
     return render_template("user.html", user_name=name)</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
+
             <ul>
               <li><code>&lt;name&gt;</code> – dynamic URL parameter.</li>
               <li>If the name is <code>admin</code>, user is redirected to the admin page.</li>
@@ -196,12 +425,28 @@ def hello_user(name):
             </ul>
 
             <h5 class="mt-4">Route with integers: <code>/add/&lt;int:num_1&gt;/&lt;int:num_2&gt;</code></h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Route — /add/&lt;int:num_1&gt;/&lt;int:num_2&gt;</span>
+                </div>
+                <span class="code-window-path">app/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>@app.route("/add/&lt;int:num_1&gt;/&lt;int:num_2&gt;")
 def add(num_1, num_2):
     result = num_1 + num_2
     return render_template("add.html", num_1=num_1, num_2=num_2, result=result)</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
+
             <ul>
               <li><code>&lt;int:num_1&gt;</code> and <code>&lt;int:num_2&gt;</code> – only accept integers in the URL.</li>
               <li><code>result = num_1 + num_2</code> – simple sum in Python.</li>
@@ -215,12 +460,15 @@ def add(num_1, num_2):
       <!-- 5) TEMPLATES -->
       <div class="accordion-item" id="templates">
         <h2 class="accordion-header" id="headingTemplates">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTemplates" aria-expanded="false" aria-controls="collapseTemplates">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseTemplates" aria-expanded="false" aria-controls="collapseTemplates">
             5) Templates and passing variables
           </button>
         </h2>
-        <div id="collapseTemplates" class="accordion-collapse collapse" aria-labelledby="headingTemplates" data-bs-parent="#flaskAccordion">
+        <div id="collapseTemplates" class="accordion-collapse collapse"
+             aria-labelledby="headingTemplates" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Templates</p>
             <p>All HTML files live inside the <code>app/templates</code> folder.</p>
 
             <ul>
@@ -233,9 +481,24 @@ def add(num_1, num_2):
             <h5 class="mt-3">Example: user.html</h5>
             <p>We can use a variable sent from the Python function:</p>
 
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — user.html</span>
+                </div>
+                <span class="code-window-path">app/templates/user.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>&lt;h1&gt;Hello {{ user_name }}&lt;/h1&gt;</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <ul>
               <li><code>{{ user_name }}</code> – Jinja2 syntax to show a Python variable in HTML.</li>
@@ -243,7 +506,7 @@ def add(num_1, num_2):
             </ul>
 
             <div class="alert alert-info mb-0">
-              <strong>Idea:</strong> Any value you pass in <code>render_template("file.html", key=value)</code> 
+              <strong>Idea:</strong> Any value you pass in <code>render_template("file.html", key=value)</code>
               can be used in the template as <code>{{ key }}</code>.
             </div>
           </div>
@@ -253,16 +516,30 @@ def add(num_1, num_2):
       <!-- 6) RUN -->
       <div class="accordion-item" id="run">
         <h2 class="accordion-header" id="headingRun">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRun" aria-expanded="false" aria-controls="collapseRun">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseRun" aria-expanded="false" aria-controls="collapseRun">
             6) Run the application
           </button>
         </h2>
-        <div id="collapseRun" class="accordion-collapse collapse" aria-labelledby="headingRun" data-bs-parent="#flaskAccordion">
+        <div id="collapseRun" class="accordion-collapse collapse"
+             aria-labelledby="headingRun" data-bs-parent="#flaskAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Run</p>
             <p>After everything is set up, run the app:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Run Flask</span>
+                </div>
+                <span class="code-window-path">project_root&gt;</span>
+              </div>
+              <div class="code-window-body">
 <pre class="mb-0"><code>env\Scripts\activate
 flask run</code></pre>
               </div>
@@ -280,7 +557,7 @@ flask run</code></pre>
               </li>
             </ul>
 
-            <div class="alert alert-success mb-0">
+            <div class="alert alert-success mb-0 border-0 shadow-sm">
               Your basic Flask app is ready – you can now add more routes, templates, and logic.
             </div>
           </div>

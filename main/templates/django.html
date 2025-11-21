@@ -2,35 +2,164 @@
 
 {% block title %}Django E-commerce{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* Sidebar */
+  .git-sidebar {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .git-sidebar .list-group-item.active {
+    background: linear-gradient(135deg, #0d6efd, #22c55e);
+    border-color: transparent;
+  }
+
+  .git-sidebar .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+  }
+
+  /* Intro badge row */
+  .git-intro-pill {
+    display: inline-flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .git-intro-pill span {
+    background: #e5f0ff;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+  }
+
+  /* Code "window" (VS Code / PowerShell look) */
+  .code-window {
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #020617;
+    color: #e5e7eb;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+  }
+
+  .code-window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.9rem;
+    background: linear-gradient(135deg, #111827, #0f172a);
+    font-size: 0.78rem;
+  }
+
+  .code-dots {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .code-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+  }
+
+  .code-dot.red { background: #f87171; }
+  .code-dot.yellow { background: #facc15; }
+  .code-dot.green { background: #4ade80; }
+
+  .code-window-title {
+    color: #9ca3af;
+  }
+
+  .code-window-path {
+    font-size: 0.7rem;
+    color: #6b7280;
+  }
+
+  .code-window-body {
+    padding: 0.75rem 1rem;
+  }
+
+  .code-window pre {
+    margin-bottom: 0;
+    background: transparent;
+    color: inherit;
+    border-radius: 0;
+    padding: 0;
+    white-space: pre;
+  }
+
+  .code-window code {
+    color: #e5e7eb;
+    font-size: 0.85rem;
+  }
+
+  /* Lighter window for config / templates */
+  .code-window.light {
+    background: #0b1220;
+  }
+
+  /* Small label over sections */
+  .section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6b7280;
+  }
+
+  .accordion-button:not(.collapsed) {
+    background-color: #eef2ff;
+    color: #111827;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="row">
   <!-- LEFT SIDEBAR -->
   <div class="col-lg-3 mb-4">
-    <div class="list-group shadow-sm sticky-top" style="top: 80px;">
-      <div class="list-group-item list-group-item-action active">
+    <div class="list-group shadow-sm sticky-top git-sidebar" style="top: 80px;">
+      <div class="list-group-item list-group-item-action active fw-semibold">
         Django E-commerce Roadmap
       </div>
       <a href="#setup" class="list-group-item list-group-item-action">0) Project Setup</a>
       <a href="#step1" class="list-group-item list-group-item-action">Step-1: settings.py</a>
-      <a href="#step2" class="list-group-item list-group-item-action">Step-2: Models & Migrations</a>
+      <a href="#step2" class="list-group-item list-group-item-action">Step-2: Models &amp; Migrations</a>
       <a href="#step3" class="list-group-item list-group-item-action">Step-3: Superuser</a>
       <a href="#step4" class="list-group-item list-group-item-action">Step-4: URLs</a>
-      <a href="#step5" class="list-group-item list-group-item-action">Step-5: Templates & Static</a>
+      <a href="#step5" class="list-group-item list-group-item-action">Step-5: Templates &amp; Static</a>
       <a href="#step6" class="list-group-item list-group-item-action">Step-6: Views</a>
-      <a href="#step7" class="list-group-item list-group-item-action">Step-7: Run & Test</a>
+      <a href="#step7" class="list-group-item list-group-item-action">Step-7: Run &amp; Test</a>
     </div>
   </div>
 
   <!-- MAIN CONTENT -->
   <div class="col-lg-9">
+    <!-- Intro -->
     <div class="mb-4">
-      <span class="badge text-bg-success rounded-pill px-3 py-2">Django E-commerce</span>
-      <h1 class="mt-3">Django E-commerce Tutorial</h1>
-      <p class="lead">
-        Aşağıdakı addımlar ilə sıfırdan sadə Django E-commerce sistemi qura biləcəksən.
-        Hamısı ardıcıllıqla yazılıb, terminal komandaları, modellər, view-lar və template-lər də buradadır.
+      <span class="badge text-bg-dark px-3 py-2">DJANGO</span>
+      <h1 class="mt-3 mb-2">Django E-commerce Tutorial</h1>
+      <p class="lead mb-2">
+        Aşağıdakı addımlarla sıfırdan sadə Django E-commerce sistemi qura biləcəksən.
+        Hamısı ardıcıllıqla yazılıb: terminal komandaları, modellər, view-lar və template-lər.
       </p>
+
+      <div class="git-intro-pill mb-3">
+        <span>virtual environment &amp; project setup</span>
+        <span>models &amp; migrations</span>
+        <span>auth (signup / login)</span>
+        <span>orders &amp; products</span>
+      </div>
+
+      <div class="alert alert-info border-0 shadow-sm">
+        <strong>Tip:</strong> Bu səhifəni bir növ “roadmap + kod kitabçası” kimi istifadə et. Hər addımı bitirəndə
+        <em>commit</em> edib GitHub-a atsan daha yaxşı yadda qalacaq.
+      </div>
     </div>
 
     <div class="accordion" id="djangoAccordion">
@@ -38,20 +167,33 @@
       <!-- 0) PROJECT SETUP -->
       <div class="accordion-item" id="setup">
         <h2 class="accordion-header" id="headingSetup">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSetup" aria-expanded="true" aria-controls="collapseSetup">
-            0) Create empty file & basic project setup
+          <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseSetup" aria-expanded="true" aria-controls="collapseSetup">
+            0) Create empty file &amp; basic project setup
           </button>
         </h2>
-        <div id="collapseSetup" class="accordion-collapse collapse show" aria-labelledby="headingSetup" data-bs-parent="#djangoAccordion">
+        <div id="collapseSetup" class="accordion-collapse collapse show"
+             aria-labelledby="headingSetup" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Başlanğıc</p>
             <p class="mb-3">
               Əvvəlcə <strong>Django E-commerce</strong> üçün əsas strukturumuzu yaradırıq:
             </p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-header">Terminal komandaları</div>
-              <div class="card-body">
-                <pre class="mb-0"><code>0) Create empty file
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Project Setup</span>
+                </div>
+                <span class="code-window-path">Django E-commerce&gt;</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>0) Create empty file
 1) Django E-commerce&gt; mkdir django
 2) Django E-commerce&gt; cd .\django\
 3) Django E-commerce\django&gt; python -m venv .venv
@@ -63,7 +205,7 @@
               </div>
             </div>
 
-            <div class="alert alert-success mb-0">
+            <div class="alert alert-success mb-0 shadow-sm">
               <strong>Structure is ready ✅</strong> – Projekt və <code>accounts</code> app artıq hazırdır.
             </div>
           </div>
@@ -73,28 +215,33 @@
       <!-- STEP 1 -->
       <div class="accordion-item" id="step1">
         <h2 class="accordion-header" id="headingStep1">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep1" aria-expanded="false" aria-controls="collapseStep1">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep1" aria-expanded="false" aria-controls="collapseStep1">
             Step-1: myproject/myproject/settings.py – INSTALLED_APPS
           </button>
         </h2>
-        <div id="collapseStep1" class="accordion-collapse collapse" aria-labelledby="headingStep1" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep1" class="accordion-collapse collapse"
+             aria-labelledby="headingStep1" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Konfiqurasiya</p>
             <p>İlk olaraq <code>accounts</code> app-i <code>INSTALLED_APPS</code> hissəsinə əlavə edirik:</p>
 
-            <div class="card bg-light mb-2">
-              <div class="card-header">Fayl:</div>
-              <div class="card-body">
-                <code>myproject/myproject/settings.py</code>
+            <div class="code-window light mb-2">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — settings.py</span>
+                </div>
+                <span class="code-window-path">myproject/myproject/settings.py</span>
               </div>
-            </div>
-
-            <div class="card border-start border-4 border-success">
-              <div class="card-header bg-white">
-                <strong>add-INSTALLED_APPS:</strong>
-              </div>
-              <div class="card-body">
+              <div class="code-window-body">
+                <div class="mb-2 small text-secondary">Fayl:</div>
 {% verbatim %}
-<pre class="mb-0"><code>INSTALLED_APPS = [
+<pre><code>INSTALLED_APPS = [
     ...
     'accounts',
 ]</code></pre>
@@ -108,23 +255,50 @@
       <!-- STEP 2 -->
       <div class="accordion-item" id="step2">
         <h2 class="accordion-header" id="headingStep2">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep2" aria-expanded="false" aria-controls="collapseStep2">
-            Step-2: Migrations & Models
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep2" aria-expanded="false" aria-controls="collapseStep2">
+            Step-2: Migrations &amp; Models
           </button>
         </h2>
-        <div id="collapseStep2" class="accordion-collapse collapse" aria-labelledby="headingStep2" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep2" class="accordion-collapse collapse"
+             aria-labelledby="headingStep2" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Database</p>
+
             <h5>1) İlk migrate</h5>
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-header">Terminal</div>
-              <div class="card-body">
-                <pre class="mb-0"><code>1) Django E-commerce\django\myproject&gt; python manage.py migrate</code></pre>
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Initial migrate</span>
+                </div>
+                <span class="code-window-path">myproject&gt;</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>1) Django E-commerce\django\myproject&gt; python manage.py migrate</code></pre>
               </div>
             </div>
 
             <h5>2) Modelleri əlavə et</h5>
             <p class="mb-2"><code>myproject/accounts/models.py</code> faylına aşağıdakı kodu yaz:</p>
 
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — models.py</span>
+                </div>
+                <span class="code-window-path">myproject/accounts/models.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>from django.db import models
 from django.contrib.auth.models import User
@@ -145,12 +319,25 @@ class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     product = models.ManyToManyField(Product)</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
-            <h5 class="mt-4">3) Makemigrations & migrate</h5>
-            <div class="card bg-dark text-light">
-              <div class="card-body">
-                <pre class="mb-2"><code>2) Django E-commerce\django\myproject&gt; python manage.py makemigrations</code></pre>
-                <pre class="mb-0"><code>3) Django E-commerce\django\myproject&gt; python manage.py migrate</code></pre>
+            <h5 class="mt-4">3) Makemigrations &amp; migrate</h5>
+            <div class="code-window terminal-window mb-2">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Apply models</span>
+                </div>
+                <span class="code-window-path">myproject&gt;</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>2) Django E-commerce\django\myproject&gt; python manage.py makemigrations
+3) Django E-commerce\django\myproject&gt; python manage.py migrate</code></pre>
               </div>
             </div>
           </div>
@@ -160,17 +347,31 @@ class Order(models.Model):
       <!-- STEP 3 -->
       <div class="accordion-item" id="step3">
         <h2 class="accordion-header" id="headingStep3">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep3" aria-expanded="false" aria-controls="collapseStep3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep3" aria-expanded="false" aria-controls="collapseStep3">
             Step-3: Superuser yaradılması
           </button>
         </h2>
-        <div id="collapseStep3" class="accordion-collapse collapse" aria-labelledby="headingStep3" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep3" class="accordion-collapse collapse"
+             aria-labelledby="headingStep3" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Admin panel</p>
             <p>Admin panelə giriş üçün superuser yaradırıq:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-body">
-                <pre class="mb-0"><code>myproject/accounts/admin.py  (sonradan modelləri register edəcəksən)
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Superuser</span>
+                </div>
+                <span class="code-window-path">myproject&gt;</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>myproject/accounts/admin.py  (sonradan modelləri register edəcəksən)
 
 1) Django E-commerce\django\myproject&gt; python manage.py createsuperuser
 
@@ -189,14 +390,30 @@ Superuser created successfully.</code></pre>
       <!-- STEP 4 -->
       <div class="accordion-item" id="step4">
         <h2 class="accordion-header" id="headingStep4">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep4" aria-expanded="false" aria-controls="collapseStep4">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep4" aria-expanded="false" aria-controls="collapseStep4">
             Step-4: myproject/myproject/urls.py
           </button>
         </h2>
-        <div id="collapseStep4" class="accordion-collapse collapse" aria-labelledby="headingStep4" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep4" class="accordion-collapse collapse"
+             aria-labelledby="headingStep4" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Routing</p>
             <p><code>accounts.views</code>-dən bütün view-ları import edib URL pattern-ləri yazırıq:</p>
 
+            <div class="code-window light mb-0">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — urls.py</span>
+                </div>
+                <span class="code-window-path">myproject/myproject/urls.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>from accounts.views import *
 
@@ -213,6 +430,8 @@ urlpatterns = [
     path('order/', get_order, name="order"),
 ]</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -220,12 +439,16 @@ urlpatterns = [
       <!-- STEP 5 -->
       <div class="accordion-item" id="step5">
         <h2 class="accordion-header" id="headingStep5">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep5" aria-expanded="false" aria-controls="collapseStep5">
-            Step-5: Templates & Static files
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep5" aria-expanded="false" aria-controls="collapseStep5">
+            Step-5: Templates &amp; Static files
           </button>
         </h2>
-        <div id="collapseStep5" class="accordion-collapse collapse" aria-labelledby="headingStep5" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep5" class="accordion-collapse collapse"
+             aria-labelledby="headingStep5" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Frontend</p>
+
             <h5>Yaradılacaq template faylları</h5>
             <ul>
               <li><code>myproject/accounts/templates/add-product.html</code></li>
@@ -248,6 +471,19 @@ urlpatterns = [
             <hr>
 
             <h5 class="mt-3">add-product.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — add-product.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/add-product.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html'%}
 
@@ -269,8 +505,23 @@ Add Product
 &lt;a href="{% url 'logout' %}"&gt;Logout&lt;/a&gt;
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">base.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — base.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/base.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>&lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
@@ -285,8 +536,23 @@ Add Product
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">index.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — index.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/index.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html'%}
 
@@ -303,8 +569,23 @@ Homepage
 &lt;a href="{% url 'logout' %}"&gt;Logout&lt;/a&gt;
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">login.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — login.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/login.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html'%}
 
@@ -323,8 +604,23 @@ Login
 &lt;/form&gt;
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">order.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — order.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/order.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html' %}
 
@@ -349,8 +645,23 @@ Orders
 {% endfor %}
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">product.html</h5>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — product.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/product.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html'%}
 
@@ -370,8 +681,23 @@ Product
 &lt;a href="{% url 'logout' %}"&gt;Logout&lt;/a&gt;
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
 
             <h5 class="mt-4">signup.html</h5>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Template — signup.html</span>
+                </div>
+                <span class="code-window-path">accounts/templates/signup.html</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>{% extends 'base.html'%}
 
@@ -392,6 +718,8 @@ Sign Up
 &lt;/form&gt;
 {% endblock %}</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -399,14 +727,30 @@ Sign Up
       <!-- STEP 6 -->
       <div class="accordion-item" id="step6">
         <h2 class="accordion-header" id="headingStep6">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep6" aria-expanded="false" aria-controls="collapseStep6">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep6" aria-expanded="false" aria-controls="collapseStep6">
             Step-6: accounts/views.py
           </button>
         </h2>
-        <div id="collapseStep6" class="accordion-collapse collapse" aria-labelledby="headingStep6" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep6" class="accordion-collapse collapse"
+             aria-labelledby="headingStep6" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Back-end</p>
             <p><code>accounts/views.py</code> faylına aşağıdakı kodu əlavə edirik:</p>
 
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">VS Code — views.py</span>
+                </div>
+                <span class="code-window-path">accounts/views.py</span>
+              </div>
+              <div class="code-window-body">
 {% verbatim %}
 <pre><code>from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -482,6 +826,8 @@ def get_order(request):
     orders = Order.objects.filter(customer__user=request.user)
     return render(request, "order.html", {"orders": orders})</code></pre>
 {% endverbatim %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -489,22 +835,36 @@ def get_order(request):
       <!-- STEP 7 -->
       <div class="accordion-item" id="step7">
         <h2 class="accordion-header" id="headingStep7">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStep7" aria-expanded="false" aria-controls="collapseStep7">
-            Step-7: Test server & DB
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseStep7" aria-expanded="false" aria-controls="collapseStep7">
+            Step-7: Test server &amp; DB
           </button>
         </h2>
-        <div id="collapseStep7" class="accordion-collapse collapse" aria-labelledby="headingStep7" data-bs-parent="#djangoAccordion">
+        <div id="collapseStep7" class="accordion-collapse collapse"
+             aria-labelledby="headingStep7" data-bs-parent="#djangoAccordion">
           <div class="accordion-body">
+            <p class="section-label mb-1">Test &amp; Debug</p>
             <p>Artıq hər şey hazırdır, serveri işə salıb test edə bilərsən:</p>
 
-            <div class="card bg-dark text-light mb-3">
-              <div class="card-body">
-                <pre class="mb-0"><code>1) Django E-commerce\django\myproject&gt; python manage.py runserver</code></pre>
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">PowerShell — Runserver</span>
+                </div>
+                <span class="code-window-path">myproject&gt;</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>1) Django E-commerce\django\myproject&gt; python manage.py runserver</code></pre>
               </div>
             </div>
 
             <p class="mb-1">Database-i vizual görmək üçün:</p>
-            <div class="alert alert-info mb-0">
+            <div class="alert alert-info mb-0 border-0 shadow-sm">
               Open: <a href="https://sqliteviewer.app/" class="alert-link" target="_blank">https://sqliteviewer.app/</a>
             </div>
           </div>

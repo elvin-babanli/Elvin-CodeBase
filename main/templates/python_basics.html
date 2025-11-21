@@ -1,0 +1,2285 @@
+{% extends "base.html" %}
+{% block title %}Python Basics — Elvin's CodeBase{% endblock %}
+
+{% block extra_head %}
+<style>
+  .git-sidebar { border-radius: 1rem; overflow: hidden; background: #ffffff; }
+  .git-sidebar .list-group-item.active { background: linear-gradient(135deg, #0d6efd, #22c55e); border-color: transparent; }
+  .git-sidebar .list-group-item { border: none; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+
+  .code-window { border-radius: 0.9rem; overflow: hidden; background: #020617; color: #e5e7eb;
+    font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    box-shadow: 0 18px 40px rgba(15,23,42,.45);}
+  .code-window-header { display:flex; align-items:center; justify-content:space-between; padding:.4rem .9rem;
+    background:linear-gradient(135deg,#111827,#0f172a); font-size:.78rem; }
+  .code-dots { display:inline-flex; gap:.3rem; }
+  .code-dot{ width:9px; height:9px; border-radius:999px; }
+  .code-dot.red{ background:#f87171; } .code-dot.yellow{ background:#facc15; } .code-dot.green{ background:#4ade80; }
+  .code-window-title{ color:#9ca3af; } .code-window-path{ font-size:.7rem; color:#6b7280; }
+  .code-window-body{ padding:.75rem 1rem; }
+  .code-window pre{ margin-bottom:0; background:transparent; color:inherit; border-radius:0; padding:0; white-space:pre; }
+  .code-window code{ color:#e5e7eb; font-size:.9rem; }
+
+  .section-label{ font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:#6b7280; }
+  .accordion-button:not(.collapsed){ background-color:#eef2ff; color:#111827; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-3 mb-4">
+    <div id="pageSidebar" class="list-group shadow-sm sticky-top git-sidebar" style="top: 80px;">
+      <div class="list-group-item list-group-item-action active fw-semibold">Python Basics</div>
+      <a href="#intro" class="list-group-item list-group-item-action">Introduction</a><a href="#sec-1--branching---part-1" class="list-group-item list-group-item-action">1) Branching — Part 1</a><a href="#sec-1-1--branching---part-1-1" class="list-group-item list-group-item-action">1.1) Branching — Part 1.1</a><a href="#sec-2--loops---part-4" class="list-group-item list-group-item-action">2) Loops — Part 4</a><a href="#sec-2-1--loops---part-5" class="list-group-item list-group-item-action">2.1) Loops — Part 5</a><a href="#sec-3--collections---tuples---sets---dicts" class="list-group-item list-group-item-action">3) Collections — Tuples · Sets · Dicts</a><a href="#sec-4--functions---part-1" class="list-group-item list-group-item-action">4) Functions — Part 1</a><a href="#sec-4-1--functions---part-2" class="list-group-item list-group-item-action">4.1) Functions — Part 2</a><a href="#sec-5--exceptions---part-1" class="list-group-item list-group-item-action">5) Exceptions — Part 1</a><a href="#sec-6--generators---fibonacci-sequence" class="list-group-item list-group-item-action">6) Generators — Fibonacci sequence</a><a href="#sec-6-1--generators---prime-numbers" class="list-group-item list-group-item-action">6.1) Generators — Prime numbers</a><a href="#sec-7--higher-order---decorators---modules---api-testing--part-2" class="list-group-item list-group-item-action">7) Higher-Order · Decorators · Modules · API Testing (Part 2)</a><a href="#sec-7-1--higher-order---decorators---modules---api-testing--part-2-1" class="list-group-item list-group-item-action">7.1) Higher-Order · Decorators · Modules · API Testing (Part 2.1)</a><a href="#sec-8--oop---objects---constructors---overloading--part-2" class="list-group-item list-group-item-action">8) OOP — Objects · Constructors · Overloading (Part 2)</a><a href="#sec-9--oop---multiple-inheritance---polymorphism---magic--part-6" class="list-group-item list-group-item-action">9) OOP — Multiple Inheritance · Polymorphism · Magic (Part 6)</a><a href="#sec-10--algorithms---sorting---searching--part-1" class="list-group-item list-group-item-action">10) Algorithms — Sorting &amp; Searching (Part 1)</a><a href="#sec-11--algorithms---recursion--select-minimum" class="list-group-item list-group-item-action">11) Algorithms — Recursion: Select Minimum</a><a href="#sec-12--mini-app---pizza-order" class="list-group-item list-group-item-action">12) Mini App — Pizza Order</a>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="mb-4" id="intro">
+      <span class="badge text-bg-dark px-3 py-2">PYTHON</span>
+      <h1 class="mt-3 mb-2">Python Basics</h1>
+      <p class="lead mb-2">
+        A structured collection of my Python lessons.
+      </p>
+    </div>
+
+
+    <div class="accordion" id="pythonAllCodes">
+      
+      <div class="accordion-item" id="sec-1--branching---part-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-1--branching---part-1" aria-expanded="false">
+            1) Branching — Part 1
+          </button>
+        </h2>
+        <div id="collapse-sec-1--branching---part-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — module_branching_statements_part_1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/module_branching_statements_part_1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Branching Statements
+# Part 1 
+
+#----------------TASK_1---------------#
+
+# The user types in three numbers. 
+# The program prints the sum or product of these numbers based on the user&#x27;s choice. 
+
+num_1=float(input(&quot;Number 1: &quot;))
+num_2=float(input(&quot;Number 2: &quot;))
+num_3=float(input(&quot;Number 3: &quot;))
+
+choose=str(input(&quot;What you want to do? (Sum / Product)&quot;)).lower()
+
+if choose == &quot;sum&quot;:
+    print(num_1+num_2+num_3)
+elif choose ==&quot;product&quot;:
+    print(num_1*num_2*num_3)
+else:
+    print(&quot;wrong&quot;)
+
+
+#----------------TASK_2---------------#
+
+# The user types in three numbers. 
+# Based on the user&#x27;s choice, the program prints a maximum of three, 
+# a minimum of three, or arithmetic mean of three numbers.
+
+
+number_1=float(input(&quot;Your first number: &quot;))
+number_2=float(input(&quot;Your seccond number: &quot;))
+number_3=float(input(&quot;Your third number: &quot;))
+
+option=str(input(&quot;What you want to do? (Max/Min/Mean)&quot;)).lower()
+
+# (Note for me )Burada biz LIST kimi də edə bilərik məsələn 
+# əgər istifadəçi 5 dəyər əlavə edərsə o zaman bizim sistem çökməməlidir
+
+if option ==&quot;max&quot;:
+    print(&quot;Maximum is:&quot;, max(number_1, number_2, number_3))
+
+elif option == &quot;min&quot;:
+    print(&quot;Minimum is:&quot;, min(number_1,number_2,number_3))
+
+elif option == &quot;mean&quot;:
+    mean = (number_1 + number_2 + number_3)/3
+    print(&quot;Mean is:&quot;, mean)
+else:
+    print(&quot;Wrong&quot;)
+
+
+# ----------------TASK_3---------------#
+
+# The user types in the number of meters.
+# Based on the user&#x27;s choice, the program converts meters to miles, inches, or yards. 
+
+
+value = float(input(&quot;Add your value (Only Meters): &quot;))
+option_2 = input(&quot;Choose your option (mile / inch / yard): &quot;).lower()
+
+if option_2 == &quot;mile&quot;:
+    print(value , &quot; Meters equal to = &quot;,value * 0.000621371,&quot; miles&quot; )
+
+elif option_2 == &quot;inch&quot;:
+    print(value , &quot; Meters equal to = &quot;,value * 39.3701,&quot; inches&quot;)
+
+elif option_2 == &quot;yard&quot;:
+    print(value , &quot; Meters equal to = &quot;,value * 1.09361,&quot; yards&quot;)
+
+else:
+    print(&quot;Wrong&quot;)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-1-1--branching---part-1-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-1-1--branching---part-1-1" aria-expanded="false">
+            1.1) Branching — Part 1.1
+          </button>
+        </h2>
+        <div id="collapse-sec-1-1--branching---part-1-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — module_branching_statements_part_1_1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/module_branching_statements_part_1_1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Branching Statements
+# Part 1
+
+
+#----------------TASK_1---------------#
+
+# The user types in three numbers. 
+# The program prints the sum or product of these numbers based on the user&#x27;s choice.
+
+num_1 = float(input(&quot;Add first number: &quot;))
+num_2 = float(input(&quot;Add second number: &quot;))
+num_3 = float(input(&quot;Add third number: &quot;))
+
+choose = input(&quot;Selrct one option (Sum/product): &quot;).lower()
+
+if choose == &quot;sum&quot;:
+    result = num_1 + num_2 + num_3
+    print(&quot;Your sum is: &quot;, result)
+
+elif choose == &quot;product&quot;:
+    result_2 = num_1 * num_2 * num_3
+    print(&quot;Your product is: &quot;, result_2)
+
+else:
+    print(&quot;Please use normal value!&quot;)
+
+
+#----------------TASK_2---------------#
+
+# Task 2
+# The user types in three numbers. 
+# Based on the user&#x27;s choice, the program prints a maximum of three, 
+# a minimum of three, or arithmetic mean of three numbers.
+
+
+number_1 = float(input(&quot;Add first number: &quot;))
+number_2 = float(input(&quot;Add second number: &quot;))
+number_3 = float(input(&quot;Add third number: &quot;))
+
+option = input(&quot;Choose (Max/Min/Mean): &quot;).lower()
+if option == &quot;max&quot;:
+    result = max(number_1, number_2, number_3)
+    print(&quot;Your max is: &quot;, result)
+
+elif option == &quot;min&quot;:
+    result = min(number_1, number_2, number_3)
+    print(&quot;Your min is: &quot;,result)
+
+elif option == &quot;mean&quot;:
+    result = (number_1 + number_2 + number_3) / 3
+    print(&quot;Your mean is: &quot;, result)
+
+else:
+    print(&quot;Invalid option!&quot;)
+
+
+
+
+#----------------TASK_3---------------#
+
+# The user types in the number of meters. 
+# Based on the user&#x27;s choice, the program converts meters to miles, inches, or yards.
+
+
+value = float(input(&quot;White your value in meters: &quot;))
+option = input(&quot;Choose (Miles/Inches/Yards): &quot;).lower()
+if option == &quot;miles&quot;:
+    result = value * 0.000621371
+    print(&quot;Your value in miles is: &quot;, result)
+    
+elif option == &quot;inches&quot;:
+    result = value * 39.3701
+    print(&quot;Your value in inches is: &quot;, result)
+
+elif option == &quot;yards&quot;:
+    result = value * 1.09361
+    print(&quot;Your value in yards is: &quot;, result)
+
+else:
+    print(&quot;Invalid option!&quot;)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-2--loops---part-4">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-2--loops---part-4" aria-expanded="false">
+            2) Loops — Part 4
+          </button>
+        </h2>
+        <div id="collapse-sec-2--loops---part-4" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — module-loops-part-4.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/module-loops-part-4.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Loops
+# Part 4
+
+#----------------TASK_1---------------#
+
+
+# The user types in two numbers (start and end points of the range). 
+# Analyze all the numbers in this range as follows: if the number is a multiple of 7, print it.
+
+first = int(input(&quot;Add your first number here: &quot;))
+second = int(input(&quot;Add your second number here: &quot;))
+
+for i in range (first, second + 1):
+    if i % 7 == 0:
+        print(&quot;There are the numbers: &quot;, i)
+
+    
+
+
+#----------------TASK_2---------------#
+
+
+# The user types in two numbers (start and end points of the range). 
+# Analyze all the numbers in this range. Print the following:
+
+# All numbers in the range;
+# All numbers in the range in descending order;
+# All numbers that are multiples of 7;
+# How many numbers are multiples of 5.
+
+num_1 = int(input(&quot;First number: &quot;))
+num_2 = int(input(&quot;Second number: &quot;))
+print(&quot;All numbers in the range:&quot;)
+for i in range (num_1, num_2 +1):
+    print(i)
+
+print(&quot;All numbers in the range in descending order: &quot;)
+for i in range(num_2, num_1 -1, -1): # (Note for me) tərsdən sayın edərkən buna diqqət et. 
+    print(i)
+
+print(&quot;All numbers that are multiples of 7: &quot;)
+for i in range (num_1, num_2 +1):
+    if i % 7 ==0:
+        print(i)
+        
+count = 0
+print(&quot;How many numbers are multiples of 5: &quot;)
+for i in range(num_1, num_2 +1):
+    if i % 5== 0:
+        count += 1
+print(count)
+
+
+
+#----------------TASK_3---------------#
+
+
+#The user types in two numbers (start and end points of the range). 
+# Analyze all the numbers in this range. 
+# The output should be according to the rules specified below.
+
+#If the number is a multiple of 3 (divisible by 3 without remainder), 
+# print the word Fizz. 
+# If it is a multiple of 5, print Buzz. If it is a multiple of 3 and 5, print Fizz Buzz. 
+# If the number is not a multiple of 3 or 5, print the number itself.
+
+
+start = int(input(&quot;First: &quot;))
+end = int(input(&quot;Last: &quot;))
+
+for number in range(start, end + 1):
+    if number % 3 == 0 and number % 5 == 0:
+        print(&quot;Fizz Buzz&quot;)
+    elif number % 3 == 0:
+        print(&quot;Fizz&quot;)
+    elif number % 5 == 0:
+        print(&quot;Buzz&quot;)
+    else:
+        print(number)
+
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-2-1--loops---part-5">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-2-1--loops---part-5" aria-expanded="false">
+            2.1) Loops — Part 5
+          </button>
+        </h2>
+        <div id="collapse-sec-2-1--loops---part-5" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — module-loops-part-5.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/module-loops-part-5.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module Loops
+# Part 5
+
+#----------------TASK_1---------------#
+
+# The user types in two numbers. 
+# Find the sum of all even, odd numbers and 
+# multiples of 9 in the specified range, as well as arithmetic mean of each group.
+
+start  = int(input(&quot;First num: &quot;))
+end = int(input(&quot;Second num: &quot;))
+
+count_1 = 0
+sum_1 = 0
+
+print(&quot;Even numbers: &quot;)
+for i in range(start, end +1):
+    if i % 2 == 0:
+        count_1 += 1
+        sum_1 += i
+        print(i)
+
+    
+if count_1 != 0:
+    total_1 = sum_1 / count_1
+
+print(&quot;Count: &quot;,count_1)
+print(&quot;Sum: &quot;, sum_1)
+print(&quot;Total: &quot;,total_1)
+
+#----------------------------
+count_2 = 0
+sum_2 = 0
+print(&quot;Odd numbers: &quot;)
+for i in range(start, end +1):
+    if i % 2 != 0:
+        count_2 += 1
+        sum_2 += i
+        print(i)
+
+    
+if count_2 != 0:
+    total_2 = sum_2 / count_2
+
+print(&quot;Count: &quot;,count_2)
+print(&quot;Sum: &quot;, sum_2)
+print(&quot;Total: &quot;,total_2)
+
+#-----------------------------
+count_3 = 0
+sum_3 = 0
+print(&quot;Only 9: &quot;)
+for i in range(start, end +1):
+    if i % 9 == 0:
+        count_3 += 1
+        sum_3 += i
+        print(i)
+        
+if count_3 != 0:
+    total_3 = sum_3 / count_3
+
+print(&quot;Count: &quot;,count_3)
+print(&quot;Sum: &quot;, sum_3)
+print(&quot;Total: &quot;,total_3)
+
+
+
+
+
+#----------------TASK_2---------------#
+
+# The user types in the length of a line and a symbol to fill the line. 
+# Print a vertical line made out of the typed in symbol of the specified length.
+
+#For instance, if the typed in number and symbol are 5 and %, the output will be as follows:
+
+lenght = int(input(&quot;Add lenght: &quot;))
+symbol = input(&quot;Add yuour symbol: &quot;)
+
+for i in range (lenght):
+    print(symbol)
+
+
+
+#----------------TASK_3---------------#
+
+# The user types in numbers. 
+# If the number is greater than 0, print &quot;Your number is positive&quot;;
+# if it is less than zero, print &quot;Your number is negative&quot;; if it is equal to 0, print &quot;Your number is equal to zero.&quot; 
+# When the user types in 7, the program stops and prints &quot;Good bye!&quot;
+
+while True:
+    choose = float(input(&quot;Whrite any number here: &quot;))
+
+    if choose == 7:
+        print(&quot;Good bye&quot;)
+        break
+    elif choose == 0:
+        print(&quot;Your number is zero&quot;)
+
+    elif choose &gt; 0:
+        print(&quot;Your number is positive&quot;)
+
+    elif choose &lt; 0:
+        print(&quot;Your number is negative&quot;)
+    
+
+
+#----------------TASK_4---------------#
+
+
+# The user types in numbers. 
+# The program must calculate their sum and find the maximum and minimum.
+# When the user types in 7, the program stops and prints &quot;Good bye!&quot;.
+
+
+# I GOT BIG HELP FOR TASK_4 FROM AI (SORRY)
+sum = 0
+max = None
+min = None
+
+while True:
+    value = float(input(&quot;Add some value: &quot;))
+
+    if value == 7:
+        print(&quot;Good bye&quot;)
+        break
+    sum += value
+
+    if max is None or  value &gt; max:
+        max = value
+
+    if min is None or value &lt; min:
+        min = value
+    
+print(&quot;Sum: &quot;,sum)
+print(&quot;Max: &quot;, max)
+print(&quot;Min: &quot;, min)</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-3--collections---tuples---sets---dicts">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-3--collections---tuples---sets---dicts" aria-expanded="false">
+            3) Collections — Tuples · Sets · Dicts
+          </button>
+        </h2>
+        <div id="collapse-sec-3--collections---tuples---sets---dicts" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — Tuples_Sets_Dictionaries_Part_2.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/Tuples_Sets_Dictionaries_Part_2.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Tuples, Sets, Dictionaries
+# Part 2
+
+#----------------TASK_1---------------#
+
+# Create an app that stores information about great basketball players.
+# Store the player&#x27;s full name and height. 
+# Provide the possibility to add, delete, search, and replace data. Use a dictionary to store information.
+
+players = {}
+
+def add_player():
+    name = input(&quot;Enter full name of the player: &quot;)
+    height = input(&quot;Enter player&#x27;s height (cm): &quot;)
+    players[name] = height
+    print(f&quot;{name} was added.&quot;)
+
+
+def delete_player():
+    name = input(&quot;Enter full name of the player: &quot;)
+    if name in players:
+        del players[name]
+        print(name, &quot;was deleted.&quot;)
+    else:
+        print(&quot;Player not found.&quot;)
+
+
+def search_player():
+    name = input(&quot;Enter full name of the player: &quot;)
+    if name in players:
+        print({name : players[name]})
+    else:
+        print(&quot;Not found&quot;)
+
+def replace_player():
+    name =  input(&quot;Enter full name of the player: &quot;)
+    if name in players:
+        players[name] = input(&quot;Enter new height: &quot;)
+    else:
+        print(&quot;Not found&quot;)
+
+def show_players():
+    print(players)
+
+while True:
+    print(&quot;1 - Add player&quot;)
+    print(&quot;2 - Delete player&quot;)
+    print(&quot;3 - Search player&quot;)
+    print(&quot;4 - Replace player height&quot;)
+    print(&quot;5 - Show all players&quot;)
+
+    choose = input(&quot;Choose: &quot;)
+
+    if choose == &quot;1&quot;:
+        add_player()
+    elif choose == &quot;2&quot;:
+        delete_player()
+    elif choose == &quot;3&quot;:
+        search_player()
+    elif choose == &quot;4&quot;:
+        replace_player()
+    elif choose == &quot;5&quot;:
+        show_players()
+        break
+    else:
+        print(&quot;Invalid choice&quot;)
+
+
+#----------------TASK_2---------------#
+
+# Create an app English-French Dictionary. 
+# Store a word in English and its French translation. 
+# Provide the possibility to add, delete, search, and replace data. 
+# Use a dictionary to store information.
+
+dicrionary ={}
+
+def add_word():
+    word =  input(&quot;Enter English word: &quot;)
+    translation = input(&quot;Enter French translation: &quot;)
+    dicrionary[word] = translation
+    print(&quot;Word added&quot;)
+
+def delete_word():
+    word = input(&quot;Delete word&quot;)
+    if word in dicrionary:
+        del dicrionary[word]
+    else:
+        print(&quot;Word not found&quot;)
+
+def search_word():
+    word = input(&quot;Search word: &quot;)
+    if word in dicrionary:
+        print(word)
+    else:
+        print(&quot;There are no such word in dictionary&quot;)
+
+def replace_word():
+    word = input(&quot;Enter word to replace: &quot;)
+    if word in dicrionary:
+        dicrionary[word] = input(&quot;Enter new word: &quot;)
+    else:
+        print(&quot;Invalid&quot;)
+
+def show_words():
+    print(dicrionary)
+
+
+while True:
+    print(&quot;1. Add word&quot;)
+    print(&quot;2. Delete word&quot;)
+    print(&quot;3. Search word&quot;)
+    print(&quot;4. Replace word&quot;)
+    print(&quot;5. Show words&quot;)
+
+    option = input(&quot;Select: &quot;)
+
+    if option == &quot;1&quot;:
+        add_word()
+    elif option == &quot;2&quot;:
+        delete_word()
+    elif option == &quot;3&quot;:
+        search_word()
+    elif option == &quot;4&quot;:
+        replace_word()
+    elif option == &quot;5&quot;:
+        show_words()
+        break
+    else:
+        print(&quot;Invalid option&quot;)
+
+
+#----------------TASK_3---------------#
+
+# Create an app Company. 
+# Store the following information about a person: 
+# full name, phone number, corporate email, job title, room number, skype. 
+# Provide the possibility to add, delete, search, and replace data. 
+# Use a dictionary to store information.
+
+company = {}
+
+def add_employee():
+    name = input(&quot;Enter full name: &quot;)
+    phone = input(&quot;Enter phone number: &quot;)
+    email = input(&quot;Enter corporate email: &quot;)
+    title = input(&quot;Enter job title: &quot;)
+    room_number = input(&quot;Enter room number: &quot;)
+    skype = input(&quot;Enter skype: &quot;)
+    company[name] = {
+        &quot;phone&quot;: phone,
+        &quot;email&quot;: email,
+        &quot;title&quot;: title,
+        &quot;room&quot;: room_number,
+        &quot;skype&quot;: skype
+    }
+    print(&quot;Employee added successfully&quot;)
+
+def delete_employee():
+    name = input(&quot;Enter full name: &quot;)
+    if name in company:
+        del company[name]
+        print(&quot;Employee deleted successfully&quot;)
+    else:
+        print(&quot;Employee not found&quot;)
+
+def search_employee():
+    name = input(&quot;Enter full name: &quot;)
+    if name in company:
+        print(company[name])
+    else:
+        print(&quot;invalid&quot;)
+
+def replace_employee():
+    name = input(&quot;Enter full name: &quot;)
+    if name in company:
+        print(&quot;What do you want to replace?&quot;)
+        phone = input(&quot;Enter new phone&quot;)
+        email = input(&quot;Enter the new email: &quot;)
+        title = input(&quot;Enter the new job title: &quot;)
+        room_number = input(&quot;Enter the new room number: &quot;)
+        skype = input(&quot;Enter the new skype: &quot;)
+
+        company[name] = {
+        &quot;phone&quot;: phone,
+        &quot;email&quot;: email,
+        &quot;title&quot;: title,
+        &quot;room&quot;: room_number,
+        &quot;skype&quot;: skype
+    }
+        
+def show_all():
+    print(company)
+
+
+
+while True:
+    print(&quot;1. Add employee&quot;)
+    print(&quot;2. Delete employee&quot;)
+    print(&quot;3. Search employee&quot;)
+    print(&quot;4. Replace employee&quot;)
+    print(&quot;5. Show all employees&quot;)
+
+    select = input(&quot;Select an option: &quot;)
+    if select == &quot;1&quot;:
+        add_employee()
+    elif select == &quot;2&quot;:
+        delete_employee()
+    elif select == &quot;3&quot;:
+        search_employee()
+    elif select == &quot;4&quot;:
+        replace_employee()
+    elif select == &quot;5&quot;:
+        show_all()
+        break
+    else:
+        print(&quot;Invalid&quot;)
+
+
+#----------------TASK_4---------------#
+
+# Create an app Book Collection. 
+# Store the following information about books: 
+# author, title, genre, year of release, publisher. 
+# Provide the possibility to add, delete, search, and replace data. 
+# Use a dictionary to store information.
+
+book = {}
+
+def add_book():
+    title = input(&quot;Enter the title of the book: &quot;)
+    author = input(&quot;Enter the author of the book: &quot;)
+    genre = input(&quot;Enter the genre of the book: &quot;)
+    year = input(&quot;Enter the year of release: &quot;)
+    publisher = input(&quot;Enter the publisher of the book: &quot;)
+    book[title] = {
+        &quot;title&quot;: title,
+        &quot;author&quot;: author,
+        &quot;genre&quot;: genre,
+        &quot;year&quot;: year,
+        &quot;publisher&quot;: publisher
+        }
+    print(&quot;Book added successfully&quot;)
+
+def delete_book():
+    title = input(&quot;Enter the title of the book to delete: &quot;)
+    if title in book:
+        del book[title]
+        print(&quot;Book deleted successfully&quot;)
+    else:
+        print(&quot;Book not found&quot;)
+
+def search_book():
+    title = input(&quot;Enter the title of the book to search: &quot;)
+    if title in book:
+        print(book[title])
+    else:
+        print(&quot;Book not found&quot;)
+
+def replace_book():
+    title = input(&quot;Add title of book: &quot;)
+    if title in book:
+        print(&quot;What do you want to replace?&quot;)
+        print(&quot;1. Author&quot;)
+        print(&quot;2. Genre&quot;)
+        print(&quot;3. Year&quot;)
+        print(&quot;4. Publisher&quot;)
+        choice = input(&quot;Enter your choice: &quot;)
+        if choice == &quot;1&quot;:
+            book[title][&quot;author&quot;] = input(&quot;Enter new author: &quot;)
+        elif choice == &quot;2&quot;:
+            book[title][&quot;genre&quot;] = input(&quot;Enter new genre: &quot;)
+        elif choice == &quot;3&quot;:
+            book[title][&quot;year&quot;] = input(&quot;Enter new year: &quot;)
+        elif choice == &quot;4&quot;:
+            book[title][&quot;publisher&quot;] = input(&quot;Enter new publisher: &quot;)
+        else:
+            print(&quot;Invalid choice&quot;)
+
+
+
+while True:
+    print(&quot;1. Add book&quot;)
+    print(&quot;2. Delete book&quot;)
+    print(&quot;3. Search book&quot;)
+    print(&quot;4. Replace book&quot;)
+    print(&quot;5. Exit&quot;)
+
+    choice = input(&quot;Enter your choice: &quot;)
+    if choice == &quot;1&quot;:
+        add_book()
+    elif choice == &quot;2&quot;:
+        delete_book()
+    elif choice == &quot;3&quot;:
+        search_book()
+    elif choice == &quot;4&quot;:
+        replace_book()
+    elif choice == &quot;5&quot;:
+        break
+    else:
+        print(&quot;Invalid choice&quot;)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-4--functions---part-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-4--functions---part-1" aria-expanded="false">
+            4) Functions — Part 1
+          </button>
+        </h2>
+        <div id="collapse-sec-4--functions---part-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — functions-part-1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/functions-part-1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Functions
+# Part 1
+
+#----------------TASK_1---------------#
+
+# Write a function that prints formatted text given below:
+# &quot;Don&#x27;t compare yourself with anyone in this world...
+# if you do so, you are insulting yourself.&quot;
+# Bill Gates
+
+def text_1():
+    print(&quot;Don&#x27;t compare yourself with anyone in this world...&quot;)
+    print(&quot;if you do so, you are insulting yourself.&quot;)
+    print(&quot;Bill Gates&quot;)
+
+
+def text_2():
+    print(&quot;The only limit to our realization of tomorrow is our doubts of today.&quot;)
+    print(&quot;— Franklin D. Roosevelt&quot;)
+
+text_1()
+print()
+text_2()
+
+
+#----------------TASK_2---------------#
+
+# Write a function that takes two numbers as a parameter and displays all even numbers in between.
+
+
+def even_numbers():
+    for i in range(x, y+1):
+        if i % 2 == 0:
+            print(i)
+
+
+
+
+print(&quot;1. Even numbers between 1 and 100&quot;)
+x = int(input(&quot;Please choose first value: &quot;))
+y = int(input(&quot;Please choose second value: &quot;))
+
+even_numbers()
+
+
+#----------------TASK_3---------------#
+
+
+# Write a function that prints an empty or solid square made out of some symbol.
+# The function takes the following as parameters: the length of the side of the square, a symbol, and a boolean 
+# variable:
+
+# if it is True, the square is solid;
+# if False, the square is empty.
+
+
+def square(size, symbol, solid):
+    if solid == True:
+        for i in range(size):
+            for j in range(size):
+                print(symbol, end=&#x27; &#x27;)
+            print()
+    else:
+        for i in range(size):
+            for j in range(size):
+                if i == 0  or i == -1 or j == 0 or j == -1:
+                    print(symbol, end=&#x27; &#x27;)
+                else:
+                    print(&#x27; &#x27;, end=&#x27; &#x27;)
+
+# Something wrond maybe
+
+size = int(input(&quot;Add size: &quot;))
+symbol = input(&quot;Add symbol: &quot;)
+solid_2 = input(&quot;Solid? (yes/no): &quot;).lower()
+
+solid = True if solid_2 == &#x27;yes&#x27; else False
+
+square(size, symbol, solid)
+
+
+
+
+#----------------TASK_4---------------#
+
+# Write a function that returns the smallest of five numbers. 
+# Numbers are passed as parameters.
+
+def small_num(a,b,c,d,e):
+    return min(a,b,c,d,e)
+
+a = int(input(&quot;A) &quot;))
+b = int(input(&quot;B) &quot;))
+c = int(input(&quot;C) &quot;))
+d = int(input(&quot;D) &quot;))
+e = int(input(&quot;E) &quot;))
+
+result = small_num(a,b,c,d,e)
+
+print(&quot;small one ----&gt; &quot;,result)
+
+
+
+#----------------TASK_5---------------#
+
+def product_range(start,end):
+    if start &gt; end:
+        start, end = end , start
+    result = 1
+    for i in range(start,end+1):
+        result *= i
+    return result
+    
+start = int(input(&quot;add num: &quot;))
+end = int(input(&quot;add secind num: &quot;))
+
+final = product_range(start,end)
+print(&quot;Product: &quot;, final)
+
+
+#----------------TASK_6---------------#
+
+def example_num(number):
+    return len(str(number))
+
+number_a = int(input(&quot;Add num: &quot;))
+
+final_a = example_num(number_a)
+
+print(&quot;How nuch number there: &quot;, final_a)
+
+#----------------TASK_7---------------#
+
+def palindrome_number(number):
+     num_str = str(number)
+     return num_str == num_str[::-1]
+
+num_b = int(input(&quot;enter: &quot;))
+if palindrome_number(num_b):
+     print(&quot;palindrome&quot;)
+else:
+     print(&quot;not palindrome&quot;)
+
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-4-1--functions---part-2">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-4-1--functions---part-2" aria-expanded="false">
+            4.1) Functions — Part 2
+          </button>
+        </h2>
+        <div id="collapse-sec-4-1--functions---part-2" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — functions-part-2.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/functions-part-2.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Functions
+# Part 2
+
+#----------------TASK_1---------------#
+def list_product(numbers):
+    result = 1
+    for num in numbers:
+        result *= num
+    return result
+
+numbers = input(&quot;Make by commas: &quot;)
+
+number_list = [int(i) for i in numbers.split(&quot;,&quot;)] # Note for me. (.split) Bir daha bax.
+print(&quot;Product: &quot;, list_product(number_list))
+
+
+#----------------TASK_2---------------#
+
+def find_min(list):
+    return min(list)
+
+num_1 = int(input(&quot;Add 1th numbers: &quot;))
+num_2 = int(input(&quot;Add 2th numbers: &quot;))
+num_3 = int(input(&quot;Add 3th numbers: &quot;))
+num_4 = int(input(&quot;Add 4th numbers: &quot;))
+
+list = [num_1,num_2,num_3,num_4]
+find_min(list)
+print(&quot;Minimum number:&quot;, find_min(list))
+
+
+#----------------TASK_3---------------#
+
+def is_prime(n):
+    if n &lt; 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+def count_primes_in_range(start, end):
+    count = 0
+    for num in range(start, end + 1):
+        if is_prime(num):
+            count += 1
+    return count
+
+start = int(input(&quot;Add first: &quot;))
+end = int(input(&quot;Add last: &quot;))
+
+result = count_primes_in_range(start, end)
+
+print(&quot;How many prime numbers are in range:&quot;, result)
+
+
+
+#----------------TASK_4---------------#
+
+def remove_target(numbers, target):
+    removed_count = numbers.count(target) 
+    numbers = [num for num in numbers if num != target]
+    return removed_count, numbers 
+
+nums = [1, 3, 5, 3, 7, 3, 9]
+target_num = 3
+removed, new_list = remove_target(nums, target_num)
+
+print(&quot;Removed count:&quot;, removed)
+print(&quot;New list:&quot;, new_list)
+
+
+#----------------TASK_5---------------#
+
+def mix_list(list_1, list_2):
+    return list_1 + list_2
+
+list_1 = [1,3,5,7]
+list_2 = [2,4,6,8]
+
+total = mix_list(list_1, list_2)
+print(&quot;Mix list &quot;, total)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-5--exceptions---part-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-5--exceptions---part-1" aria-expanded="false">
+            5) Exceptions — Part 1
+          </button>
+        </h2>
+        <div id="collapse-sec-5--exceptions---part-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — exceptions_part_1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/exceptions_part_1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># Module: Exceptions
+# Part 1
+#----------------TASK_1---------------#
+
+try:
+    name = input(&quot;Enter your name: &quot;)
+    age = int(input(&quot;Enter your age: &quot;))
+    if age &lt; 0 or age &gt; 130:
+        print(&quot;Invalid age&quot;)
+    else:
+        print(f&quot;Hello, {name}! Your age is {age}&quot;)
+except ValueError:
+    print(&quot;Please add correct info!&quot;)
+
+
+
+#----------------TASK_2---------------#
+# Exception inside here!
+
+def user_welcome(name_2,age_2):
+    try:
+        age_2 = int(age_2)
+        if age_2 &lt; 0 or age_2 &gt; 130:
+            print(&quot;Invalid age&quot;)
+        else:
+            print(f&quot;Hello, {name_2}! Your age is {age_2}&quot;)
+    except ValueError:
+        print(&quot;Invalid input&quot;)
+
+name_2 = input(&quot;Enter your name: &quot;)
+age_2 = input(&quot;Enter your age: &quot;)
+info = user_welcome(name_2,age_2)
+print(info)
+
+
+
+# Exception not inside here!
+
+def user_welcome(name_2,age_2):
+    if age_2 &lt; 0 or age_2 &gt; 130:
+        print(&quot;Invalid age&quot;)
+    else:
+        print(f&quot;Hello, {name_2}! Your age is {age_2}&quot;)
+
+
+
+try:
+    name_2 = input(&quot;Enter your name: &quot;)
+    age_2 = int(input(&quot;Enter your age: &quot;))
+    info = user_welcome(name_2,age_2)
+    print(info)
+
+except ValueError:
+
+    print(&quot;Please add correct info!&quot;)
+
+
+#----------------TASK_3---------------#
+
+print(&quot;All numbers should be greater than 0!\n&quot;)
+
+numbers = []
+
+try:
+    while True:
+        user_input = input(&quot;Enter numbers or press (E) for exit: &quot;)
+
+        if user_input.lower() == &#x27;e&#x27;:
+            break
+
+        number = int(user_input)
+
+        if number &lt;= 0:
+            raise ValueError(&quot;Please enter number greater than 0!&quot;)
+
+        numbers.append(number)
+
+    print(&quot;Numbers:&quot;, numbers)
+    print(&quot;Sum of numbers:&quot;, sum(numbers))
+
+except ValueError :
+    print(&quot;Error!&quot;)
+
+
+#----------------TASK_4---------------#
+
+# Exception inside the function!
+def num_calc():
+    numbers = []
+    try:
+        while True:
+            user_input = input(&quot;Enter numbers or press (E) for exit: &quot;)
+
+            if user_input.lower() == &#x27;e&#x27;:
+              break
+
+            number = int(user_input)
+
+            if number &lt;= 0:
+                raise ValueError(&quot;Please enter number greater than 0!&quot;)
+
+
+            numbers.append(number)
+
+        print(&quot;Numbers:&quot;, numbers)
+        print(&quot;Sum of numbers:&quot;, sum(numbers))
+
+    except ValueError:
+        print(&quot;Error!&quot;)
+
+num_calc()
+
+
+
+# Exception not inside the function!
+
+def num_calc():
+    numbers = []
+    while True:
+        user_input = input(&quot;Enter numbers or press (E) for exit: &quot;)
+
+        if user_input.lower() == &#x27;e&#x27;:
+            break
+
+        number = int(user_input)
+
+        if number &lt;= 0:
+            raise ValueError(&quot;Please enter number greater than 0!&quot;)
+
+
+        numbers.append(number)
+    return numbers
+
+
+try:
+    result = num_calc()
+    print(&quot;Numbers:&quot;, result)
+    print(&quot;Sum of numbers:&quot;, sum(result))
+except ValueError as ve:
+    print(&quot;Error!&quot;, ve)
+except Exception:
+    print(&quot;Unexpected error occurred!&quot;)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-6--generators---fibonacci-sequence">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-6--generators---fibonacci-sequence" aria-expanded="false">
+            6) Generators — Fibonacci sequence
+          </button>
+        </h2>
+        <div id="collapse-sec-6--generators---fibonacci-sequence" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — Fibonacci_sequence.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/Fibonacci_sequence.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>a = int(input(&quot;Please add range: &quot;))
+list  =[]
+x,y = 0,1
+for i in range(0,a):
+    list.append(x)
+    x,y=y,x+y
+print(list)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-6-1--generators---prime-numbers">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-6-1--generators---prime-numbers" aria-expanded="false">
+            6.1) Generators — Prime numbers
+          </button>
+        </h2>
+        <div id="collapse-sec-6-1--generators---prime-numbers" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — prime_generator.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/prime_generator.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>while True:
+    def prime_number(num):
+        if num &lt;= 1:
+            return False
+        for i in range(2, num):
+            if num % i == 0:
+                return False
+        return True
+
+    def list_prime(func, n):
+        if n &lt;= 1:
+            return &quot;Add normal&quot;
+        prime_list = []
+        for i in range(2, n + 1):
+            if func(i):
+                prime_list.append(i)
+        return prime_list 
+
+    m = int(input(&quot;Add a number: &quot;))
+    x = list_prime(prime_number, m)
+    print(&quot;Prime numbers list:&quot;, x)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-7--higher-order---decorators---modules---api-testing--part-2">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-7--higher-order---decorators---modules---api-testing--part-2" aria-expanded="false">
+            7) Higher-Order · Decorators · Modules · API Testing (Part 2)
+          </button>
+        </h2>
+        <div id="collapse-sec-7--higher-order---decorators---modules---api-testing--part-2" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — generators-higher-order-functions-decorators-modules-api-testing-part-2.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/generators-higher-order-functions-decorators-modules-api-testing-part-2.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>#----------------------TASK_1--------------------
+def fib_range(start, end):
+    x, y = 0, 1
+    while x &lt;= end:
+        if x &gt;= start:
+            yield x
+        x, y = y, x + y
+
+
+for num in fib_range(5, 30):
+    print(num)
+
+#----------------------TASK_2--------------------
+list1 = [1, 4, 2]
+list2 = [3, 6, 5, 5]
+
+
+def sum_lists(l1, l2):
+    max_len = max(len(l1), len(l2))
+    for i in range(max_len):
+        a = l1[i] if i &lt; len(l1) else 0
+        b = l2[i] if i &lt; len(l2) else 0
+        yield a + b
+
+
+for val in sum_lists(list1, list2):
+    print(val)
+
+#----------------------TASK_3--------------------
+
+nums = [1,2,3,4]
+
+def square(x):
+    return x ** 2
+
+
+def cube(x):
+    return x ** 3
+
+
+def calculate(list_to_work, function_to_call):
+    result = []
+    for i in list_to_work:
+        result.append(function_to_call(i))
+    return result
+
+
+print(calculate(nums, square))
+print(calculate(nums, cube))
+
+
+#----------------------TASK_4--------------------
+
+def agency_a_format(func):
+    def wrapper():
+        result = func()
+        return f&quot;agency_a_format: {result}&quot;
+    return wrapper
+
+def agency_b_format(func):
+    def wrapper():
+        result = func()
+        return result.replace(&quot;$&quot;,&quot;£&quot;)
+    return wrapper
+
+@agency_a_format
+@agency_b_format
+def report():
+    return &quot;Total revenue: $10000&quot;
+
+
+print(report())
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-7-1--higher-order---decorators---modules---api-testing--part-2-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-7-1--higher-order---decorators---modules---api-testing--part-2-1" aria-expanded="false">
+            7.1) Higher-Order · Decorators · Modules · API Testing (Part 2.1)
+          </button>
+        </h2>
+        <div id="collapse-sec-7-1--higher-order---decorators---modules---api-testing--part-2-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — generators-higher-order-functions-decorators-modules-api-testing-part-2.1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/generators-higher-order-functions-decorators-modules-api-testing-part-2.1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>#-------------------------TASK_1--------------------
+
+def check_prime(n):
+    if n &lt;= 1:
+        return False
+    for i in range(2,int(n**0.5)+1):
+        if n % i == 0:
+            return False
+    return True
+
+def print_range(start,end):
+    for i in range(start,end+1):
+        if check_prime(i):
+            yield i 
+
+for prime in print_range(10, 30):
+    print(prime)
+
+#-------------------------TASK_2--------------------
+
+def is_armstrong(n):
+    digits = list(map(int, str(n)))
+    power = len(digits)
+    total = sum(d**power for d in digits)
+    return total == n
+
+def armstrong_range(start, end):
+    for number in range(start, end + 1):
+        if is_armstrong(number):
+            yield number
+
+for a in armstrong_range(100, 999):
+    print(a)
+
+
+#-------------------------TASK_3--------------------
+
+lst = [1,3,5,7,9]
+
+def min_lst(num):
+    return min(num)
+
+def max_lst(num):
+    return max(num)
+
+def find_min_or_max(list_to_check, function_to_call):
+    return function_to_call(list_to_check)
+
+
+print(&quot;Minimum:&quot;, find_min_or_max(lst, min_lst))
+print(&quot;Maximum:&quot;, find_min_or_max(lst, max_lst))
+
+#-------------------------TASK_4--------------------
+
+def pizza_base():
+    return &quot;Pizza with dough&quot;
+
+def margarita(func):
+    def wrapper():
+        return func() + &quot; + tomato sauce + cheese&quot;
+    return wrapper
+
+def capricosa(func):
+    def wrapper():
+        return func() + &quot; + tomato sauce + cheese + ham&quot;
+    return wrapper
+
+def four_cheeses(func):
+    def wrapper():
+        return func() + &quot; + tomato sauce + cheese + cheese + cheese + cheese&quot;
+    return wrapper
+
+def hawaiian(func):
+    def wrapper():
+        return func() + &quot; + tomato sauce + cheese + ham + pineapple&quot;
+    return wrapper
+
+
+
+def mushrooms(func):
+    def wrapper():
+        return func() + &quot; + mushrooms&quot;
+    return wrapper
+
+def pepperoni(func):
+    def wrapper():
+        return func() + &quot; + pepperoni&quot;
+    return wrapper
+
+def olives(func):
+    def wrapper():
+        return func() + &quot; + olives&quot;
+    return wrapper
+
+choice = input(&quot;Choose pizza: margarita, capricosa, four_cheeses, hawaiian: (M)(C)(F)(H) &quot;).lower()
+
+if choice == &quot;m&quot;:
+    pizza = margarita(pizza_base)
+elif choice == &quot;c&quot;:
+    pizza = capricosa(pizza_base)
+elif choice == &quot;f&quot;:
+    pizza = four_cheeses(pizza_base)
+elif choice == &quot;h&quot;:
+    pizza = hawaiian(pizza_base)
+else:
+    pizza = pizza_base
+
+extra_choice = input(&quot;Add extra? mushrooms, pepperoni, olives, none: (M)(P)(O)(N) &quot;).lower()
+
+if extra_choice == &quot;m&quot;:
+    pizza = mushrooms(pizza)
+elif extra_choice == &quot;p&quot;:
+    pizza = pepperoni(pizza)
+elif extra_choice == &quot;o&quot;:
+    pizza = olives(pizza)
+
+
+print(&quot;\nYour order:&quot;)
+print(pizza())
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-8--oop---objects---constructors---overloading--part-2">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-8--oop---objects---constructors---overloading--part-2" aria-expanded="false">
+            8) OOP — Objects · Constructors · Overloading (Part 2)
+          </button>
+        </h2>
+        <div id="collapse-sec-8--oop---objects---constructors---overloading--part-2" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — objects-constructors-method-overloading-part-2.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/objects-constructors-method-overloading-part-2.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># ----------------------Task_1----------------------
+class Car:
+    def __init__(self,brand,model,speed):
+        self.brand = brand
+        self.speed = speed
+        self.model = model
+
+    def start(self,sound=None):
+        if sound is None:
+            print(f&quot;Your {self.model} is starting&quot;)
+        else:
+            print(f&quot;Your {self.model} is starting with: {sound}&quot;)
+    
+    def drive(self,speed=None):
+        if speed is None:
+            print(f&quot;Your {self.brand} {self.model} car is driving &quot;)
+        else:
+            print(f&quot;Your {self.brand} {self.model} car is driving {speed} km/h&quot;)
+
+print(&quot;Task 1&quot;)
+car_1 = Car(&quot;BMW&quot;,&quot;M5&quot;,2025)
+car_1.start()
+car_1.start(&quot;vir vir vir&quot;)
+car_1.drive()
+car_1.drive(180)
+print()
+
+# ----------------------Task_2----------------------
+
+class Book:
+    def __init__(self,name,genre,page):
+        self.name = name
+        self.genre = genre
+        self.page = page
+
+    def start(self,smell=None):
+        if smell is None:
+            print(f&quot;The book&#x27;s have {self.page} pages&quot;)
+        else:
+            print(f&quot;The book&#x27;s smell is {smell} in the {self.page} pages&quot;)
+
+    def read(self,color=None):
+        if color is None:
+            print(f&quot;The book {self.name} with {self.genre} genre of book is reading &quot;)
+        else:
+            print(f&quot;The book {self.name} with {self.genre} genre book have {self.page} with {color} color&quot;)
+
+print(&quot;Task 2&quot;)
+book_1 = Book(&quot;Crime and Punishment&quot;,&quot;Novel&quot;,450)
+book_1.start()
+book_1.start(&quot;like that&quot;)
+book_1.read()
+book_1.read(&quot;Red&quot;)
+print()
+
+
+# ----------------------Task_3----------------------
+
+class Stadium:
+    def __init__(self,name):
+        self.name = name
+
+    def start(self,color=None):
+        if color is None:
+            print(f&quot;The stadium name is {self.name}&quot;)
+        else:
+            print(f&quot;The stadium color is {color}&quot;)
+
+    def match(self,rival_1 = None, rival_2 = None):
+        if rival_1 is None and rival_2 is None:
+            print(f&quot;Match playing in the {self.name} stadium&quot;)
+        else:
+            print(f&quot;Match started: {rival_1} vs {rival_2}&quot;)
+
+print(&quot;Task 3&quot;)
+match_1 = Stadium(&quot;Camp Nou&quot;)
+match_1.start()
+match_1.start(&quot;Red and Blue&quot;)
+match_1.match()
+match_1.match(&quot;Barcelona&quot;,&quot;Real Madrid&quot;)
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-9--oop---multiple-inheritance---polymorphism---magic--part-6">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-9--oop---multiple-inheritance---polymorphism---magic--part-6" aria-expanded="false">
+            9) OOP — Multiple Inheritance · Polymorphism · Magic (Part 6)
+          </button>
+        </h2>
+        <div id="collapse-sec-9--oop---multiple-inheritance---polymorphism---magic--part-6" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — multiple-inheritance-polymorphis-using-magic-method-part-6.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/multiple-inheritance-polymorphis-using-magic-method-part-6.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>#-------------------------------------Task_1---------------------------------
+
+class Shape:
+    def __str__(self):
+        return f&quot;{self.__class__.__name__} with area: {self.area()}&quot;
+    
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+   
+    def area(self):
+        return self.width * self.height
+        
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+    def area(self):
+        return 3.14 * (self.radius ** 2)
+
+class RightTriangle(Shape):
+    def __init__(self, base, height):
+        self.base = base
+        self.height = height
+    def area(self):
+        return (self.base * self.height) / 2
+
+class Trapezoid(Shape):
+    def __init__(self,a,b,h):
+        self.a = a
+        self.b = b
+        self.h = h
+
+    def area(self):
+        return ((self.a + self.b) / 2) * self.h
+
+
+rectangle = Rectangle(5,3)
+print(rectangle)
+
+circle = Circle(5)
+print(circle)
+
+rightTriangle = RightTriangle(5,4)
+print(rightTriangle)
+
+trapezoid = Trapezoid(2,3,5)
+print(trapezoid)
+
+
+
+
+#-------------------------------------Task_2---------------------------------
+
+class Shape:
+    def __init__(self):
+        return int(self.area())
+    def __str__(self):
+        return f&quot;{self.__class__.__name__} with area: {self.area()}&quot;
+    
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+   
+    def area(self):
+        return self.width * self.height
+    
+    def __str__(self):
+        return f&quot;Rectangle: width={self.width}, height={self.height}, area={self.area()}&quot;
+
+        
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * (self.radius ** 2)
+    
+    def __str__(self):
+        return f&quot;Circle: Radius={self.radius}, area={self.area()}&quot;
+
+class RightTriangle(Shape):
+    def __init__(self, base, height):
+        self.base = base
+        self.height = height
+
+    def area(self):
+        return (self.base * self.height) / 2
+    
+    def __str__(self):
+        return f&quot;RightTriangle: width={self.base}, height={self.height}, area={self.area()}&quot;
+
+class Trapezoid(Shape):
+    def __init__(self,a,b,h):
+        self.a = a
+        self.b = b
+        self.h = h
+
+    def area(self):
+        return ((self.a + self.b) / 2) * self.h
+    
+    def __str__(self):
+        return f&quot;Trapezoid: width_1={self.a}, width_2={self.b}, height={self.h}, area={self.area()}&quot;
+
+
+
+
+rectangle = Rectangle(5,3)
+print(rectangle)
+
+circle = Circle(5)
+print(circle)
+
+rightTriangle = RightTriangle(5,4)
+print(rightTriangle)
+
+trapezoid = Trapezoid(2,3,5)
+print(trapezoid)
+
+#-------------------------------------Task_3---------------------------------
+
+
+class Shape:
+    def __init__(self):
+        pass
+    def __str__(self):
+        pass
+    
+
+class Square(Shape):
+    def __init__(self, x, y, side):
+        self.x = x
+        self.y = y
+        self.side = side
+
+    def show(self):
+        print(self.x, self.y),
+        print(self.x + self.side, self.y),
+        print(self.x, self.y + self.side),
+        print(self.x + self.side, self.y + self.side)
+
+    def save(self):
+        with open(&quot;save.txt&quot;,&quot;w&quot;) as file:
+            file.write(f&quot;Top Left: {self.x}, {self.y}\n&quot;)
+            file.write(f&quot;Top Right: {self.x + self.side}, {self.y}\n&quot;)
+            file.write(f&quot;Bottom Left: {self.x}, {self.y + self.side}\n&quot;)
+            file.write(f&quot;Bottom Right: {self.x + self.side}, {self.y + self.side}\n&quot;)
+
+    def load(self):
+        with open(&quot;save.txt&quot;, &quot;r&quot;) as file:
+            return file.read()
+    
+
+class Rectangle(Shape):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.heigh = height
+
+    def show(self):
+        print(self.x, self.y),
+        print(self.x + self.width, self.y),
+        print(self.x, self.y + self.heigh),
+        print(self.x + self.width, self.y + self.heigh)
+
+    def save(self):
+        with open(&quot;save.txt&quot;,&quot;w&quot;) as file:
+            file.write(f&quot;Top Left: {self.x}, {self.y}\n&quot;)
+            file.write(f&quot;Top Right: {self.x + self.width}, {self.y}\n&quot;)
+            file.write(f&quot;Bottom Left: {self.x}, {self.y + self.heigh}\n&quot;)
+            file.write(f&quot;Bottom Right: {self.x + self.width}, {self.y + self.heigh}\n&quot;)
+
+    def load(self):
+        with open(&quot;save.txt&quot;, &quot;r&quot;) as file:
+            return file.read()
+
+
+class Circle(Shape):
+    def __init__(self, cx, cy, radius):
+        self.cx = cx
+        self.cy = cy
+        self.radius = radius
+
+    def show(self):
+        print(f&quot;Circle: center=({self.cx}, {self.cy}), radius={self.radius}&quot;)
+
+    def save(self):
+        with open(&quot;save.txt&quot;,&quot;w&quot;) as file:
+            file.write(f&quot;Circle: center=({self.cx}, {self.cy}), radius={self.radius}&quot;)
+
+    def load(self):
+        with open(&quot;save.txt&quot;, &quot;r&quot;) as file:
+            return file.read()
+
+
+class Ellipse(Shape):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.heigh = height
+
+    def show(self):
+        print(f&quot;Ellipse: top-left=({self.x}, {self.y}), width={self.width}, height={self.heigh}&quot;)
+        print(f&quot;Center=({self.x + self.width/2}, {self.y + self.heigh/2})&quot;)
+
+    def save(self):
+        with open(&quot;save.txt&quot;,&quot;w&quot;) as file:
+            file.write(f&quot;Ellipse: top-left=({self.x}, {self.y}), width={self.width}, height={self.heigh}&quot;)
+            file.write(f&quot;Center=({self.x + self.width/2}, {self.y + self.heigh/2})&quot;)
+
+
+def save_shapes(filename, shapes):
+    with open(filename, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+        for s in shapes:
+            if isinstance(s, Square):
+                f.write(f&quot;Square {s.x} {s.y} {s.side}\n&quot;)
+            elif isinstance(s, Rectangle):
+                f.write(f&quot;Rectangle {s.x} {s.y} {s.width} {s.heigh}\n&quot;)
+            elif isinstance(s, Circle):
+                f.write(f&quot;Circle {s.cx} {s.cy} {s.radius}\n&quot;)
+            elif isinstance(s, Ellipse):
+                f.write(f&quot;Ellipse {s.x} {s.y} {s.width} {s.heigh}\n&quot;)
+
+
+def load_shapes(filename):
+    shapes = []
+    with open(filename, &quot;r&quot;, encoding=&quot;utf-8&quot;) as f:
+        for line in f:
+            parts = line.strip().split()
+            if not parts:
+                continue
+            t = parts[0]
+            nums = list(map(float, parts[1:]))
+
+            if t == &quot;Square&quot; and len(nums) == 3:
+                x, y, side = nums
+                shapes.append(Square(x, y, side))
+
+            elif t == &quot;Rectangle&quot; and len(nums) == 4:
+                x, y, w, h = nums
+                shapes.append(Rectangle(x, y, w, h))
+
+            elif t == &quot;Circle&quot; and len(nums) == 3:
+                cx, cy, r = nums
+                shapes.append(Circle(cx, cy, r))
+
+            elif t == &quot;Ellipse&quot; and len(nums) == 4:
+                x, y, w, h = nums
+                shapes.append(Ellipse(x, y, w, h))
+    return shapes
+
+shapes_list = [
+    Square(2, 3, 5),
+    Rectangle(1, 1, 4, 6),
+    Circle(5, 5, 3),
+    Ellipse(0, 0, 7, 4)
+]
+
+save_shapes(&quot;shapes.txt&quot;, shapes_list)
+
+loaded_list = load_shapes(&quot;shapes.txt&quot;)
+
+for i in loaded_list:
+    i.show()
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-10--algorithms---sorting---searching--part-1">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-10--algorithms---sorting---searching--part-1" aria-expanded="false">
+            10) Algorithms — Sorting &amp; Searching (Part 1)
+          </button>
+        </h2>
+        <div id="collapse-sec-10--algorithms---sorting---searching--part-1" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — Sorting and Searching Part-1.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/Sorting and Searching Part-1.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>#--------------Task_1------------------------
+nums = [4, -2, 3, 1, -5, 6, 2, -1, 0]
+
+result = (sum(nums)) / len(nums)
+
+if result &gt; 0:
+    x = (len(nums) *2) // 3
+else:
+    x = len(nums) //3
+
+
+part = nums[0:x]
+sorted_part = sorted(part)
+nums[0:x] = sorted_part
+
+nums[x:] =nums[x:][::-1]
+
+print(nums)
+
+#--------------Task_2------------------------
+
+
+grades = []
+
+for i in range(0,10):
+    grade = int(input(&quot;Add your grade: &quot;))
+    if grade &gt;= 0 or grade &lt;= 12:
+        grades.append(grade)
+    else:
+        print(&quot;Please enter a grade between 0 and 12&quot;)
+
+
+print()
+print(&quot;------------Choices-------------&quot;)
+print()
+print(&quot;1. Show all your grades&quot;)
+print(&quot;2. Take the exam again&quot;)
+print(&quot;3. Check if you can get a scholarship&quot;)
+print(&quot;4. Sort your grades&quot;)
+print(&quot;5. Exit&quot;)
+print()
+
+choice = input(&quot;Enter your choice: &quot;)
+
+while True:
+    
+    if choice == &quot;1&quot;:
+        print()
+        print(&quot;--------------------------------&quot;)
+        print(grades)
+        print(&quot;--------------------------------&quot;)
+        print()
+
+        exit = int(input(&quot;Press 0 to exit: &quot;))
+        if exit == 0:
+            break
+    elif choice == &quot;2&quot;:
+        print()
+        # print(&quot;Press 0 to exit&quot;)
+        print(&quot;Which subject do you want to retake the exam? (replacing grade)&quot;)
+        subject = int(input(&quot;Enter the subject (1 to 12): &quot;))
+        if 1 &lt;= subject &lt;= 10:
+            print()
+            print(&quot;Your current grade for this subject is: &quot;, grades[subject-1])
+            print()
+            new_grade = int(input(&quot;Enter your new grade: &quot;))
+            grades[subject-1] = new_grade
+            print()
+            print(&quot;Succesfully removed the old grade&quot;)
+            print()
+            print(&quot;--------------------------------&quot;)
+            print(grades)
+            print(&quot;--------------------------------&quot;)
+        else:
+            print(&quot;Please enter a subject between 1 and 12&quot;)
+            print()
+
+    elif choice == &quot;3&quot;:
+        print(&quot;--------------------------------&quot;)
+        print(grades)
+        print(&quot;--------------------------------&quot;)
+        print(&quot;You need 10.7 agerage grade at least! &quot;)
+        if sum(grades) / len(grades) &gt;= 10.7:
+            print(&quot;Your average is: &quot;,sum(grades) / len(grades))
+            print(&quot;You can get a scholarship!&quot;)
+            break
+        else:
+            print(&quot;Your average is: &quot;,sum(grades) / len(grades))
+            print(&quot;You can&#x27;t get a scholarship!&quot;)
+            print()
+            break
+
+    elif choice == &quot;4&quot;:
+        choice = str(input(&quot;Ascending or Descending (A/D): &quot;)).lower()
+        if choice == &quot;a&quot;:
+            grades.sort()
+            print(grades)
+        elif choice == &quot;d&quot;:
+            grades.sort(reverse=True)
+            print(grades)
+        else:
+            print(&quot;Invalid choice&quot;)
+    
+    elif choice == &quot;5&quot;:
+        print(&quot;Goodbye!&quot;)
+    break
+     
+
+#--------------Task_3------------------------
+
+nums = [12,15,17,14,9,5,21,19]
+n = len(nums)
+for i in range(n-1):
+    swapped = False
+    for j in range(n-i-1):
+        if nums[j] &gt; nums[j+1]:
+            nums[j], nums[j+1] = nums[j+1], nums[j]
+            swapped = True
+    if not swapped:
+        break
+
+print(nums)</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-11--algorithms---recursion--select-minimum">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-11--algorithms---recursion--select-minimum" aria-expanded="false">
+            11) Algorithms — Recursion: Select Minimum
+          </button>
+        </h2>
+        <div id="collapse-sec-11--algorithms---recursion--select-minimum" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — Select_minimum.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/Select_minimum.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>def find_minimum(numbers):
+    if len(numbers) == 1:
+        return numbers[0]
+    rest_minimum = find_minimum(numbers[1:])
+    if numbers[0] &lt; rest_minimum:
+        return numbers[0]
+    else:
+        return rest_minimum
+my_list = [4, 5, 6, 7, 8]
+print(&quot;minimum number is:&quot;, find_minimum(my_list))
+</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <div class="accordion-item" id="sec-12--mini-app---pizza-order">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-sec-12--mini-app---pizza-order" aria-expanded="false">
+            12) Mini App — Pizza Order
+          </button>
+        </h2>
+        <div id="collapse-sec-12--mini-app---pizza-order" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — Pizza_order_app.py</span>
+                </div>
+                <span class="code-window-path">/mnt/data/Pizza_order_app.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>def pizza_orders():
+    price = 0
+
+size = input(&quot;Add a size: small / large / extra-large:  &quot;)
+if size == &quot;small&quot;:
+    price =10
+elif size == &quot;large&quot;:
+    price = 15
+elif size == &quot;extra-large&quot;:
+    price = 20
+
+peperoni = input(&quot;Do you wanna add peperoni? (yes / no): &quot;)
+if peperoni == &quot;yes&quot;:
+    price = price + 2
+
+chesse = input(&quot;Do you wanna add cheese? (yes / no): &quot;)
+if chesse == &quot;yes&quot;:
+    price = price + 1
+
+tip = price * 0.1
+
+final = price + tip
+print(&quot;Your final bill is: $&quot;,final)
+
+pizza_orders()</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    </div>
+  </div>
+</div>
+{% endblock %}

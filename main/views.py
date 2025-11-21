@@ -24,6 +24,9 @@ def get_git(request):
 def get_crud(request):
     return render(request,"crud.html")
 
+def get_python_basics(request):
+    return render(request,"python_basics.html")
+
 # Projects______________________________________________
 
 # def weather_app(request):
