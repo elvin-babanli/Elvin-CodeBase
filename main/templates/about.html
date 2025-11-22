@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About Me — Elvin Babanlı{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- HERO -->
+  <div class="row align-items-center g-4">
+    <div class="col-md-3 text-center">
+      <img src="{% static 'img/elvin-profile.png' %}"
+           alt="Elvin Babanlı"
+           class="img-fluid rounded-circle shadow-sm"
+           style="max-width: 220px;">
+    </div>
+    <div class="col-md-9">
+      <h1 class="mb-2">{{ profile.name }}</h1>
+      <p class="lead mb-1">{{ profile.title }}</p>
+      <p class="text-muted mb-3">
+        {{ profile.location }} ·
+        <a href="mailto:{{ profile.email }}">{{ profile.email }}</a>
+      </p>
+
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ profile.github }}" target="_blank" class="btn btn-sm btn-dark">GitHub</a>
+        <a href="{{ profile.linkedin }}" target="_blank" class="btn btn-sm btn-primary">LinkedIn</a>
+        {% if profile.instagram %}
+          <a href="{{ profile.instagram }}" target="_blank" class="btn btn-sm btn-outline-secondary">Instagram</a>
+        {% endif %}
+        <a href="mailto:{{ profile.email }}" class="btn btn-sm btn-outline-dark">Contact</a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-4">
+
+  <!-- SKILLS -->
+  <h5 class="mb-2">Skills & Stack</h5>
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    {% for s in profile.skills %}
+      <span class="badge text-bg-dark">{{ s }}</span>
+    {% endfor %}
+  </div>
+
+  <hr class="my-4">
+
+  <!-- PROJECTS -->
+  <h5 class="mb-3">Featured Projects</h5>
+  <div class="row g-3">
+    {% for p in profile.projects %}
+      <div class="col-sm-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body d-flex flex-column">
+            <h6 class="card-title mb-2">{{ p.name }}</h6>
+            <p class="small text-muted flex-grow-1">
+              Open-source repository on GitHub.
+            </p>
+            <a href="{{ p.url }}" target="_blank" class="btn btn-sm btn-outline-primary mt-auto">View on GitHub</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

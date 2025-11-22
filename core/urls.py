@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from main.views import *
+from main import views
 from main.weather_app import weather_project_view
 
 
@@ -29,6 +30,7 @@ urlpatterns = [
     path('git/',get_git,name="git"),
     path('crud/',get_crud,name="crud"),
     path("weather-app/", weather_project_view, name="weather_app"),
-    path("python-basics/",get_python_basics,name="python-basics")
+    path("python-basics/",get_python_basics,name="python-basics"),
+    path("about/", views.about, name="about"),
     
 ]

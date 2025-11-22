@@ -1,8 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Main Page{% endblock %}
-
+{% block title %}Home — Python Updates{% endblock %}
 {% block content %}
-<h1>Main page</h1>
-<p>Welcome to Python Website!</p>
+<div class="container py-4">
+  <h1 class="mb-2">Python — What’s New</h1>
+  <p class="text-muted mb-3">Fresh articles and releases (soon).</p>
+
+  <div class="alert alert-info">
+    Live news feed is coming next. For now, check:
+    <a class="alert-link" href="https://www.python.org/blogs/" target="_blank">python.org/blogs</a>,
+    <a class="alert-link" href="https://realpython.com/" target="_blank">Real Python</a>.
+  </div>
+
+  <div class="mt-4">
+    <a class="btn btn-dark btn-sm" href="{% url 'about' %}">About Me</a>
+  </div>
+</div>
 {% endblock %}
