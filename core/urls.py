@@ -37,5 +37,6 @@ urlpatterns = [
     path('4o4-page/',get4o4, name='4o4-page'),
     path('stock-predictor/',stock_predictor_view, name="stock-predictor"),
     path('cheap-flight-finder/', cheap_flight_finder_view, name="cheap_flight_finder"),
+    path('pandas/',get_pandas,name="pandas")
     
 ]

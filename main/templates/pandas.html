@@ -1,8 +1,691 @@
 {% extends "base.html" %}
 
-{% block title %}Pandas{% endblock %}
+{% block title %}Pandas Guide — Elvin's CodeBase{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Sidebar */
+  .pd-sidebar {
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .pd-sidebar .list-group-item.active {
+    background: linear-gradient(135deg, #0d6efd, #22c55e);
+    border-color: transparent;
+  }
+  .pd-sidebar .list-group-item {
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.9rem;
+  }
+
+  /* Intro pills */
+  .intro-pill {
+    display: inline-flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+  .intro-pill span {
+    background: #e5f0ff;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+  }
+
+  /* Code window */
+  .code-window {
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #020617;
+    color: #e5e7eb;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+  }
+  .code-window-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.9rem;
+    background: linear-gradient(135deg, #111827, #0f172a);
+    font-size: 0.78rem;
+  }
+  .code-dots { display: inline-flex; gap: 0.3rem; }
+  .code-dot { width: 9px; height: 9px; border-radius: 999px; }
+  .code-dot.red { background: #f87171; }
+  .code-dot.yellow { background: #facc15; }
+  .code-dot.green { background: #4ade80; }
+  .code-window-title { color: #9ca3af; }
+  .code-window-path { font-size: 0.7rem; color: #6b7280; }
+  .code-window-body { padding: 0.75rem 1rem; }
+  .code-window pre { margin-bottom: 0; background: transparent; color: inherit; border-radius: 0; padding: 0; white-space: pre; }
+  .code-window code { color: #e5e7eb; font-size: 0.85rem; }
+
+  .code-window.light { background: #0b1220; }
+
+  /* Labels & accordion */
+  .section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; }
+  .accordion-button:not(.collapsed) { background-color: #eef2ff; color: #111827; }
+</style>
+{% endblock %}
 
 {% block content %}
-<h1>Pandas Page</h1>
-<p>This is Pandas section.</p>
+
+<div class="row">
+
+  <!-- SIDEBAR -->
+  <div class="col-lg-3 mb-4">
+    <div class="list-group shadow-sm sticky-top pd-sidebar" style="top: 80px;">
+      <div class="list-group-item active fw-semibold">Pandas Tutorial</div>
+
+      <a href="#intro" class="list-group-item list-group-item-action">Introduction</a>
+      <a href="#install" class="list-group-item list-group-item-action">1) Installation</a>
+      <a href="#load_save" class="list-group-item list-group-item-action">2) Load & Save</a>
+      <a href="#inspect" class="list-group-item list-group-item-action">3) Inspect Data</a>
+      <a href="#select_filter" class="list-group-item list-group-item-action">4) Select & Filter</a>
+      <a href="#mutate" class="list-group-item list-group-item-action">5) Mutate Columns</a>
+      <a href="#groupby" class="list-group-item list-group-item-action">6) GroupBy & Crosstab</a>
+      <a href="#reshape" class="list-group-item list-group-item-action">7) Pivot & Reshape</a>
+      <a href="#missing" class="list-group-item list-group-item-action">8) Missing & Duplicates</a>
+      <a href="#merge" class="list-group-item list-group-item-action">9) Merge & Join</a>
+      <a href="#datetime" class="list-group-item list-group-item-action">10) Datetime & Resample</a>
+      <a href="#mini_project" class="list-group-item list-group-item-action">11) Mini Project</a>
+      <a href="#exercises" class="list-group-item list-group-item-action">12) Exercises</a>
+      <a href="#pitfalls" class="list-group-item list-group-item-action">13) Common Pitfalls</a>
+      <a href="#cheatsheet" class="list-group-item list-group-item-action">14) Tiny CSV & Cheat</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="col-lg-9">
+
+    <!-- Intro -->
+    <div class="mb-4" id="intro">
+      <span class="badge text-bg-dark px-3 py-2">PANDAS</span>
+      <h1 class="mt-3 mb-2">Pandas — Beginner ➜ Middle</h1>
+      <p class="lead mb-2">
+        Bu səhifə Pandas biliklərini praktik nümunələrlə toplayır: oxuma–yazma, seçim–filtrləmə, qruplaşdırma,
+        pivot/crosstab, merge, datetime və s.
+      </p>
+
+      <div class="intro-pill mb-3">
+        <span>read_csv → head()</span>
+        <span>filter / sort_values</span>
+        <span>groupby / agg</span>
+        <span>pivot_table / melt</span>
+        <span>merge / join</span>
+        <span>to_datetime / resample</span>
+      </div>
+
+      <div class="alert alert-info border-0 shadow-sm">
+        <strong>Tip:</strong> `.str.lower` bir **metoddur** — həmişə `()` ilə çağır:
+        <code>df["col"].str.lower()</code>.
+      </div>
+    </div>
+
+    <div class="accordion" id="pdAccordion">
+
+      <!-- 1) INSTALLATION -->
+      <div class="accordion-item" id="install">
+        <h2 class="accordion-header">
+          <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#c1">
+            1) Installation (venv / conda)
+          </button>
+        </h2>
+        <div id="c1" class="accordion-collapse collapse show">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Qurulum</p>
+            <p>Layihə üçün virtual mühit yarat və Pandas quraşdır. (Təmiz mühit tövsiyə olunur.)</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Terminal — venv / conda</span>
+                </div>
+                <span class="code-window-path">$ project/</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># venv
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+# source .venv/bin/activate
+pip install --upgrade pip
+pip install pandas
+
+# conda
+# conda create -n pandas101 python=3.11 -y
+# conda activate pandas101
+# conda install pandas -y
+
+python -c "import pandas as pd; print(pd.__version__)"</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) LOAD & SAVE -->
+      <div class="accordion-item" id="load_save">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c2">
+            2) Load & Save (CSV/Excel/JSON/SQL)
+          </button>
+        </h2>
+        <div id="c2" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Oxuma/Yazma</p>
+            <p>CSV, Excel, JSON, SQL-dən oxu və fayla yaz.</p>
+
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                    <span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Python — IO</span>
+                </div>
+                <span class="code-window-path">pandas_io.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>import pandas as pd
+
+df = pd.read_csv("grocery-data.csv")
+print(df.shape)           # (rows, cols)
+
+xl = pd.read_excel("report.xlsx", sheet_name="Sales")
+j  = pd.read_json("data.json")
+
+# import sqlite3
+# con = sqlite3.connect("db.sqlite")
+# sql_df = pd.read_sql("SELECT * FROM sales", con)
+
+df.to_csv("grocery-data_out.csv", index=False)</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) INSPECT -->
+      <div class="accordion-item" id="inspect">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c3">
+            3) Inspect: columns, dtypes, info, describe
+          </button>
+        </h2>
+        <div id="c3" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">İlkin baxış</p>
+            <p>Cədvələ ümumi baxış, sütunlar, tiplər və statistik xülasə.</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Inspect</span>
+                </div>
+                <span class="code-window-path">inspect.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>print(df.head(5))     # first 5
+print(df.columns)     # column names
+print(df.dtypes)      # data types
+print(df.info())      # schema + nulls (auto-prints)
+print(df.describe())  # numeric stats</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) SELECT & FILTER -->
+      <div class="accordion-item" id="select_filter">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c4">
+            4) Select & Filter: loc/iloc, boolean masks, sort
+          </button>
+        </h2>
+        <div id="c4" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Seçim/Filtrləmə</p>
+            <p>loc/iloc ilə sətir-sütun seç, boolean masklarla filtrlə, sort et.</p>
+
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Select/Filter</span>
+                </div>
+                <span class="code-window-path">select_filter.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># columns
+price = df["Price"]
+sub   = df[["Product", "Price"]]
+
+# position vs label
+first_row   = df.iloc[0]
+subset_pos  = df.iloc[0:3, 0:2]
+row_by_idx  = df.loc[5]
+subset_lbl  = df.loc[0:5, ["Product", "Qty"]]
+
+# boolean filtering
+expensive   = df[df["Price"] > 5]
+mask        = (df["Brand"] == "Natura") & (df["Qty"] >= 3)
+filtered    = df[mask]
+
+some_brands = df[df["Brand"].isin(["Mlek", "Baker"])]
+mid_price   = df[df["Price"].between(3, 6)]
+with_apple  = df[df["Product"].str.contains("apple", case=False, na=False)]
+
+# sort
+by_price     = df.sort_values("Price")
+by_price_desc= df.sort_values("Price", ascending=False)</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) MUTATE -->
+      <div class="accordion-item" id="mutate">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c5">
+            5) Mutate: new columns, strings, datetime
+          </button>
+        </h2>
+        <div id="c5" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Yeni sütunlar</p>
+            <p>Hesablanmış sütunlar, şərti sütunlar, string və datetime əməliyyatları.</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Mutations</span>
+                </div>
+                <span class="code-window-path">mutate.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>import numpy as np
+
+df["Total"]   = df["Price"] * df["Qty"]
+df["IsCheap"] = np.where(df["Price"] &lt; 3, True, False)
+
+# IMPORTANT: method call needs ()
+df["Product"] = df["Product"].str.strip().str.lower()
+
+df["Date"]  = pd.to_datetime(df["Date"], errors="coerce")
+df["Month"] = df["Date"].dt.to_period("M")</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 6) GROUPBY & CROSSTAB -->
+      <div class="accordion-item" id="groupby">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c6">
+            6) GroupBy, Agg & Crosstab
+          </button>
+        </h2>
+        <div id="c6" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Qruplaşdırma</p>
+            <p>Orta qiymətlər, çoxlu aqreqatlar, crosstab.</p>
+
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — GroupBy & Crosstab</span>
+                </div>
+                <span class="code-window-path">groupby.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># mean price per brand
+brand_mean = df.groupby("Brand", as_index=False)["Price"].mean()
+
+# multi aggregations
+agg_df = (
+    df.groupby("Brand")
+      .agg(avg_price=("Price","mean"),
+           total_qty=("Qty","sum"),
+           items=("Product","nunique"))
+      .reset_index()
+)
+
+# crosstab: Product x Brand
+xt = pd.crosstab(df["Product"], df["Brand"])
+print(xt)</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 7) RESHAPE -->
+      <div class="accordion-item" id="reshape">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c7">
+            7) Pivot Table & Melt (wide ↔ long)
+          </button>
+        </h2>
+        <div id="c7" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Reshape</p>
+            <p>Pivot cədvəlləri və uzun/eniş formalar.</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Pivot/Melt</span>
+                </div>
+                <span class="code-window-path">reshape.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>pt = pd.pivot_table(
+    df, index="Month", columns="Brand", values="Qty",
+    aggfunc="sum", fill_value=0
+)
+long = pt.reset_index().melt(
+    id_vars="Month", var_name="Brand", value_name="Qty"
+)</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 8) MISSING & DUPLICATES -->
+      <div class="accordion-item" id="missing">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c8">
+            8) Missing Values & Duplicates
+          </button>
+        </h2>
+        <div id="c8" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">NaN və Dublikatlar</p>
+            <p>Boş dəyərləri say/doldur, dublikatları təmizlə.</p>
+
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Missing/Duplicates</span>
+                </div>
+                <span class="code-window-path">quality.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>na_counts   = df.isnull().sum()
+df["Price"] = df["Price"].fillna(df["Price"].median())
+clean       = df.dropna(subset=["Product","Brand","Price"])
+
+dups        = df.duplicated()
+df_no_dups  = df.drop_duplicates(subset=["Product","Brand","Date"])</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 9) MERGE -->
+      <div class="accordion-item" id="merge">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c9">
+            9) Merge & Join (Enrichment)
+          </button>
+        </h2>
+        <div id="c9" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Birləşdirmə</p>
+            <p>Digər cədvəllərlə birləşdirərək məlumatı zənginləşdir.</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Merge</span>
+                </div>
+                <span class="code-window-path">merge.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>brands = pd.DataFrame({
+    "Brand": ["Mlek", "Baker", "Natura"],
+    "Country": ["PL", "AZ", "TR"],
+})
+merged = df.merge(brands, on="Brand", how="left")
+print(merged.columns)</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 10) DATETIME -->
+      <div class="accordion-item" id="datetime">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c10">
+            10) Datetime & Resample (Monthly totals)
+          </button>
+        </h2>
+        <div id="c10" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Tarix/Saat</p>
+            <p>Aylıq toplam satışları çıxarmaq üçün resample istifadə et.</p>
+
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Resample</span>
+                </div>
+                <span class="code-window-path">datetime.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>df["Total"] = df["Price"] * df["Qty"]
+monthly = (
+    df.set_index("Date")
+      .resample("M")["Total"]
+      .sum()
+      .to_frame("Total")
+      .reset_index()
+)
+print(monthly.tail())</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 11) MINI PROJECT -->
+      <div class="accordion-item" id="mini_project">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c11">
+            11) Mini Project: Brand & Product Insights
+          </button>
+        </h2>
+        <div id="c11" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Mini layihə</p>
+            <p>Brend üzrə toplam gəlir, TOP-3 məhsul və aylıq trend.</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Mini Project</span>
+                </div>
+                <span class="code-window-path">mini_project.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>sales = df.dropna(subset=["Product","Brand","Price","Qty","Date"]).copy()
+sales["Date"]  = pd.to_datetime(sales["Date"])
+sales["Total"] = sales["Price"] * sales["Qty"]
+
+# 1) Brand totals
+brand_totals = (sales.groupby("Brand", as_index=False)["Total"]
+                      .sum()
+                      .sort_values("Total", ascending=False))
+print(brand_totals.head())
+
+# 2) Top-3 products
+top3_products = (sales.groupby("Product", as_index=False)["Total"]
+                       .sum()
+                       .sort_values("Total", ascending=False)
+                       .take([0,1,2]))
+print(top3_products)
+
+# 3) Monthly trend
+monthly = (sales.set_index("Date").resample("M")["Total"].sum().reset_index())
+print(monthly.tail())</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 12) EXERCISES -->
+      <div class="accordion-item" id="exercises">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c12">
+            12) Exercises (Practice)
+          </button>
+        </h2>
+        <div id="c12" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Tapşırıqlar</p>
+            <ul class="mb-3">
+              <li><strong>Filter:</strong> Price 3–6 arası olan sətirlərin Qty ortasını hesabla.</li>
+              <li><strong>Pivot:</strong> Brand × Product üçün Total dəyərləri ilə pivot cədvəl qur.</li>
+              <li><strong>Datetime:</strong> Date → datetime çevir, aylıq satışları çıxart və ən çox olan ayı tap.</li>
+              <li><strong>Merge:</strong> Brand → Country xəritəsi ilə merge edib ölkə üzrə toplam Total tap.</li>
+              <li><strong>Missing:</strong> Boş Price dəyərlərini median ilə doldur; neçə dəyər dəyişdiyini say.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 13) PITFALLS -->
+      <div class="accordion-item" id="pitfalls">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c13">
+            13) Common Pitfalls & Best Practices
+          </button>
+        </h2>
+        <div id="c13" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Səhvlər</p>
+            <ul class="mb-3">
+              <li><code>.str.lower</code> → <strong>doğrusu:</strong> <code>.str.lower()</code></li>
+              <li><strong>SettingWithCopyWarning:</strong> zəncirli indeksləmə əvəzinə <code>.loc</code> istifadə et.</li>
+              <li>Dtype-ları düz saxla: <code>to_datetime</code>, <code>to_numeric</code>.</li>
+              <li>Vectorization: mümkün olduqda <code>apply</code> əvəzinə vektor əməliyyatları.</li>
+            </ul>
+
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — .loc fix</span>
+                </div>
+                <span class="code-window-path">best_practices.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># bad
+subset = df[df["Brand"] == "Natura"]
+# subset["Price"] = subset["Price"] * 1.1  # may warn
+
+# good
+df.loc[df["Brand"] == "Natura", "Price"] *= 1.1</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14) CHEATSHEET & TINY CSV -->
+      <div class="accordion-item" id="cheatsheet">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c14">
+            14) Tiny Demo CSV + Quick Cheats
+          </button>
+        </h2>
+        <div id="c14" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Kiçik CSV</p>
+            <p>Test üçün minimal CSV:</p>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">CSV — grocery-data.csv</span>
+                </div>
+                <span class="code-window-path">/data/</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>Product,Brand,Price,Qty,Date
+Milk,Mlek,4.5,2,2025-11-01
+Bread,Baker,3.2,1,2025-11-02
+Apple,Natura,2.0,6,2025-11-03
+Apple,Natura,2.5,3,2025-11-04
+Milk,Mlek,5.0,2,2025-11-05
+Bread,Baker,3.2,4,2025-11-06</code></pre>
+              </div>
+            </div>
+
+            <p class="section-label mb-1">Cheat Lines</p>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Quick Cheats</span>
+                </div>
+                <span class="code-window-path">cheats.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>df = pd.read_csv("grocery-data.csv")
+df["Product"] = df["Product"].str.lower().str.strip()
+df["Date"]    = pd.to_datetime(df["Date"])
+df["Total"]   = df["Price"] * df["Qty"]
+
+print(pd.crosstab(df["Product"], df["Brand"]))
+print(df.groupby("Brand")["Price"].mean())
+print(df.sort_values(["Brand","Price"], ascending=[True, False]).head())
+
+# select rows
+print(df[(df["Brand"]=="Natura") & (df["Qty"]>=3)][["Product","Qty","Total"]])</code></pre>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div><!-- END ACCORDION -->
+
+  </div>
+</div>
+
 {% endblock %}
