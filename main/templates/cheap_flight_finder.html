@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Cheap Flight Finder — Elvin's CodeBase{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hero {
+    background: linear-gradient(135deg,#eaf2ff,#f6fff4);
+    border-radius: 1.1rem;
+    padding: 1.4rem 1.2rem;
+  }
+  .gradient-text{
+    background-image: linear-gradient(135deg,#0d6efd,#22c55e);
+    background-size: 100%; background-repeat: repeat;
+    color: transparent; -webkit-background-clip: text; background-clip: text;
+  }
+  .pill{background:#eef2ff;border-radius:999px;padding:.2rem .6rem;font-size:.8rem}
+  .code-window{border-radius:.9rem;overflow:hidden;background:#020617;color:#e5e7eb;box-shadow:0 16px 35px rgba(2,6,23,.35)}
+  .code-header{display:flex;align-items:center;justify-content:space-between;padding:.45rem .9rem;background:linear-gradient(135deg,#111827,#0f172a);font-size:.78rem;color:#9ca3af}
+  .dots{display:inline-flex;gap:.3rem}.dot{width:9px;height:9px;border-radius:999px}.dot.red{background:#f87171}.dot.yellow{background:#facc15}.dot.green{background:#4ade80}
+  .code-body{padding:.85rem 1rem}
+  .code-body p, .code-body li{color:#cbd5e1}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 align-items-start">
+
+  <!-- LEFT: UI -->
+  <div class="col-lg-7">
+    <div class="hero mb-3 shadow-sm">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <div class="text-uppercase text-muted" style="letter-spacing:.08em;font-size:.8rem;">Projects / Cheap Flight Finder</div>
+          <h1 class="h3 mb-2"><span class="gradient-text">Cheap Flight Finder</span> (Amadeus Test API)</h1>
+          <p class="mb-0 text-muted">Search flight offers by origin, destination, and date. We’ll pick the cheapest option and list its segments with times.</p>
+        </div>
+        <div class="text-end">
+          <span class="pill">API: Amadeus (test)</span>
+          <span class="pill ms-1">Tech: Python, Django, requests</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="card border-0 shadow-sm" style="border-radius:1rem;">
+      <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label mb-1">Origin</label>
+            <input type="text" name="origin" class="form-control" placeholder="WAW" value="{{ origin }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">Destination</label>
+            <input type="text" name="destination" class="form-control" placeholder="BCN" value="{{ destination }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">Date</label>
+            <input type="date" name="depart_date" class="form-control" value="{{ depart_date }}">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label mb-1">Currency</label>
+            <input type="text" name="currency" class="form-control" placeholder="USD" value="{{ currency|default:'USD' }}">
+          </div>
+          <div class="col-12">
+            <button class="btn btn-primary mt-2" type="submit">🔎 Search Cheapest</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Errors -->
+    {% if error %}
+      <div class="alert alert-danger border-0 shadow-sm mt-3">{{ error }}</div>
+    {% endif %}
+
+    <!-- Result -->
+    {% if result %}
+      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div style="font-size:2rem;" class="me-3">✈️</div>
+            <div>
+              <div class="fw-semibold">Cheapest offer</div>
+              <div class="fs-5">{{ result.price }} {{ result.currency }}</div>
+            </div>
+          </div>
+
+          {% if result.segments %}
+            <hr>
+            <div class="fw-semibold mb-2">Segments</div>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Carrier</th>
+                    <th>Route</th>
+                    <th class="text-end">Departure</th>
+                    <th class="text-end">Arrival</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for seg in result.segments %}
+                    <tr>
+                      <td>{{ seg.carrier }}</td>
+                      <td>{{ seg.route }}</td>
+                      <td class="text-end">{{ seg.dep_time }}</td>
+                      <td class="text-end">{{ seg.arr_time }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if sample_rows and not result %}
+      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Sample segments</div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Carrier</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th class="text-end">Dep</th>
+                  <th class="text-end">Arr</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in sample_rows %}
+                  <tr>
+                    <td>{{ r.carrier }}</td>
+                    <td>{{ r.from }}</td>
+                    <td>{{ r.to }}</td>
+                    <td class="text-end">{{ r.dep_time }}</td>
+                    <td class="text-end">{{ r.arr_time }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <small class="text-muted d-block mt-2">A small subset from returned offers (for context).</small>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if not result and not error %}
+      <p class="text-muted mt-3">Fill the form above and click <strong>Search Cheapest</strong> to see results.</p>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT: How it works + Notes -->
+  <div class="col-lg-5">
+    <div class="code-window mb-3">
+      <div class="code-header">
+        <div class="d-flex align-items-center gap-2">
+          <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+          <span>How the finder works</span>
+        </div>
+        <span>Overview</span>
+      </div>
+      <div class="code-body">
+        <p>Plain-English workflow:</p>
+        <ul class="mb-3" style="padding-left:1.1rem;">
+          <li>🔎 You provide <strong>origin</strong>, <strong>destination</strong>, <strong>date</strong>, and <strong>currency</strong>.</li>
+          <li>🔐 App requests a <em>test</em> access token from <strong>Amadeus</strong>.</li>
+          <li>🧾 It queries flight offers and parses <em>itineraries → segments</em> including times.</li>
+          <li>💰 The app picks the <strong>lowest total price</strong> and shows carrier, route, and departure/arrival times.</li>
+        </ul>
+
+        <p>Limitations (test mode):</p>
+        <ul style="padding-left:1.1rem;">
+          <li>🧪 Uses Amadeus <em>test</em> environment (sandbox-like data).</li>
+          <li>⏳ Rate limits, missing routes, or partial dictionaries may occur.</li>
+          <li>🌍 Airport codes must be IATA (e.g., WAW, BCN).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert alert-warning border-0 shadow-sm">
+      <strong>Heads-up:</strong> Educational demo only — not booking or live pricing. Always verify offers on real providers before making travel decisions.
+    </div>
+
+    <div class="alert alert-secondary border-0 shadow-sm" style="font-size:.95rem;">
+      <strong>Notes:</strong> Requires <code>AMADEUS_CLIENT_ID</code> and <code>AMADEUS_CLIENT_SECRET</code>. If you get “No offers found”, try another date/route or check your API plan.
+    </div>
+  </div>
+</div>
+{% endblock %}

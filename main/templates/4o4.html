@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}404 — Page Not Found{% endblock %}
+
+{% block extra_head %}
+<style>
+  .error-hero {
+      padding: 80px 0;
+      text-align: center;
+  }
+
+  .error-number {
+      font-size: 110px;
+      font-weight: 800;
+      color: #0d6efd;
+      letter-spacing: -3px;
+  }
+
+  .error-subtext {
+      font-size: 1.3rem;
+      color: #6b7280;
+  }
+
+  /* macOS style code window */
+  .code-window {
+      border-radius: 0.9rem;
+      overflow: hidden;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+      max-width: 650px;
+      margin: 40px auto;
+  }
+
+  .code-window-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.9rem;
+      background: linear-gradient(135deg, #111827, #0f172a);
+      font-size: 0.78rem;
+  }
+
+  .code-dots {
+      display: inline-flex;
+      gap: 0.3rem;
+  }
+
+  .code-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+  }
+
+  .code-dot.red { background: #f87171; }
+  .code-dot.yellow { background: #facc15; }
+  .code-dot.green { background: #4ade80; }
+
+  .code-window-body {
+      padding: 0.75rem 1rem;
+  }
+
+  .code-window-body pre {
+      margin: 0;
+      color: #e5e7eb;
+      white-space: pre;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="error-hero">
+      <div class="error-number">404</div>
+      <p class="error-subtext">Oops... the page you're looking for doesn’t exist.</p>
+
+      <div class="code-window mt-4">
+          <div class="code-window-header">
+              <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots">
+                      <span class="code-dot red"></span>
+                      <span class="code-dot yellow"></span>
+                      <span class="code-dot green"></span>
+                  </div>
+                  <span class="code-window-title">Terminal — Django Router</span>
+              </div>
+              <span class="code-window-path">/router/check/path</span>
+          </div>
+          <div class="code-window-body">
+<pre><code>$ GET /unknown/page
+❌ Error: route not found
+
+Tip:
+→ Check the URL again
+→ Or return to the homepage
+→ Or explore the documentation
+</code></pre>
+          </div>
+      </div>
+
+      <a href="/" class="btn btn-dark mt-3 px-4">Return Home</a>
+  </div>
+
+</div>
+{% endblock %}

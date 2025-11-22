@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Predictor — Elvin's CodeBase{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hero {
+    background: linear-gradient(135deg,#eaf2ff,#f6fff4);
+    border-radius: 1.1rem;
+    padding: 1.5rem 1.25rem;
+  }
+  .gradient-text {
+  background-image: linear-gradient(135deg, #0d6efd, #22c55e);
+  background-size: 100%;
+  background-repeat: repeat;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+  .code-window {
+    border-radius: .9rem; overflow: hidden;
+    background:#020617; color:#e5e7eb;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    box-shadow: 0 16px 35px rgba(2,6,23,.35);
+  }
+  .code-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.45rem .9rem;
+    background: linear-gradient(135deg,#111827,#0f172a);
+    font-size:.78rem; color:#9ca3af;
+  }
+  .dots{display:inline-flex; gap:.3rem}
+  .dot{width:9px;height:9px;border-radius:999px}
+  .dot.red{background:#f87171}.dot.yellow{background:#facc15}.dot.green{background:#4ade80}
+  .code-body{padding:.8rem 1rem}
+  .code-body pre{margin:0;white-space:pre}
+  .stat-pill{background:#eef2ff;border-radius:999px;padding:.15rem .6rem;font-size:.8rem}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 align-items-start">
+  <!-- LEFT: UI -->
+  <div class="col-lg-7">
+
+    <!-- Hero -->
+    <div class="hero mb-3 shadow-sm">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <div class="text-uppercase text-muted" style="letter-spacing:.08em;font-size:.8rem;">Projects / Stock Predictor</div>
+          <h1 class="h3 mb-2"><span class="gradient-text">Stock Predictor</span> (Marketstack + OpenAI)</h1>
+          <p class="mb-0 text-muted">Enter a stock symbol (e.g., <code>TSLA</code>, <code>AAPL</code>, <code>GOOGL</code>) to fetch last EOD data and get closing price estimate.</p>
+        </div>
+        <div class="text-end">
+          <span class="stat-pill">Data: Marketstack</span>
+          <span class="stat-pill ms-1">AI: OpenAI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="card border-0 shadow-sm mb-2" style="border-radius:1rem;">
+      <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+          <div class="col-md-8">
+            <label class="form-label mb-1">Symbol</label>
+            <input type="text" name="symbol" class="form-control" placeholder="e.g. TSLA" value="{{ symbol|default_if_none:'' }}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label mb-1 d-none d-md-block">&nbsp;</label>
+            <button class="btn btn-primary w-100" type="submit">🔮 Predict</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Results -->
+    {% if error %}
+      <div class="alert alert-danger border-0 shadow-sm mt-3">{{ error }}</div>
+    {% endif %}
+
+    {% if prediction %}
+      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
+        <div class="card-body d-flex align-items-center">
+          <div class="me-3" style="font-size:2.1rem;">📈</div>
+          <div>
+            <div class="fw-semibold">Prediction</div>
+            <div class="fs-5">
+              {{ prediction }}
+              {% if symbol %}<span class="text-muted">for</span> <span class="fw-semibold">{{ symbol }}</span>{% endif %}
+            </div>
+            {% if model_name or fetched_at %}
+              <div class="text-muted mt-1" style="font-size:.9rem;">
+                {% if model_name %}Model: {{ model_name }}{% endif %}
+                {% if model_name and fetched_at %} • {% endif %}
+                {% if fetched_at %}Updated: {{ fetched_at }}{% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if rows %}
+      <div class="card border-0 shadow-sm mt-3" style="border-radius:1rem;">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Recent EOD (sample)</div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Date</th><th class="text-end">Open</th><th class="text-end">High</th><th class="text-end">Low</th><th class="text-end">Close</th><th class="text-end">Vol</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in rows %}
+                <tr>
+                  <td>{{ r.date }}</td>
+                  <td class="text-end">{{ r.open }}</td>
+                  <td class="text-end">{{ r.high }}</td>
+                  <td class="text-end">{{ r.low }}</td>
+                  <td class="text-end">{{ r.close }}</td>
+                  <td class="text-end">{{ r.volume }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-muted">No data loaded yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <small class="text-muted d-block mt-2">Showing up to the latest 10 records.</small>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if not prediction and not error %}
+      <p class="text-muted mt-3">Type a symbol above and press <strong>Predict</strong> to see the result.</p>
+    {% endif %}
+  </div>
+<!-- RIGHT: How it works (no code) -->
+<div class="col-lg-5">
+  <div class="code-window mb-3">
+    <div class="code-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="dots">
+          <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        </div>
+        <span>How the Stock Predictor works</span>
+      </div>
+      <span>Overview</span>
+    </div>
+    <div class="code-body" style="line-height:1.55;">
+      <div class="mb-2" style="color:#cbd5e1;">Plain-English workflow:</div>
+      <ul class="mb-3" style="padding-left:1.1rem; margin:0;">
+        <li>🔎 <strong>Input:</strong> You enter a stock symbol (e.g., <code>TSLA</code>).</li>
+        <li>⬇️ <strong>Data fetch:</strong> App pulls recent EOD (end-of-day) data from <em>Marketstack</em> API.</li>
+        <li>📝 <strong>Prompt build:</strong> It writes a compact prompt + series into <code>prediction.txt</code>.</li>
+        <li>🤖 <strong>Model call:</strong> Sends that text to an AI model (OpenAI) asking for a single number (next 5 trading days closing estimate).</li>
+        <li>📤 <strong>Parse & show:</strong> Reads the model’s single numeric answer and displays it as the prediction.</li>
+        <li>📊 <strong>Context:</strong> A small sample table shows recent EOD rows for reference.</li>
+      </ul>
+
+      <div class="mb-2" style="color:#cbd5e1;">What this <em>doesn’t</em> do:</div>
+      <ul style="padding-left:1.1rem; margin:0;">
+        <li>❌ No fundamentals, no news, no macro data.</li>
+        <li>❌ No real trading signals or risk management.</li>
+        <li>❌ Not a backtested strategy; it’s a <strong>toy predictor</strong> for learning.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert alert-warning border-0 shadow-sm">
+    <strong>Important:</strong> Educational demo only — <em>not financial advice</em>. Do <u>not</u> make investment decisions solely based on this prediction. Markets are volatile and the model can be wrong.
+  </div>
+
+  <div class="alert alert-secondary border-0 shadow-sm" style="font-size:.95rem;">
+    <strong>Notes:</strong> Requires environment variables <code>MARKETSTACK_API_KEY</code> and <code>OPENAI_API_KEY</code>. API rate limits and latency may affect response times. If symbols return no data, check ticker, exchange, or your API plan.
+  </div>
+</div>
+
+  </div>
+</div>
+{% endblock %}

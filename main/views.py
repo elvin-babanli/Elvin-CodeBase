@@ -2,6 +2,12 @@ import requests, time
 from django.shortcuts import render, redirect
 
 
+# 4o4-page_____________________________________________
+
+def get4o4(request):
+    return render(request,"4o4.html")
+
+
 def index(request):
     return render(request, "index.html")
 
