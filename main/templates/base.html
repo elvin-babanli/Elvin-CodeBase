@@ -36,6 +36,7 @@
         --cprimary-weak:#e8f0fe;
         --border:rgba(17,24,39,.08);
         --shadow:0 12px 30px rgba(0,0,0,.10);
+        --chat-gradient: linear-gradient(135deg,#eaf2ff,#f6fff4);
       }
 
       .chat-launcher{
@@ -46,6 +47,7 @@
         border-radius:999px; padding:10px 14px;
         box-shadow:var(--shadow); cursor:pointer;
         transform:translateY(16px); opacity:0; transition:all .28s ease;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45),0 2px 8px rgba(0, 0, 0, 0.25);
       }
       .chat-launcher.show{ transform:translateY(0); opacity:1; }
       .chat-launcher .dot{
@@ -57,7 +59,10 @@
       .chat-panel{
         position:fixed; right:18px; bottom:18px; z-index:1056;
         width:360px; max-width:calc(100vw - 36px); height:580px;
-        background:var(--cbg);
+        background: var(--cprimary);
+        border-radius:16px;
+        overflow:hidden;
+        box-shadow: 0 24px 60px rgba(0,0,0,.35);
         border-radius:16px;
         overflow:hidden;
     
@@ -94,10 +99,19 @@
       }
       .chat-header .icon-btn:hover{ background:#eef2ff; color:var(--cprimary); }
 
-      .chat-body{
-        flex:1; overflow:auto; padding:12px 10px 8px 10px; background:#fff;
-        scrollbar-width:thin; scrollbar-color:#e5e7eb transparent;
+      .chat-body {
+      flex:1;
+      overflow-y: auto;
+      padding: 12px 10px 6px 10px;
+
+      /* Yeni gradient */
+      background: linear-gradient(135deg, #eaf2ff, #f6fff4);
+      
+      /* Mövcud scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: #343445 transparent;
       }
+
       .chat-body::-webkit-scrollbar{ width:8px; }
       .chat-body::-webkit-scrollbar-thumb{ background:#e5e7eb; border-radius:8px; }
 
@@ -107,10 +121,20 @@
         border:1px solid var(--border);
       }
       .bubble.bot{ background:#f9fafb; color:#111827; border-top-left-radius:6px; }
-      .bubble.user{
-        margin-left:auto; color:#0b1220; background:#eff6ff;
-        border:1px solid #dbeafe; border-top-right-radius:6px;
+      .bubble.user {
+      margin-left: auto;
+      color: #ffffff;
+      /* Smooth light-blue Instagram DM Gradient */
+      background: linear-gradient(135deg, rgba(48, 108, 193, 0.75), rgba(112, 177, 237, 0.75));
+      /* Glass blur effect */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      border-top-right-radius: 6px;
+      box-shadow: 0 8px 28px rgba(120,170,255,0.35);
       }
+
 
       .typing{ display:inline-flex; gap:4px; align-items:center; }
       .typing .t-dot{

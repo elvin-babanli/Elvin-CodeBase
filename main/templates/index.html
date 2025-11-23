@@ -1,18 +1,370 @@
-{% extends "base.html" %}
-{% block title %}Home — Python Updates{% endblock %}
-{% block content %}
-<div class="container py-4">
-  <h1 class="mb-2">Python — What’s New</h1>
-  <p class="text-muted mb-3">Fresh articles and releases (soon).</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Home — Minimal</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-  <div class="alert alert-info">
-    Live news feed is coming next. For now, check:
-    <a class="alert-link" href="https://www.python.org/blogs/" target="_blank">python.org/blogs</a>,
-    <a class="alert-link" href="https://realpython.com/" target="_blank">Real Python</a>.
-  </div>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --card:#f8fafc;
+      --border:#e5e7eb;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+      --radius:16px;
+      --radius-sm:12px;
+      --acc:#0d6efd;
+      --acc-2:#22c55e;
+    }
 
-  <div class="mt-4">
-    <a class="btn btn-dark btn-sm" href="{% url 'about' %}">About Me</a>
-  </div>
-</div>
-{% endblock %}
+    /* Global reset */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    }
+    img{max-width:100%;display:block}
+
+    .page{max-width:1200px;margin:0 auto;padding:16px 16px 80px}
+
+    .section{margin-top:28px}
+    .title{
+      font-weight:700;letter-spacing:.2px;margin:0 0 12px;font-size:clamp(20px,2vw,24px)
+    }
+    .muted{color:var(--muted)}
+
+    /* ------------------------------
+       I) VIDEO SLIDER
+       ------------------------------ */
+    .slider{
+      position:relative;width:100%;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius);
+      overflow:hidden;
+      background:#000;
+      box-shadow: var(--shadow);
+      user-select:none;
+    }
+    .slide{
+      position:absolute;inset:0;display:none;
+    }
+    .slide.active{ display:block; }
+    .slide iframe{
+      width:100%;height:100%;border:0;display:block;
+    }
+    .nav-btn{
+      position:absolute;top:50%;translate:0 -50%;
+      width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.35);
+      display:grid;place-items:center;color:#fff;background:rgba(15,23,42,.18);
+      backdrop-filter: blur(4px); cursor:pointer; opacity:.35;transition:.25s;
+    }
+    .nav-btn:hover{opacity:.9}
+    .nav-left{left:10px}
+    .nav-right{right:10px}
+    .nav-btn svg{width:20px;height:20px}
+
+    .dots{
+      position:absolute;left:0;right:0;bottom:10px;display:flex;gap:6px;justify-content:center
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background:rgba(255,255,255,.35);
+      transition:.25s
+    }
+    .dot.active{background:#fff}
+
+    /* ------------------------------
+       II) Websites I Use — Mac window
+       ------------------------------ */
+    .mac-window{
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      background:#0b0f19;
+      color:#e2e8f0;
+    }
+    .mac-top{
+      display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0a0e17;
+      border-bottom:1px solid rgba(148,163,184,.12)
+    }
+    .dot-r,.dot-y,.dot-g{
+      width:12px;height:12px;border-radius:50%
+    }
+    .dot-r{background:#ef4444}.dot-y{background:#eab308}.dot-g{background:#22c55e}
+    .sites{padding:14px}
+    .sites-grid{
+      display:grid;gap:12px;
+      grid-template-columns:repeat(6,1fr);
+    }
+    @media (max-width:1024px){
+      .sites-grid{grid-template-columns:repeat(4,1fr)}
+    }
+    @media (max-width:768px){
+      .sites-grid{grid-template-columns:repeat(3,1fr)}
+    }
+    @media (max-width:520px){
+      .sites-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    .site-card{
+      display:block;padding:14px;border-radius:12px;
+      background:#0f172a;border:1px solid rgba(148,163,184,.12);
+      color:#e2e8f0;text-decoration:none;transition:.2s;
+    }
+    .site-card:hover{transform: translateY(-2px); box-shadow: 0 8px 22px rgba(2,6,23,.35)}
+    .site-card small{color:#94a3b8;display:block;margin-top:4px;font-size:.8rem;word-break:break-all}
+
+    /* ------------------------------
+       III) Projects — cards
+       ------------------------------ */
+    .projects-grid{
+      display:grid;gap:16px;grid-template-columns: repeat(3,1fr);
+    }
+    @media (max-width:992px){
+      .projects-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:600px){
+      .projects-grid{grid-template-columns:1fr}
+    }
+    .card{
+      background:var(--card);border:1px solid var(--border);
+      border-radius:var(--radius-sm); padding:18px;
+      box-shadow: var(--shadow); transition:.2s
+    }
+    .card:hover{ transform: translateY(-3px)}
+    .card h3{margin:0 0 6px;font-size:1.05rem}
+    .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .link{font-weight:600;text-decoration:none;color:var(--acc);border-bottom:1px dashed transparent}
+    .link:hover{border-bottom-color:var(--acc)}
+
+    /* ------------------------------
+       IV) News — cards with thumbnail
+       ------------------------------ */
+    .news-grid{
+      display:grid;gap:16px;grid-template-columns:repeat(3,1fr);
+    }
+    @media (max-width:992px){
+      .news-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:560px){
+      .news-grid{grid-template-columns:1fr}
+    }
+    .news{
+      border-radius:14px;overflow:hidden;border:1px solid var(--border);
+      display:flex;flex-direction:column;background:#fff;box-shadow: var(--shadow);
+      transition:.2s
+    }
+    .news:hover{transform: translateY(-2px)}
+    .news img{aspect-ratio:16/9;object-fit:cover;width:100%}
+    .news .b{padding:12px 14px}
+    .news h4{margin:0 0 6px;font-size:1rem}
+    .news p{margin:0;color:#475569;font-size:.95rem}
+  </style>
+</head>
+<body>
+  <main class="page">
+
+    <!-- I) VIDEO SLIDER (autoplay, arrows, dots) -->
+    <section class="slider section" id="slider">
+      <button class="nav-btn nav-left" aria-label="Prev">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/></svg>
+      </button>
+      <button class="nav-btn nav-right" aria-label="Next">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/></svg>
+      </button>
+      <!-- slides injected by JS -->
+      <div class="dots" id="sliderDots"></div>
+    </section>
+
+    <!-- II) Websites I Use — Mac window -->
+    <section class="section">
+      <div class="mac-window">
+        <div class="mac-top">
+          <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+        </div>
+        <div class="sites">
+          <h2 class="title">Websites I Use</h2>
+          <p class="muted" style="margin:0 0 14px">Quick access to my daily tools</p>
+          <div class="sites-grid">
+            <a href="https://same.new/" target="_blank" class="site-card"><strong>same.new</strong><small>https://same.new/</small></a>
+            <a href="https://stackoverflow.com/" target="_blank" class="site-card"><strong>Stack Overflow</strong><small>https://stackoverflow.com/</small></a>
+            <a href="https://21st.dev/community/components" target="_blank" class="site-card"><strong>21st.dev Components</strong><small>https://21st.dev/community/components</small></a>
+            <a href="https://chathub.gg/" target="_blank" class="site-card"><strong>ChatHub</strong><small>https://chathub.gg/</small></a>
+            <a href="https://www.enki.com/" target="_blank" class="site-card"><strong>Enki</strong><small>https://www.enki.com/</small></a>
+            <a href="https://www.n2yo.com/api/" target="_blank" class="site-card"><strong>N2YO API</strong><small>https://www.n2yo.com/api/</small></a>
+            <a href="https://www.data.com/" target="_blank" class="site-card"><strong>Data.com</strong><small># https://www.data.com/</small></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- III) Projects -->
+    <section class="section">
+      <h2 class="title">Projects</h2>
+      <div class="projects-grid">
+        <article class="card">
+          <h3>PDF Summarizer</h3>
+          <p class="muted">Large PDF files converted into clean short summaries using AI.</p>
+          <div class="links">
+            <a class="link" href="https://summerizer-ubum.onrender.com/" target="_blank">Live</a>
+            <a class="link" href="https://www.linkedin.com/feed/update/urn:li:activity:7391036469328433152/" target="_blank">LinkedIn</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Exam Passer</h3>
+          <p class="muted">AI-assisted tool that helps users pass exams by automating study assistance.</p>
+          <div class="links">
+            <a class="link" href="https://www.linkedin.com/feed/update/urn:li:activity:7386493560302350336/" target="_blank">LinkedIn</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Future Project</h3>
+          <p class="muted">Reserved for next portfolio tool.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- IV) News -->
+    <section class="section" style="margin-top:38px">
+      <h2 class="title">News</h2>
+      <div class="news-grid">
+        <a class="news" href="https://news.ycombinator.com/" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>Hacker News — Top stories</h4>
+            <p>Daily top tech stories curated by the community. Quick pulse on the industry.</p>
+          </div>
+        </a>
+        <a class="news" href="https://arxiv.org/" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>arXiv — AI & CS preprints</h4>
+            <p>Fresh research straight from labs. Great for staying ahead on ML trends.</p>
+          </div>
+        </a>
+        <a class="news" href="https://blog.google/technology/ai/" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>Google AI Blog</h4>
+            <p>Official updates on Google’s AI research and product features.</p>
+          </div>
+        </a>
+
+        <!-- optional more -->
+        <a class="news" href="https://openai.com/news" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>OpenAI — News</h4>
+            <p>Model releases, safety research, developer updates, and partnerships.</p>
+          </div>
+        </a>
+        <a class="news" href="https://aws.amazon.com/blogs/aws/" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>AWS Official Blog</h4>
+            <p>Cloud features, serverless patterns, and enterprise best practices.</p>
+          </div>
+        </a>
+        <a class="news" href="https://vercel.com/blog" target="_blank" rel="noopener">
+          <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1200&auto=format&fit=crop" alt="">
+          <div class="b">
+            <h4>Vercel — Blog</h4>
+            <p>Frontend performance, DX tooling, and modern web workflow insights.</p>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ------------------------------
+    // VIDEO SLIDER (no external libs)
+    // ------------------------------
+    (function(){
+      const videos = [
+        "FOGRHBp6lvM",
+        "JZZr0PjZsIk",
+        "Y0dLgtF4IHM",
+        "QM5XDc4NQJo",
+        "1lwddP0KUEg"
+      ];
+      const slider = document.getElementById('slider');
+      const dotsWrap = document.getElementById('sliderDots');
+
+      let idx = 0;
+      let timer = null;
+      const DURATION = 3800; // 3.8s
+
+      // build slides
+      videos.forEach((id, i)=>{
+        const s = document.createElement('div');
+        s.className = 'slide';
+        if (i===0) s.classList.add('active');
+        slider.appendChild(s);
+
+        const d = document.createElement('div');
+        d.className = 'dot' + (i===0?' active':'');
+        d.addEventListener('click', ()=>go(i, true));
+        dotsWrap.appendChild(d);
+      });
+
+      const slides = [...slider.querySelectorAll('.slide')];
+      const dots = [...dotsWrap.querySelectorAll('.dot')];
+
+      function ytURL(id){
+        // muted autoplay, no controls
+        return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&modestbranding=1`;
+      }
+
+      function setSrc(el, id){
+        el.innerHTML = ''; // clear old iframe if any
+        const ifr = document.createElement('iframe');
+        ifr.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        ifr.allowFullscreen = true;
+        ifr.src = ytURL(id);
+        el.appendChild(ifr);
+      }
+
+      // initialize first
+      setSrc(slides[0], videos[0]);
+
+      function go(n, manual=false){
+        if (n===idx) return;
+        // stop old
+        slides[idx].classList.remove('active');
+        slides[idx].innerHTML = ''; // remove iframe to stop playback
+        dots[idx].classList.remove('active');
+
+        idx = (n + videos.length) % videos.length;
+
+        // start new
+        slides[idx].classList.add('active');
+        setSrc(slides[idx], videos[idx]);
+        dots[idx].classList.add('active');
+
+        if (manual) restart();
+      }
+
+      function next(){ go(idx+1) }
+      function prev(){ go(idx-1) }
+
+      function start(){ timer = setInterval(next, DURATION) }
+      function stop(){ clearInterval(timer); timer=null }
+      function restart(){ stop(); start() }
+
+      // arrows
+      slider.querySelector('.nav-left').addEventListener('click', ()=>go(idx-1, true));
+      slider.querySelector('.nav-right').addEventListener('click', ()=>go(idx+1, true));
+
+      // pause on hover
+      slider.addEventListener('mouseenter', stop);
+      slider.addEventListener('mouseleave', start);
+
+      start();
+    })();
+  </script>
+</body>
+</html>

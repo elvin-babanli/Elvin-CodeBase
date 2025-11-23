@@ -1,5 +1,6 @@
 import requests, time
 from django.shortcuts import render, redirect
+from .home_news import get_home_feed
 
 
 # 4o4-page_____________________________________________
@@ -39,7 +40,12 @@ def get_python_basics(request):
 # def weather_app(request):
 #     return render(request, "weather_app.html")
 
+# Home__________________________________________________
 
+
+def index(request):
+    articles = get_home_feed()
+    return render(request, "index.html", {"articles": articles})
 
 
 
