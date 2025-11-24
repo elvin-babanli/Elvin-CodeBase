@@ -344,8 +344,13 @@ def answer(q: str, history: Optional[List[Dict]]=None) -> Tuple[str, bool, str]:
 app = FastAPI(title="Elvin Babanlı — Chatbot API (NEW)")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    allow_origins=[
+        "https://elvin-codebase.onrender.com",
+        "https://elvin-babanli.com",
+        "https://www.elvin-babanli.com",
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class ChatIn(BaseModel):
