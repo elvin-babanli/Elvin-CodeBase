@@ -19,3 +19,6 @@
 
 # collectstatic çıxışını olduğu kimi saxla (EOL çevirmə, xəbərdarlıq olmasın)
 staticfiles/** -text
+
+* text=auto
+*.txt text eol=lf
