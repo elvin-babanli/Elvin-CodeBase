@@ -348,7 +348,10 @@ app.add_middleware(
         "https://elvin-codebase.onrender.com",
         "https://elvin-babanli.com",
         "https://www.elvin-babanli.com",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
     ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
