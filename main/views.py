@@ -97,16 +97,19 @@ def fetch_news():
 
 
 def home(request):
-    # Boş default-lar veririk ki, template partlamasın
+    articles_ai = get_home_feed()
+    
     context = {
-        "articles": [],       # sonra real data ilə doldurarsan
-        "articles_ai": None,  # yoxdursa None qalır
+        "articles_ai": articles_ai,       
+        "articles": articles_ai,  
         # lazım ola biləcək digər listlər də varsa, hamısına boş dəyər ver:
         # "projects": [],
         # "news": [],
         # "tools": [],
     }
     return render(request, "index.html", context)
+
+
 def about(request):
     profile = {
         "name": "Elvin Babanlı",
