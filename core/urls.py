@@ -35,8 +35,7 @@ sitemaps = {
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("main.urls")),
-    path('', index, name="Mainpage"),
+    path("", include("main.urls")),  # <-- ana səhifə BURA GƏLİR
     path('django/',get_django, name="django"),
     path('flask/',get_flask,name="flask"),
     path('pandas/',get_pandas,name="pandas"),
@@ -49,6 +48,4 @@ urlpatterns = [
     path('stock-predictor/',stock_predictor_view, name="stock-predictor"),
     path('cheap-flight-finder/', cheap_flight_finder_view, name="cheap_flight_finder"),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
-    path('pandas/',get_pandas,name="pandas"),
-    
 ]

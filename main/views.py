@@ -2,6 +2,12 @@ import requests, time
 from django.shortcuts import render, redirect
 from .home_news import get_home_feed
 
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Elvin CodeBase — It works!")
+
+
 
 # 4o4-page_____________________________________________
 
