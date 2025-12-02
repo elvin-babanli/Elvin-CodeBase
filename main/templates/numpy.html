@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+
+{% block title %}NumPy Guide — Elvin's CodeBase{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Sidebar */
+  .np-sidebar { border-radius: 1rem; overflow: hidden; background: #ffffff; }
+  .np-sidebar .list-group-item.active { background: linear-gradient(135deg, #0d6efd, #22c55e); border-color: transparent; }
+  .np-sidebar .list-group-item { border: none; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+
+  /* Intro pill row */
+  .np-intro-pill { display: inline-flex; gap: 0.35rem; flex-wrap: wrap; font-size: 0.8rem; color: #6b7280; }
+  .np-intro-pill span { background: #e5f0ff; border-radius: 999px; padding: 0.15rem 0.6rem; }
+
+  /* Code windows */
+  .code-window { border-radius: 0.9rem; overflow: hidden; background: #020617; color: #e5e7eb; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45); }
+  .code-window.light { background: #0b1220; }
+  .code-window-header { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.9rem; background: linear-gradient(135deg, #111827, #0f172a); font-size: 0.78rem; }
+  .code-window-title { color: #9ca3af; }
+  .code-window-path { font-size: 0.7rem; color: #6b7280; }
+  .code-dots { display: inline-flex; gap: 0.3rem; }
+  .code-dot { width: 9px; height: 9px; border-radius: 999px; }
+  .code-dot.red { background: #f87171; }
+  .code-dot.yellow { background: #facc15; }
+  .code-dot.green { background: #4ade80; }
+  .code-window-body { padding: 0.75rem 1rem; }
+  .code-window pre { margin-bottom: 0; background: transparent; color: inherit; border-radius: 0; padding: 0; white-space: pre; }
+  .code-window code { color: #e5e7eb; font-size: 0.85rem; }
+
+  /* Section label */
+  .section-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7280; }
+
+  .accordion-button:not(.collapsed) { background-color: #eef2ff; color: #111827; }
+
+  /* Output label */
+  .out-label { display:inline-block; font-size: 0.75rem; color:#93c5fd; background:#0b1220; border:1px solid #1f2937; border-radius: 0.4rem; padding: 0.05rem 0.4rem; margin-bottom: 0.35rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+  <!-- SIDEBAR -->
+  <div class="col-lg-3 mb-4">
+    <div class="list-group shadow-sm sticky-top np-sidebar" style="top: 80px;">
+      <div class="list-group-item active fw-semibold">NumPy Tutorial</div>
+      <a href="#intro" class="list-group-item list-group-item-action">Introduction</a>
+      <a href="#install" class="list-group-item list-group-item-action">0) Installation (pip)</a>
+      <a href="#arrays" class="list-group-item list-group-item-action">1) First Arrays & Metadata</a>
+      <a href="#creation" class="list-group-item list-group-item-action">2) Array Creation Patterns</a>
+      <a href="#indexing" class="list-group-item list-group-item-action">3) Indexing & Masks</a>
+      <a href="#reshape" class="list-group-item list-group-item-action">4) Reshape / Transpose / Join</a>
+      <a href="#stats" class="list-group-item list-group-item-action">5) Stats & Broadcasting</a>
+      <a href="#linalg" class="list-group-item list-group-item-action">6) Linear Algebra</a>
+      <a href="#csv" class="list-group-item list-group-item-action">7) Same CSV, Different Outputs</a>
+      <a href="#tasks" class="list-group-item list-group-item-action">8) Mini Tasks</a>
+      <a href="#qa" class="list-group-item list-group-item-action">Interview Q&A</a>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="col-lg-9">
+
+    <!-- Intro -->
+    <div class="mb-4" id="intro">
+      <span class="badge text-bg-dark px-3 py-2">NUMPY</span>
+      <h1 class="mt-3 mb-2">NumPy — 0-dan Praktik Bələdçi</h1>
+      <p class="lead mb-2">Addım → Çıxış formatında, sıfırdan başlamaq üçün hazırlanıb. Eyni CSV üzərində müxtəlif baxışlar, izahlar və Interview Q&A ayrıca bölmədə.</p>
+      <div class="np-intro-pill mb-3">
+        <span>ndarray · shape · dtype</span>
+        <span>indexing & masks</span>
+        <span>reshape / concatenate</span>
+        <span>stats & linalg</span>
+        <span>CSV → müxtəlif çıxışlar</span>
+      </div>
+      <div class="alert alert-info border-0 shadow-sm"><strong>Qeyd:</strong> Hər kod blokunun altında <em>Output</em> ayrıca göstərilir və yanında <em>hansı əməliyyatın nəticəsi</em> olduğu yazılıb.</div>
+    </div>
+
+    <div class="accordion" id="npAccordion">
+
+      <!-- 0) INSTALL -->
+      <div class="accordion-item" id="install">
+        <h2 class="accordion-header">
+          <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#collapseInstall">0) Quraşdırma (pip + virtual env)</button>
+        </h2>
+        <div id="collapseInstall" class="accordion-collapse collapse show">
+          <div class="accordion-body">
+            <p class="section-label mb-1">Addım-addım</p>
+            <div class="code-window terminal-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Terminal — Setup</span>
+                </div>
+                <span class="code-window-path">$ project/</span>
+              </div>
+              <div class="code-window-body">
+<pre><code># 1) Virtual env (opsional, tövsiyə olunur)
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
+# 2) Paketlər
+pip install --upgrade pip
+pip install numpy pandas
+
+# 3) Test versiyalar
+python -c "import numpy as np, pandas as pd; print(np.__version__, pd.__version__)"</code></pre>
+              </div>
+            </div>
+            <div class="code-window light mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">example</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>2.1.3 2.2.3  # np, pandas versiyaları (səndə fərqli ola bilər)</code></pre>
+              </div>
+            </div>
+            <p class="mb-0"><strong>Problem?</strong> <code>ModuleNotFoundError</code> görürsənsə, virtual env aktiv deyil və ya paket quraşdırılmayıb.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1) ARRAYS -->
+      <div class="accordion-item" id="arrays">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseArrays">1) İlk massivlər & metadata</button>
+        </h2>
+        <div id="collapseArrays" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Arrays</span>
+                </div>
+                <span class="code-window-path">arrays.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>import numpy as np
+import pandas as pd
+
+# 1D massiv
+a1 = np.array([1, 2, 3])
+print(a1.shape)              # → Output A1
+
+# 2D massiv
+a2 = np.array([[1, 2.0, 3.3],
+               [4, 5,   6.5]])
+print(a2)                    # → Output A2 (bütöv)
+print(a2[1])                 # → Output A3 (2-ci sətir)
+
+# 3D massiv
+a3 = np.array([[[ 1,  2,  3],
+                [ 4,  5,  6],
+                [ 7,  8,  9]],
+               [[10, 11, 12],
+                [13, 14, 15],
+                [16, 17, 18]]])
+print(a3.ndim)               # → Output A4 (ölçü)
+print(a3.dtype)              # → Output A5 (tip)
+print(a3.size)               # → Output A6 (say)
+print(type(a3))              # → Output A7 (obyekt tipi)</code></pre>
+              </div>
+            </div>
+
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">A1–A7</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>(3,)                         # A1: print(a1.shape)
+[[1.  2.  3.3]
+ [4.  5.  6.5]]              # A2: print(a2)
+[4.  5.  6.5]                # A3: print(a2[1])
+3                            # A4: print(a3.ndim)
+int64                        # A5: print(a3.dtype) (səndə fərqli ola bilər)
+18                           # A6: print(a3.size)
+&lt;class 'numpy.ndarray'&gt;      # A7: print(type(a3))</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2) CREATION -->
+      <div class="accordion-item" id="creation">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseCreation">2) Massiv yaratma şablonları</button>
+        </h2>
+        <div id="collapseCreation" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Creation</span>
+                </div>
+                <span class="code-window-path">creation.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>np.random.seed(1)
+
+simple_array = np.array([1, 2, 3])
+print(simple_array)                              # → C1
+
+zeros = np.zeros((2, 3))
+print(zeros)                                     # → C2
+
+ones = np.ones((1, 3))
+print(ones)                                      # → C3
+
+random_arange = np.arange(2, 10, 1)
+print(random_arange)                             # → C4
+
+random_array = np.random.randint(6, 20, size=(2, 5))
+print(random_array, random_array.shape, random_array.size)  # → C5
+
+new_random = np.random.random((5, 3))
+print(new_random)                                # → C6
+
+random_data = np.random.randint(10, size=(5, 3))
+print(random_data)                               # → C7
+
+unique_array = np.unique(random_data)
+print(unique_array)                              # → C8
+
+a4 = np.random.randint(10, size=(2, 3, 4, 5))
+print(a4.shape)                                  # → C9</code></pre>
+              </div>
+            </div>
+
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">C1–C9</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>[1 2 3]                                  # C1
+[[0. 0. 0.]
+ [0. 0. 0.]]                            # C2
+[[1. 1. 1.]]                             # C3
+[2 3 4 5 6 7 8 9]                        # C4
+[[ 7  9 15 12 11]
+ [ 6 19  6  6 16]] (2, 5) 10             # C5
+[[0.417022   0.72032449 0.00011437]
+ [0.30233257 0.14675589 0.09233859]
+ [0.18626021 0.34556073 0.39676747]
+ [0.53881673 0.41919451 0.6852195 ]
+ [0.20445225 0.87811744 0.02738759]]     # C6
+[[2 9 0]
+ [4 9 5]
+ [9 3 5]
+ [1 2 4]
+ [1 7 7]]                                # C7
+[0 1 2 3 4 5 7 9]                         # C8
+(2, 3, 4, 5)                              # C9</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3) INDEXING -->
+      <div class="accordion-item" id="indexing">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseIndexing">3) İndeksləmə, dilimləmə, maskalar</button>
+        </h2>
+        <div id="collapseIndexing" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Indexing</span>
+                </div>
+                <span class="code-window-path">indexing.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>A = np.arange(1, 13).reshape(3, 4)
+print(A)               # → I1
+print(A[0, 0])         # → I2
+print(A[1])            # → I3
+print(A[:, 2])         # → I4
+print(A[:2, :2])       # → I5
+
+mask = A % 2 == 0
+print(mask)            # → I6
+print(A[mask])         # → I7
+
+B = A.copy()
+B[B < 5] = 0
+print(B)               # → I8</code></pre>
+              </div>
+            </div>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">I1–I8</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>[[ 1  2  3  4]         # I1
+ [ 5  6  7  8]
+ [ 9 10 11 12]]
+1                      # I2
+[5 6 7 8]              # I3
+[ 3  7 11]             # I4
+[[1 2]                 # I5
+ [5 6]]
+[[False  True False  True]
+ [False  True False  True]
+ [False  True False  True]]  # I6
+[ 2  4  6  8 10 12]           # I7
+[[0 0 0 0]                    # I8
+ [0 6 7 8]
+ [9 10 11 12]]</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4) RESHAPE -->
+      <div class="accordion-item" id="reshape">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseReshape">4) Forma dəyişimi, transpose, birləşdirmə</button>
+        </h2>
+        <div id="collapseReshape" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Reshape/Join</span>
+                </div>
+                <span class="code-window-path">reshape.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>B = np.arange(12)
+print(B.reshape(3, 4))      # → R1
+print(B.reshape(-1, 6))     # → R2
+print(B.reshape(3, 4).T)    # → R3
+
+X = np.arange(1, 7).reshape(2, 3)
+Y = np.arange(7, 13).reshape(2, 3)
+print(np.concatenate([X, Y], axis=0))  # → R4
+print(np.concatenate([X, Y], axis=1))  # → R5
+print(np.stack([X, Y], axis=0).shape)  # → R6</code></pre>
+              </div>
+            </div>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">R1–R6</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>[[ 0  1  2  3]          # R1
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+[[ 0  1  2  3  4  5]    # R2
+ [ 6  7  8  9 10 11]]
+[[ 0  4  8]              # R3
+ [ 1  5  9]
+ [ 2  6 10]
+ [ 3  7 11]]
+[[ 1  2  3]              # R4
+ [ 4  5  6]
+ [ 7  8  9]
+ [10 11 12]]
+[[ 1  2  3  7  8  9]     # R5
+ [ 4  5  6 10 11 12]]
+(2, 2, 3)                 # R6</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5) STATS -->
+      <div class="accordion-item" id="stats">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseStats">5) Riyazi/statistik əməliyyatlar & broadcasting</button>
+        </h2>
+        <div id="collapseStats" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Stats & Broadcasting</span>
+                </div>
+                <span class="code-window-path">stats.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>M = np.array([[1, 2, 3],
+              [4, 5, 6]])
+print(M.sum())                      # → S1
+print(M.sum(axis=0))                # → S2
+print(M.sum(axis=1))                # → S3
+print(M.mean(), M.std(), M.min(), M.max())  # → S4
+print(np.percentile(M, [25, 50, 75]))       # → S5
+
+v = np.array([1, 0, -1])
+print(M + v)                        # → S6 (broadcasting)</code></pre>
+              </div>
+            </div>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">S1–S6</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>21               # S1
+[5 7 9]          # S2
+[ 6 15]          # S3
+3.5 1.707825127659933 1 6   # S4
+[1.5 3.5 5.5]    # S5
+[[2 2 2]         # S6
+ [5 5 5]]</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6) LINALG -->
+      <div class="accordion-item" id="linalg">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseLinalg">6) Xətti cəbr (Linear Algebra)</button>
+        </h2>
+        <div id="collapseLinalg" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — Linear Algebra</span>
+                </div>
+                <span class="code-window-path">linalg.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>A = np.array([[3, 1],
+              [0, 2]])
+b = np.array([9, 8])
+
+print(A @ A)                 # → L1
+print(np.linalg.det(A))      # → L2
+print(np.linalg.inv(A))      # → L3
+vals, vecs = np.linalg.eig(A)
+print(vals)                  # → L4
+print(np.linalg.solve(A, b)) # → L5</code></pre>
+              </div>
+            </div>
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">L1–L5</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>[[9 5]
+ [0 4]]         # L1
+6.0             # L2
+[[ 0.33333333 -0.16666667]
+ [ 0.          0.5       ]]  # L3
+[3. 2.]         # L4
+[2.66666667 4.] # L5</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7) CSV -->
+      <div class="accordion-item" id="csv">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseCSV">7) Eyni CSV → fərqli çıxışlar</button>
+        </h2>
+        <div id="collapseCSV" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <p class="section-label mb-1">sales.csv (mini)</p>
+            <div class="code-window light mb-2">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">File — sales.csv</span>
+                </div>
+                <span class="code-window-path">sales.csv</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>order_id,city,product,qty,price
+1,Warsaw,Keyboard,2,120
+2,Warsaw,Mouse,1,50
+3,Gdansk,Keyboard,1,125
+4,Warsaw,Monitor,1,900
+5,Gdansk,Mouse,3,45</code></pre>
+              </div>
+            </div>
+
+            <div class="code-window mb-3">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Python — CSV Views</span>
+                </div>
+                <span class="code-window-path">csv_views.py</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>import pandas as pd
+import numpy as np
+
+df = pd.read_csv('sales.csv')
+arr = df.values
+
+print(df.head())                 # → C1
+print(arr.shape, arr.dtype)      # → C2
+
+qty = df['qty'].to_numpy()
+price = df['price'].to_numpy()
+revenue = qty * price
+print(qty)                       # → C3
+print(price)                     # → C4
+print(revenue, revenue.sum())    # → C5
+
+print(df[df['city']=='Warsaw'].to_numpy())  # → C6
+print(np.unique(df['product']))             # → C7
+
+pivot = df.pivot_table(index='city', columns='product', values='qty', aggfunc='sum', fill_value=0)
+print(pivot)                    # → C8
+print(pivot.to_numpy())         # → C9</code></pre>
+              </div>
+            </div>
+
+            <div class="code-window light">
+              <div class="code-window-header">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="code-dots"><span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span></div>
+                  <span class="code-window-title">Output</span>
+                </div>
+                <span class="code-window-path">C1–C9</span>
+              </div>
+              <div class="code-window-body">
+<pre><code>   order_id    city  product  qty  price   # C1
+0         1  Warsaw  Keyboard    2    120
+1         2  Warsaw     Mouse    1     50
+2         3  Gdansk  Keyboard    1    125
+3         4  Warsaw    Monitor    1    900
+4         5  Gdansk     Mouse    3     45
+(5, 5) object                                   # C2
+[2 1 1 1 3]                                     # C3
+[120  50 125 900  45]                           # C4
+[240  50 125 900 135] 1450                      # C5
+[[1 'Warsaw' 'Keyboard' 2 120]
+ [2 'Warsaw' 'Mouse' 1 50]
+ [4 'Warsaw' 'Monitor' 1 900]]                 # C6
+['Keyboard' 'Monitor' 'Mouse']                  # C7
+product  Keyboard  Monitor  Mouse               # C8
+city
+Gdansk          1        0      3
+Warsaw          2        1      1
+[[1 0 3]
+ [2 1 1]]                                       # C9</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8) TASKS -->
+      <div class="accordion-item" id="tasks">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseTasks">8) Mini tapşırıqlar</button>
+        </h2>
+        <div id="collapseTasks" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <ul>
+              <li><strong>T1:</strong> <code>np.arange(1, 37)</code> → <code>reshape(3,3,4)</code> — gözlənilən: <code>(3, 3, 4)</code>.</li>
+              <li><strong>T2:</strong> Pivotda ən böyük <code>qty</code> hüceyrəsinin <em>(city, product)</em> etiketini tap.</li>
+              <li><strong>T3:</strong> <code>revenue</code> üzrə top‑2 sifariş indeksləri (azalan).</li>
+              <li><strong>T4:</strong> 10,000 təsadüfi <code>float32</code> və <code>float64</code> üçün <code>mean/std</code> fərqlərini müqayisə et.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q&A -->
+      <div class="accordion-item" id="qa">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseQA">Interview Q&A (Ayrı blok)</button>
+        </h2>
+        <div id="collapseQA" class="accordion-collapse collapse">
+          <div class="accordion-body">
+            <ol>
+              <li><strong>list vs ndarray?</strong> — <code>ndarray</code> sabit tipli, vektorlaşdırılmış və sürətlidir; <code>list</code> heterogendir, döngü tələb edir.</li>
+              <li><strong>Broadcasting nədir?</strong> — Formanın avtomatik genişlənməsi ilə element‑wise əməliyyat.</li>
+              <li><strong>View vs Copy?</strong> — Dilim çox vaxt <em>view</em>; müstəqil işləmək üçün <code>copy()</code>.</li>
+              <li><strong>reshape vs resize?</strong> — <code>reshape</code> forma; <code>resize</code> ölçünü dəyişib doldura bilər.</li>
+              <li><strong>np.vectorize sürət verir?</strong> — Yox, əsasən rahatlıqdır; sürət vektorlaşdırmada.</li>
+              <li><strong>np.dot vs @?</strong> — 2D-də eyni; ND hallarda <code>@</code> daha aydındır.</li>
+              <li><strong>np.nan müqayisəsi?</strong> — <code>np.isnan</code>; <code>nan==nan</code> <code>False</code>.</li>
+              <li><strong>dtype seçimi?</strong> — Yaddaş+sürət+dəqiqlik balansı (ML: <code>float32</code>, elm: <code>float64</code>).</li>
+              <li><strong>np.unique nə qaytarır?</strong> — Unikal dəyərlər; istəyə görə saylar (<code>return_counts=True</code>).</li>
+              <li><strong>Maskalı indeksləmə?</strong> — <code>x[x&gt;0]</code> kimi boolean filtr.</li>
+              <li><strong>np.argsort nə edir?</strong> — Sıralama indeksləri.</li>
+              <li><strong>C vs F‑order?</strong> — Sətir‑əsaslı vs sütun‑əsaslı yaddaş düzümü.</li>
+              <li><strong>Böyük fayllar?</strong> — <code>np.memmap</code>, parçalı oxu, <code>dtype</code> optimizasiyası.</li>
+              <li><strong>einsum?</strong> — Çoxölçülü hasil/toplamaları qısa və tez.</li>
+              <li><strong>Performans?</strong> — Vektorlaşdırma, lazımsız kopyadan qaç, doğru <code>dtype</code>, lazım olsa Numba/Cython.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- END ACCORDION -->
+
+  </div>
+</div>
+{% endblock %}

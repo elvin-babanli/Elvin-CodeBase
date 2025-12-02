@@ -48,4 +48,5 @@ urlpatterns = [
     path('stock-predictor/',stock_predictor_view, name="stock-predictor"),
     path('cheap-flight-finder/', cheap_flight_finder_view, name="cheap_flight_finder"),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+    path('numpy/',get_numpy, name='numpy'),
 ]

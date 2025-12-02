@@ -30,6 +30,9 @@ def get_flask(request):
 def get_pandas(request):
     return render(request,"pandas.html")
 
+def get_numpy(request):
+    return render(request,"numpy.html")
+
 # Pages_________________________________________________
 
 def get_git(request):
