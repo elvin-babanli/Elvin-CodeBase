@@ -32,7 +32,7 @@
       main { padding-top: 1.5rem; padding-bottom: 2rem; }
       footer { font-size: 0.8rem; color: #6b7280; }
 
-      /* ======== NEW ANIMATED CHAT LAUNCHER (Circle) ======== */
+      /* ======== CHAT LAUNCHER ======== */
       .chat-launcher{
         position:fixed; right:20px; bottom:20px; width:62px; height:62px; border-radius:50%;
         background:linear-gradient(135deg,#2563eb,#3b82f6);
@@ -52,7 +52,7 @@
       .typing-dots span:nth-child(3){ animation-delay:.3s; }
       @keyframes bounce{ 0%,80%,100%{ transform:translateY(0); opacity:.4; } 40%{ transform:translateY(-5px); opacity:1; } }
 
-      /* ================= CHAT PANEL (unchanged) ================== */
+      /* ================= CHAT PANEL ================== */
       .chat-panel{
         position:fixed; right:18px; bottom:18px; z-index:1056;
         width:360px; max-width:calc(100vw - 36px); height:580px;
@@ -104,15 +104,9 @@
       .chat-input .box{ flex:1; background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px 12px; color:#111827; outline:none; }
       .chat-input .send-btn{ background:#3c98d5; color:#fff; border:none; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; }
 
-      /* ========= NEW: Heartbeat Pulse for Ola ========= */
-      .pulse-ui{
-        animation: heartbeat 1.1s ease-in-out infinite;
-        transform-origin:center;
-      }
-      .pulse-bubble{
-        animation: heartbeat 1.1s ease-in-out infinite;
-        transform-origin: 10% 50%;
-      }
+      /* ========= Heartbeat Pulse (Ola) ========= */
+      .pulse-ui{ animation: heartbeat 1.1s ease-in-out infinite; transform-origin:center; }
+      .pulse-bubble{ animation: heartbeat 1.1s ease-in-out infinite; transform-origin: 10% 50%; }
       @keyframes heartbeat{
         0%{ transform: scale(1); }
         14%{ transform: scale(1.06); }
@@ -122,10 +116,8 @@
         100%{ transform: scale(1); }
       }
 
-      /* ========= NEW: Full-screen Heart Rain for Ola ========= */
-      .heart-rain-overlay{
-        position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index: 2000;
-      }
+      /* ========= Heart Rain (reused) ========= */
+      .heart-rain-overlay{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index: 2000; }
       .hr-heart{
         position:absolute; top:-10%; will-change: transform, opacity;
         animation: heartFall var(--dur, 4.6s) linear forwards, heartSpin var(--dur, 4.6s) linear forwards;
@@ -139,6 +131,88 @@
       @keyframes heartSpin{
         0%{ transform: translate3d(var(--x,0px), -12vh, 0) rotate(0deg); }
         100%{ transform: translate3d(calc(var(--x,0px) + var(--dx, 0px)), 110vh, 0) rotate(360deg); }
+      }
+
+      /* ========= NEW: OLAELVIN CINEMA MODE ========= */
+      .oe-overlay{
+        position:fixed; inset:0; background:#000; z-index:3000; pointer-events:none; display:none;
+        animation: oeFadeIn .8s ease forwards;
+      }
+      .oe-overlay.show{ display:block; }
+
+      @keyframes oeFadeIn{ from{opacity:0} to{opacity:1} }
+      @keyframes oeFadeOut{ from{opacity:1} to{opacity:0} }
+
+      /* Eyes container */
+      .oe-eyes{
+        position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+        gap:12vw; opacity:0;
+        transition: opacity .6s ease;
+      }
+      .oe-eyes.show{ opacity:1; }
+      .eye{
+        width:22vw; height:22vw; max-width:320px; max-height:320px; min-width:160px; min-height:160px;
+        background:#fff; border-radius:50%; position:relative; overflow:hidden;
+        box-shadow:0 0 60px rgba(255,255,255,.12), inset 0 0 40px rgba(0,0,0,.25);
+      }
+      .pupil{
+        position:absolute; width:32%; height:32%; background:#111; border-radius:50%;
+        top:34%; left:34%; transition: transform .7s ease;
+        box-shadow: inset 0 0 10px rgba(255,255,255,.2);
+      }
+      .look-left .pupil{ transform: translate(-35%, 0); }
+      .look-right .pupil{ transform: translate(35%, 0); }
+      .look-center .pupil{ transform: translate(0, 0); }
+
+      /* Shhh moment */
+      .oe-shhh{
+        position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+        gap:2vh; color:#fff; text-align:center; opacity:0; transition: opacity .5s ease;
+      }
+      .oe-shhh .face{
+        font-size:18vw; line-height:1; filter: drop-shadow(0 8px 32px rgba(255,255,255,.15));
+      }
+      .oe-shhh .text{
+        font-size:6vw; font-weight:800; letter-spacing:.08em;
+        text-shadow: 0 8px 30px rgba(255,255,255,.25);
+      }
+      @media (max-width: 520px){
+        .oe-shhh .face{ font-size:26vw; }
+        .oe-shhh .text{ font-size:9.5vw; }
+      }
+
+      /* Pink Heart pulse (big) */
+      .oe-big-heart{
+        position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition: opacity .4s ease;
+        color:#ff4da6; text-shadow: 0 12px 48px rgba(255,77,166,.35);
+        font-size:22vw; line-height:1;
+      }
+      .oe-big-heart span{
+        display:inline-block; animation: bigHeartBeat 1.6s ease-in-out 3 forwards;
+      }
+      @keyframes bigHeartBeat{
+        0%{ transform:scale(1); }
+        25%{ transform:scale(1.18); }
+        50%{ transform:scale(1); }
+        75%{ transform:scale(1.22); }
+        100%{ transform:scale(1); }
+      }
+
+      /* Letter build-up */
+      .oe-letters{
+        position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition: opacity .6s ease;
+      }
+      .oe-letters .line{
+        font-weight:800; color:#fff; font-size:6.5vw; letter-spacing:.05em; display:flex; flex-wrap:wrap; justify-content:center;
+        max-width:90vw; text-align:center; line-height:1.2; text-shadow:0 12px 40px rgba(255,255,255,.2);
+      }
+      .oe-letters .char{
+        display:inline-block; opacity:0; transform: translate3d(var(--sx,0), var(--sy,0), 0) rotate(var(--rot,0));
+        transition: transform 1s ease, opacity 1s ease;
+        will-change: transform, opacity;
+      }
+      @media (max-width:520px){
+        .oe-letters .line{ font-size:9.5vw; }
       }
     </style>
   </head>
@@ -241,7 +315,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Chat logic + OLA effects -->
+    <!-- Chat logic + OLA + OLAELVIN effects -->
     <script>
       (function(){
         const launcher = document.getElementById('chatLauncher');
@@ -288,16 +362,8 @@
           history.forEach(msg => addBubble(msg.content, msg.role === "assistant" ? "bot" : "user"));
         }
 
-        function openPanel(){
-          panel.classList.add("open");
-          hideLauncher();
-          renderHistory();
-          inputEl.focus();
-        }
-        function closePanel(){
-          panel.classList.remove("open");
-          showLauncher();
-        }
+        function openPanel(){ panel.classList.add("open"); hideLauncher(); renderHistory(); inputEl.focus(); }
+        function closePanel(){ panel.classList.remove("open"); showLauncher(); }
 
         function addBubble(text, who="bot"){
           const div = document.createElement("div");
@@ -305,7 +371,7 @@
           div.textContent = text;
           bodyEl.appendChild(div);
           bodyEl.scrollTop = bodyEl.scrollHeight;
-          return div; /* return for later effects */
+          return div;
         }
 
         function addTyping(){
@@ -319,21 +385,17 @@
           return wrap;
         }
 
-        /* ====== OLA SPECIAL EFFECTS ====== */
+        /* ===== Heart rain (reused) ===== */
         function rand(min, max){ return Math.random()*(max-min)+min; }
         function choice(arr){ return arr[Math.floor(Math.random()*arr.length)] }
 
         function startHeartRain(durationMs=4700){
-          if (olaAnimating) return;
-          olaAnimating = true;
-
-          // Overlay
           const overlay = document.createElement('div');
           overlay.className = 'heart-rain-overlay';
           document.body.appendChild(overlay);
 
           const W = window.innerWidth;
-          const count = Math.min(120, Math.max(70, Math.floor(W/10))); // responsive density
+          const count = Math.min(120, Math.max(70, Math.floor(W/10)));
 
           for (let i=0;i<count;i++){
             const span = document.createElement('span');
@@ -342,9 +404,9 @@
 
             const left = rand(0, W);
             const drift = rand(-120,120);
-            const size = rand(18,36); // font-size px
-            const delay = rand(0, 1200); // ms
-            const dur = rand(3600, 5200); // ms
+            const size = rand(18,36);
+            const delay = rand(0, 1200);
+            const dur = rand(3600, 5200);
 
             span.style.left = left + 'px';
             span.style.setProperty('--x', left + 'px');
@@ -355,19 +417,117 @@
 
             overlay.appendChild(span);
           }
-
-          // add subtle pulse to panel
-          panel.classList.add('pulse-ui');
-
-          setTimeout(()=>{
-            panel.classList.remove('pulse-ui');
-            overlay.remove();
-            olaAnimating = false;
-          }, durationMs + 200);
+          setTimeout(()=> overlay.remove(), durationMs + 200);
         }
 
-        function isExactOla(txt){
-          return txt.trim() === "Ola"; // tam uyğunluq, case sensitive
+        function isExactOla(txt){ return txt.trim() === "Ola"; }
+        function isExactOlaElvin(txt){ return txt.trim() === "OlaElvin"; } // NEW
+
+        /* ===== OLAELVIN: 45s Cinema Mode ===== */
+        async function playOlaElvinSequence(){
+          // Create overlay
+          const ov = document.createElement('div');
+          ov.className = 'oe-overlay show';
+          document.body.appendChild(ov);
+
+          // Build layers
+          const eyes = document.createElement('div');
+          eyes.className = 'oe-eyes';
+          eyes.innerHTML = `
+            <div class="eye look-center"><div class="pupil"></div></div>
+            <div class="eye look-center"><div class="pupil"></div></div>
+          `;
+          const shhh = document.createElement('div');
+          shhh.className = 'oe-shhh';
+          shhh.innerHTML = `<div class="face">🤫</div><div class="text">Shhhhhh…</div>`;
+
+          const bigHeart = document.createElement('div');
+          bigHeart.className = 'oe-big-heart';
+          bigHeart.innerHTML = `<span>💗</span>`;
+
+          const letters = document.createElement('div');
+          letters.className = 'oe-letters';
+          const line = document.createElement('div');
+          line.className = 'line';
+          const phrase = "You and Me together forever";
+          // Build chars with random start transforms
+          for(let ch of phrase){
+            const span = document.createElement('span');
+            span.className = 'char';
+            span.textContent = ch === ' ' ? '\u00A0' : ch;
+            const sx = (Math.random()*2-1)*60 + 'vw';
+            const sy = (Math.random()*2-1)*40 + 'vh';
+            const rot = (Math.random()*2-1)*60 + 'deg';
+            span.style.setProperty('--sx', sx);
+            span.style.setProperty('--sy', sy);
+            span.style.setProperty('--rot', rot);
+            line.appendChild(span);
+          }
+          letters.appendChild(line);
+
+          ov.appendChild(eyes);
+          ov.appendChild(shhh);
+          ov.appendChild(bigHeart);
+          ov.appendChild(letters);
+
+          // Helper wait
+          const wait = ms => new Promise(r=>setTimeout(r, ms));
+
+          // Timeline (~45s)
+          // 0–2s: fade in black (already)
+          await wait(1200);
+
+          // 2–10s: Eyes appear, look left -> right -> center + shhh
+          eyes.classList.add('show');
+          await wait(800);
+          eyes.querySelectorAll('.eye').forEach(e=>{ e.classList.remove('look-center'); e.classList.add('look-left'); });
+          await wait(2200);
+          eyes.querySelectorAll('.eye').forEach(e=>{ e.classList.remove('look-left'); e.classList.add('look-right'); });
+          await wait(2000);
+          eyes.querySelectorAll('.eye').forEach(e=>{ e.classList.remove('look-right'); e.classList.add('look-center'); });
+          await wait(600);
+          shhh.style.opacity = '1';  // 🤫 + Shhhhhh
+          await wait(1400);
+          // Hide eyes + shhh
+          shhh.style.opacity = '0';
+          eyes.classList.remove('show');
+          await wait(600);
+
+          // 14–20s: Big pink heart pulses 3x
+          bigHeart.style.opacity = '1';
+          await wait(5200);
+          bigHeart.style.opacity = '0';
+          await wait(600);
+
+          // 22–32s: Letters assemble (10s)
+          letters.style.opacity = '1';
+          const chars = letters.querySelectorAll('.char');
+          const total = chars.length;
+          const totalDuration = 10000; // 10s
+          const step = totalDuration / total;
+          chars.forEach((c, i)=>{
+            setTimeout(()=>{
+              c.style.transform = 'translate3d(0,0,0) rotate(0)';
+              c.style.opacity = '1';
+            }, i*step);
+          });
+          await wait(totalDuration + 600);
+          letters.style.opacity = '0';
+          await wait(600);
+
+          // 32–37s: black
+          await wait(1200);
+
+          // 37–45s: Heart rain + gentle pulse on chat for vibe
+          startHeartRain(4700);
+          panel.classList.add('pulse-ui');
+          await wait(4700);
+          panel.classList.remove('pulse-ui');
+
+          // Fade out overlay
+          ov.style.animation = 'oeFadeOut .8s ease forwards';
+          await wait(900);
+          ov.remove();
         }
 
         async function sendMessage(){
@@ -375,16 +535,35 @@
           if (!text || !apiURL) return;
           inputEl.value = "";
 
-          const userBubble = addBubble(text, "user");
+          const isOla = isExactOla(text);
+          const isOlaElvin = isExactOlaElvin(text);
 
+          // Add user bubble
+          addBubble(text, "user");
           history.push({role:"user", content:text});
           persist();
 
+          // Special: OLAELVIN → block network, run 45s cinema, then add romantic closing line
+          if (isOlaElvin){
+            // Start immediately (no server call)
+            const typing = addTyping();
+            try{
+              await playOlaElvinSequence();
+              typing.remove();
+              const closing = "Zawsze Ty i Ja — razem na zawsze. 💗";
+              addBubble(closing, "bot");
+              history.push({role:"assistant", content:closing});
+              persist();
+            } catch(e){
+              typing.remove();
+            }
+            return;
+          }
+
           const typing = addTyping();
 
-          // If exact "Ola" — pre-trigger visual FX immediately (don’t wait network)
-          const ola = isExactOla(text);
-          if (ola) {
+          // If exact "Ola" — trigger heart rain & force PL line regardless of server
+          if (isOla) {
             startHeartRain(4700);
           }
 
@@ -400,15 +579,13 @@
 
             typing.remove();
 
-            // Force Polish romantic line if exact Ola (ignore server text to guarantee PL)
             let replyText = data.reply || "Okay.";
-            if (ola){
-              replyText = choice(OLA_PL);
+            if (isOla){
+              replyText = choice(OLA_PL); // PL-only romantic line
             }
             const botBubble = addBubble(replyText, "bot");
 
-            // Add gentle heartbeat to the bot message bubble for Ola
-            if (ola){
+            if (isOla){
               botBubble.classList.add('pulse-bubble');
               setTimeout(()=> botBubble.classList.remove('pulse-bubble'), 4800);
             }
