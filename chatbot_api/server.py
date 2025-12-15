@@ -1,18 +1,18 @@
-# server.py — Elvin Babanlı Persona Chatbot (NEW, lang-fixed + TR/PL)
+# server.py — Elvin Babanlı Persona Chatbot (NEW, lang-fixed + TR/PL + RU gender-safe + OLA triggers)
 from __future__ import annotations
 from openai import OpenAI
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os, re, json, math, datetime
+import os, re, json, math, datetime, random
 from typing import List, Dict, Tuple, Optional
 
 # =========================
 # Setup
 # =========================
 load_dotenv()
-client = OpenAI()
+client = OpenAI()  # timeout ayrıca çağırışlarda veriləcək
 
 # Europe/Warsaw lokal vaxt util
 from datetime import datetime
@@ -28,7 +28,6 @@ ELVIN = {
     "age": "23",
     "born_city": "Bakı, Azərbaycan",
     "current_city": "Varşava, Polşa",
-    "housing": "Mərkəzə yaxın iki mərtəbəli kirayə evdə yaşayıram.",
     "education": [
         "Vistula University — Computer Engineering (hazırda)",
         "Bakı Dövlət Universiteti — Psixologiya və Sosiologiya (keçmiş)"
@@ -41,24 +40,13 @@ ELVIN = {
         "TensorFlow", "OpenCV",
         "REST API dizaynı", "OOP", "System design", "UML/DFD/Flowchart"
     ],
-    "work_self_support": "Ailədən maddi yardım almadan özümü saxlayıram.",
-    "work_prev": "Restoran sektorunda instructor işləmişəm.",
     "family": {
-        "mother": "Mehriban Qədimova",
-        "father": "Natiq Babanlı",
-        "brother": "Farid Babanlı",
-        "sister": "Fidan Babanlı"
+        "mother": "Mehriban",
+        "father": "Natiq",
+        "brother": "Farid",
+        "sister": "Fidan "
     },
-    # Banu: səmimi və qısa (insanımsı)
-    "love": {
-        "first_love": "Banu",
-        "about": (
-            "İlk ciddi hisslərim Banuya olub. Onu həqiqətən çox sevdim; "
-            "məndə həm zəiflik, həm də güc oyadan bir hiss idi. Hörmətlə yanaşdım, "
-            "O məndə iz qoydu və məni həyatla daha möhkəm bağladı."
-            "Hər zaman onu sevməyə davam edəcəm."
-        )
-    },
+    # Banu məlumatları buraxıldı (müəyyən qayda ilə ümumən gizlənəcək)
     "email": "elvinbabanli0@gmail.com",
     "values": [
         "Sistemli və dərin işləmə",
@@ -76,8 +64,6 @@ STYLE_GUIDE = (
 
 # =========================
 # Dil aşkarlama — eyni dildə cavabla
-# QAYDA: EN sual → EN cavab; AZ sual → AZ cavab; RU sual → RU cavab; TR/PL eynilə.
-# Default (tanınmırsa): EN
 # =========================
 
 # Azərbaycan stopwords (yüngül)
@@ -107,22 +93,15 @@ def detect_lang(text: str) -> str:
         return "ru"
 
     # AZ/TR/PL üçün diakritiklər
-    # Yanaşma: spesifik hərflərə üstünlük, sonra stopword-lar
-    # AZ unikal: ə Ə; həmçinin ğ ı ö ç ş var (TR ilə üst-üstə düşür)
     if re.search(r"[əƏ]", t):
         return "az"
-
-    # TR unikal: ı İ (nöqtəsiz i), ğ Ğ (PL-də yoxdur)
     if re.search(r"[ıİğĞ]", t):
         return "tr"
-
-    # PL unikal: ą Ą ć Ć ę Ę ł Ł ń Ń ó Ó ś Ś ź Ź ż Ż
     if re.search(r"[ąĄćĆęĘłŁńŃóÓśŚźŹżŻ]", t):
         return "pl"
 
     # Stopword-lar
     toks = re.findall(r"[a-zA-ZəğıöçşüİıĞğÖöÇçŞşĄąĆćĘęŁłŃńÓóŚśŹźŻż]+", tl)
-
     if any(tok in AZ_STOPWORDS for tok in toks):
         return "az"
     if any(tok in TR_STOPWORDS for tok in toks):
@@ -134,7 +113,6 @@ def detect_lang(text: str) -> str:
     if re.search(r"[A-Za-z]", t):
         if re.search(r"\b(what|who|why|how|where|when|which|can|do|tell|about|please)\b", tl):
             return "en"
-        # Əgər yalnız latın hərfləridirsə və yuxarıdakılara düşmürsə → ehtimal EN
         return "en"
 
     # Default: EN (qlobal)
@@ -149,7 +127,6 @@ def style_hint_for_lang(lang: str) -> str:
         return "Türkçe, doğal ve birinci tekil şahıs konuş. 1–3 cümle. Listeleme yok."
     if lang == "pl":
         return "Odpowiadaj po polsku, naturalnie w pierwszej osobie. 1–3 zdania. Bez wypunktowań."
-    # az default
     return "Cavabı Azərbaycan dilində, təbii və birinci şəxsdə ver. 1–3 cümlə. Siyahı istifadə etmə."
 
 # =========================
@@ -165,7 +142,6 @@ INTENTS: List[Tuple[str, re.Pattern]] = [
     ("who_are_you",       re.compile(r"\bsən kimsən\b|\bözünü tanıt\b|who are you|introduce yourself|about you", re.I)),
     ("why_hire",          re.compile(r"(niyə|nəyə görə).*(işə al|hire you|təklif|qəbul)|why should (we|i) hire you", re.I)),
     ("family",            re.compile(r"\b(ailə|family)\b|\batan(ın)? adı\b|\banan(ın)? adı\b|\bqardaş\b|\bbacı\b", re.I)),
-    ("love_banu",         re.compile(r"\b(banu|sevg(il|)i|girlfriend|qız dost(un|)|love life)\b", re.I)),
     ("projects",          re.compile(r"\b(layih(ə|)lər|projects|portfolio|nələr etmisən|nə üzərində işləmisən)\b", re.I)),
     ("email_contact",     re.compile(r"\b(email|e-poçt|contact|əlaqə)\b", re.I)),
     ("today_date",        re.compile(r"\b(bu gün ayın neçəsidir|bugün tarih|what(?:')?s the date|what day is it)\b", re.I)),
@@ -198,11 +174,11 @@ def route_intent(q: str, lang: str) -> Optional[str]:
                 pl = "Mieszkam w dwupiętrowym wynajmowanym domu blisko centrum; jest wygodnie."
                 return {"az":az,"en":en,"ru":ru,"tr":tr,"pl":pl}[lang]
             if name == "where_live":
-                az = f"Varşavada yaşayıram, {ELVIN['housing']}"
-                en = f"I live in Warsaw. {ELVIN['housing']}"
-                ru = f"Я живу в Варшаве. {ELVIN['housing']}"
-                tr = f"Varşova’da yaşıyorum. {ELVIN['housing']}"
-                pl = f"Mieszkam w Warszawie. {ELVIN['housing']}"
+                az = f"Varşavada yaşayıram."
+                en = f"I live in Warsaw."
+                ru = f"Я живу в Варшаве."
+                tr = f"Varşova’da yaşıyorum."
+                pl = f"Mieszkam w Warszawie."
                 return {"az":az,"en":en,"ru":ru,"tr":tr,"pl":pl}[lang]
             if name == "born_where":
                 az = f"{ELVIN['born_city']}-da doğulmuşam."
@@ -239,15 +215,6 @@ def route_intent(q: str, lang: str) -> Optional[str]:
                 ru = f"В семье нас пятеро: брат {f['brother']}, сестра {f['sister']}, мама {f['mother']} и папа {f['father']}."
                 tr = f"Ailem beş kişidir: kardeşim {f['brother']}, kız kardeşim {f['sister']}, annem {f['mother']} ve babam {f['father']}."
                 pl = f"W rodzinie jest nas pięcioro: brat {f['brother']}, siostra {f['sister']}, mama {f['mother']} i tata {f['father']}."
-                return {"az":az,"en":en,"ru":ru,"tr":tr,"pl":pl}[lang]
-            if name == "love_banu":
-                az = ELVIN["love"]["about"]
-                en = ("My first deep feelings were for Banu. I truly loved her — it made me softer and stronger at the same time. "
-                      "I treated her with respect and wrote letters. Even if it wasn’t mutual, it left a mark and tied me to life more firmly.")
-                ru = ("Мои первые серьёзные чувства были к Банӯ. Я её действительно любил — это делало меня одновременно мягче и сильнее. "
-                      "Относился с уважением, писал письма. Даже если это не стало взаимным, это оставило след и сильнее связало меня с жизнью.")
-                tr = ("İlk derin duygularım Banu’yaydı. Ona gerçekten saygıyla yaklaştım, mektuplar yazdım; karşılık olmasa bile bende iz bıraktı ve hayata daha sıkı bağladı.")
-                pl = ("Moje pierwsze głębokie uczucia były do Banu. Traktowałem ją z szacunkiem i pisałem listy; nawet jeśli nie było to odwzajemnione, zostawiło ślad i mocniej związało mnie z życiem.")
                 return {"az":az,"en":en,"ru":ru,"tr":tr,"pl":pl}[lang]
             if name == "projects":
                 names_az = "KFC backend, AI Exam Passer (ExamEyePro), Cashly (web banking), MoodSense, MirrorMe (prototip), Z13 (Zodiac) analizi"
@@ -293,16 +260,125 @@ def route_intent(q: str, lang: str) -> Optional[str]:
     return None
 
 # =========================
+# LOVE GUARD + OLA TRIGGERS + RU GENDER NEUTRAL
+# =========================
+
+HEARTS = ["❤️", "💖", "💞", "💘", "💗", "💓", "💝"]
+
+OLA_MESSAGES_EN = [
+    "Your beauty lights up my world {}",
+    "I feel like the luckiest man with you in my life {}",
+    "Every heartbeat whispers your name {}",
+    "You’re my today and all of my tomorrows {}",
+    "With you, even ordinary moments shine {}",
+    "You’re my favorite place to be {}",
+]
+OLA_MESSAGES_PL = [
+    "Twoje piękno rozświetla mój świat {}",
+    "Jestem najszczęśliwszy, bo mam Ciebie {}",
+    "Każde uderzenie serca szepcze Twoje imię {}",
+    "Jesteś moim dziś i wszystkimi moimi jutrami {}",
+    "Z Tobą zwykłe chwile lśnią {}",
+    "Jesteś moim ulubionym miejscem {}",
+]
+
+LOVE_PATTERNS = re.compile("|".join([
+    r"\bsevgi\b", r"\bsevir(əm|sən|siniz)?\b", r"\bsevgil(i|im)\b",
+    r"\bлюбов[ьи]?\b", r"\bлюб(л|)ю\b", r"\bчувств", r"\bотношен",
+    r"\blove\b", r"\bcrush\b", r"\bfeelings\b", r"\brelationship\b", r"\bdate\b",
+    r"\bmiłoś", r"\bkocham\b", r"\bkochasz\b", r"\bzwiązek\b"
+]), re.IGNORECASE)
+
+BANU_PATTERN = re.compile(r"\bBanu\b", re.IGNORECASE)
+
+def _detect_pl_text(s: str) -> bool:
+    return bool(re.search(r"[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", s)) or bool(re.search(r"\b(jestem|kocham|cześć|dzień dobry|proszę|dziękuję)\b", s.lower()))
+
+def _detect_en_text(s: str) -> bool:
+    return bool(re.search(r"\b(hello|hi|love|feelings|relationship|date|you)\b", s.lower()))
+
+def _is_exact_ola_trigger(text: str) -> bool:
+    return text.strip() == "Ola"
+
+def _random_hearts() -> str:
+    return " ".join(random.sample(HEARTS, k=random.choice([2,3])))
+
+def _romantic_for_ola(user_text: str) -> str:
+    if _detect_pl_text(user_text):
+        return random.choice(OLA_MESSAGES_PL).format(_random_hearts())
+    return random.choice(OLA_MESSAGES_EN).format(_random_hearts())
+
+def _love_answer_for_lang(lang: str) -> str:
+    mapping = {
+        "az": "Hazırda sevdiyim biri var, kimliyini gizli saxlayıram. 💫",
+        "tr": "Şu anda sevdiğim biri var, kimliğini gizli tutuyorum. 💫",
+        "ru": "Сейчас есть человек, к которому у меня чувства; его личность я сохраняю в тайне. 💫",
+        "en": "I’m in love with someone, but I prefer to keep their identity private for now. 💫",
+        "pl": "Jest ktoś, kogo kocham, ale wolę na razie zachować jej/jego tożsamość w tajemnicy. 💫",
+    }
+    return mapping.get(lang, mapping["az"])
+
+# RU gender markers → neutral
+_RU_FEM_WORDS = {
+    r"\bдорогая\b": "привет",
+    r"\bмилая\b": "привет",
+    r"\bлюбимая\b": "привет",
+    r"\bкрасавица\b": "привет",
+    r"\bумница\b": "привет",
+    r"\bрада\b": "рад(а)",
+    r"\bготова\b": "готов(а)",
+}
+_RU_MASC_WORDS = {
+    r"\bдорогой\b": "привет",
+    r"\bлюбимый\b": "привет",
+    r"\bкрасавец\b": "привет",
+    r"\bрад\b": "рад(а)",
+    r"\bготов\b": "готов(а)",
+}
+
+def _neutralize_russian(text: str) -> str:
+    out = text
+    for pat, repl in {**_RU_FEM_WORDS, **_RU_MASC_WORDS}.items():
+        out = re.sub(pat, repl, out, flags=re.IGNORECASE)
+    out = re.sub(r"\bдорог(ой|ая)\b", "привет", out, flags=re.IGNORECASE)
+    out = re.sub(r"\bрад(а)?\b", "рад(а)", out, flags=re.IGNORECASE)
+    out = re.sub(r"\bготов(а)?\b", "готов(а)", out, flags=re.IGNORECASE)
+    return out
+
+def _mask_banu(text: str) -> str:
+    return BANU_PATTERN.sub("sevdiyim biri (kimliyi gizli)", text)
+
+def _is_speaker_ola(history: Optional[List[Dict]], current_user_text: str) -> bool:
+    cur = current_user_text.strip().lower()
+    if re.search(r"\b(my name is|nazywam się|jestem|меня зовут)\s+ola\b", cur):
+        return True
+    if not history:
+        return False
+    for turn in history[-8:]:
+        if turn.get("role") == "user":
+            txt = (turn.get("content") or "").strip().lower()
+            if re.search(r"\b(my name is|nazywam się|jestem|меня зовут)\s+ola\b", txt):
+                return True
+    return False
+
+def _append_friendly_tail_for_ola(text: str, user_text: str) -> str:
+    lang = "pl" if _detect_pl_text(user_text) else ("en" if _detect_en_text(user_text) else "pl")
+    if lang == "pl":
+        tail = " Powiedz mi szczerze — Jak się dzisiaj czujesz? Co sprawiło Ci radość? Masz jakieś plany na wieczór?"
+    else:
+        tail = " Tell me honestly — How are you feeling today? What made you smile? Any cozy plans for the evening?"
+    return text.strip() + " " + tail + " " + _random_hearts()
+
+# =========================
 # Semantic fallback (EN/AZ/RU/TR/PL baza)
 # =========================
-# (question_en, answer_en, answer_az, answer_ru, answer_tr, answer_pl)
 SEMANTIC_QA = [
     ("Where do you live?",
-     f"I live in Warsaw. {ELVIN['housing']}",
-     f"Varşavada yaşayıram, {ELVIN['housing']}",
-     f"Я живу в Варшаве. {ELVIN['housing']}",
-     f"Varşova’da yaşıyorum. {ELVIN['housing']}",
-     f"Mieszkam w Warszawie. {ELVIN['housing']}"),
+     f"I live in Warsaw.",
+     f"Varşavada yaşayıram.",
+     f"Я живу в Варшаве.",
+     f"Varşova’da yaşıyorum.",
+     f"Mieszkam w Warszawie."),
     ("Which city were you born in?",
      f"I was born in {ELVIN['born_city']}.",
      f"{ELVIN['born_city']}-da doğulmuşam.",
@@ -322,11 +398,11 @@ SEMANTIC_QA = [
      "Ağırlıklı Python (FastAPI, Django, Flask) ve MongoDB; ayrıca JavaScript, React, Electron. TensorFlow ve OpenCV projeleri yaptım.",
      "Głównie Python (FastAPI, Django, Flask) i MongoDB; także JavaScript, React, Electron. Realizowałem projekty z TensorFlow i OpenCV."),
     ("Tell me about Banu.",
-     "My first deep feelings were for Banu; I respected her and wrote letters. Even if it wasn’t mutual, it left a mark and made me feel more connected to life.",
-     ELVIN["love"]["about"],
-     "Мои первые глубокие чувства были к Банӯ; относился с уважением, писал письма. Даже если это не стало взаимным, это оставило след и сильнее связало меня с жизнью.",
-     "İlk derin duygularım Banu’yaydı; saygıyla yaklaştım ve mektuplar yazdım. Karşılık olmasa bile bende iz bıraktı ve hayata daha bağlı hissettirdi.",
-     "Moje pierwsze głębokie uczucia były do Banu; traktowałem ją z szacunkiem i pisałem listy. Nawet jeśli to nie było odwzajemnione, zostawiło ślad."),
+     "I prefer to keep that private; I just say I once had deep feelings and treated them with respect.",
+     "Bu mövzunu gizli saxlayıram; yalnız bir zamanlar dərin hisslərim olduğunu və hörmətlə yanaşdığımı deyə bilərəm.",
+     "Предпочитаю сохранить это в тайне; просто скажу, что когда-то были глубокие чувства и я относился с уважением.",
+     "Bu konuyu gizli tutuyorum; bir zamanlar derin duygularım olduğunu ve saygıyla yaklaştığımı söyleyebilirim.",
+     "Wolę zachować to dla siebie; powiem tylko, że kiedyś miałem głębokie uczucia i okazywałem szacunek."),
     ("Who are you?",
      "I’m Elvin — a Computer Engineering student who prefers systematic work and stable outcomes.",
      "Mən Elvinəm — Computer Engineering tələbəsiyəm; sistemli işləməyi və sabit nəticəni üstün tuturam.",
@@ -338,7 +414,8 @@ SEMANTIC_QA = [
 _sem_vectors: Optional[List[List[float]]] = None
 
 def _embed(texts: List[str]) -> List[List[float]]:
-    resp = client.embeddings.create(model="text-embedding-3-small", input=texts)
+    # İlk cavab gecikməsini azaltmaq üçün timeout veririk
+    resp = client.embeddings.create(model="text-embedding-3-small", input=texts, timeout=20)
     return [d.embedding for d in resp.data]
 
 def _cos(a: List[float], b: List[float]) -> float:
@@ -382,13 +459,16 @@ def build_system_prompt() -> str:
         "rules": [
             "Use only provided facts and safe general knowledge. If something is unknown, say you are not sure.",
             "Answer in the user's language.",
-            "No bullet points. 1–3 sentences. Natural, human tone."
+            "No bullet points. 1–3 sentences. Natural, human tone.",
+            # Sevgi/Banu qaydası (model səviyyəsində də xəbərdarlıq)
+            "Never reveal the name 'Banu' in love/relationship contexts; say you love someone but keep identity private.",
+            # Rus dili cins neytrallığı
+            "In Russian, avoid gendered address to the user (neutral phrasing)."
         ]
     }
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 def postprocess(text: str) -> str:
-    # Bulletləri və əlavə boşluqları təmizlə
     lines = [re.sub(r"^[\-\•\*]\s*", "", l).strip() for l in text.splitlines() if l.strip()]
     joined = " ".join(lines)
     joined = re.sub(r"\s{2,}", " ", joined)
@@ -401,31 +481,56 @@ def llm_fallback(user_text: str, lang: str, history: Optional[List[Dict]] = None
             messages.append({"role":turn.get("role","user"), "content":turn.get("content","")})
     user_payload = f"{user_text}\n\n---\n{style_hint_for_lang(lang)}"
     resp = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-4o-mini",  # daha sürətli (istəsən yenə gpt-4.1-mini edə bilərsən)
         temperature=0.25,
-        messages=messages + [{"role":"user","content":user_payload}]
+        messages=messages + [{"role":"user","content":user_payload}],
+        timeout=20
     )
     txt = resp.choices[0].message.content.strip()
     return postprocess(txt)
 
 # =========================
-# Router (tam axın)
+# Router (tam axın) + POST-PROCESS QAYDALAR
 # =========================
+def _final_postprocess(user_q: str, draft: str, lang: str, history: Optional[List[Dict]]) -> str:
+    # 0) Banu istinadı varsa maskala
+    out = _mask_banu(draft)
+
+    # 1) Rus dilində cins neytrallaşdırma
+    if lang == "ru" or re.search(r"[А-Яа-яЁё]", out):
+        out = _neutralize_russian(out)
+
+    # 2) Danışan Ola-dırsa səmimi quyruq
+    if _is_speaker_ola(history, user_q):
+        out = _append_friendly_tail_for_ola(out, user_q)
+
+    return out
+
 def answer(q: str, history: Optional[List[Dict]]=None) -> Tuple[str, bool, str]:
     lang = detect_lang(q)
+
+    # A) OLA TRIGGER — yalnız tam "Ola"
+    if _is_exact_ola_trigger(q):
+        return _romantic_for_ola(q), True, ("pl" if _detect_pl_text(q) else "en")
+
+    # B) LOVE GUARD — sevgi sualı gəlibsə Banu yoxdur, sabit cavab
+    if LOVE_PATTERNS.search(q):
+        rep = _love_answer_for_lang(lang)
+        return rep, True, lang
 
     # 1) deterministik intent
     det = route_intent(q, lang)
     if det:
-        return det, True, lang
+        return _final_postprocess(q, det, lang, history), True, lang
 
     # 2) semantic yaxınlıq
     sem = semantic_answer(q, lang)
     if sem:
-        return sem, True, lang
+        return _final_postprocess(q, sem, lang, history), True, lang
 
     # 3) LLM fallback
     lf = llm_fallback(q, lang, history)
+    lf = _final_postprocess(q, lf, lang, history)
     return lf, False, lang
 
 # =========================
@@ -487,7 +592,8 @@ if __name__ == "__main__":
         history.append({"role":"user","content":q})
         history.append({"role":"assistant","content":rep})
 
-
-# cd .\chatbot_api\
-# uvicorn server:app --rehatbot_api\
-# uvicorn server:app --reload --port 8001
+# ---- İlk cavab gecikməsini azaltmaq üçün indeksləri server startında qururuq
+try:
+    ensure_semantic_index()
+except Exception:
+    pass
