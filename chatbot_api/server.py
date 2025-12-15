@@ -304,9 +304,10 @@ def _random_hearts() -> str:
     return " ".join(random.sample(HEARTS, k=random.choice([2,3])))
 
 def _romantic_for_ola(user_text: str) -> str:
-    if _detect_pl_text(user_text):
-        return random.choice(OLA_MESSAGES_PL).format(_random_hearts())
-    return random.choice(OLA_MESSAGES_EN).format(_random_hearts())
+    # HƏMİŞƏ polyak (PL) romantik cümlə qaytar
+    return random.choice(OLA_MESSAGES_PL).format(_random_hearts())
+
+
 
 def _love_answer_for_lang(lang: str) -> str:
     mapping = {
