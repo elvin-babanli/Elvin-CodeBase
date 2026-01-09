@@ -1,173 +1,164 @@
-import requests
 from django.conf import settings
 from django.shortcuts import render
-from datetime import datetime
+from django.http import JsonResponse
+
+import requests
+from collections import defaultdict, Counter
+from datetime import datetime, timezone as tz
 import calendar
-from collections import Counter, defaultdict
 
 OW_ICON = "https://openweathermap.org/img/wn/{icon}@2x.png"
 
 
-def _fmt_hhmm_from_unix(ts: int, tz_offset_sec: int) -> str:
-    """Unix timestamp + timezone offset (seconds) -> 'HH:MM' (local)."""
-    if ts is None:
-        return ""
-    dt = datetime.utcfromtimestamp(ts + tz_offset_sec)
-    return dt.strftime("%H:%M")
-
-
-def _weekday_date_from_iso(iso_str: str):
-    """
-    'YYYY-MM-DD HH:MM:SS' -> (WeekdayName, 'Mon DD')
-    """
+def _get_json(url, params, timeout=25):
     try:
-      dt = datetime.strptime(iso_str, "%Y-%m-%d %H:%M:%S")
+        r = requests.get(url, params=params, timeout=timeout)
+        try:
+            return r.status_code, r.json(), None
+        except Exception:
+            return r.status_code, {"message": r.text}, None
+    except requests.exceptions.Timeout:
+        return 0, None, "timeout"
+    except requests.exceptions.RequestException as e:
+        return 0, None, f"network_error: {str(e)}"
+
+
+def _fmt_local_hhmm(unix_ts: int, tz_offset_seconds: int):
+    if not unix_ts:
+        return None
+    return datetime.fromtimestamp(unix_ts + tz_offset_seconds, tz=tz.utc).strftime("%H:%M")
+
+
+def _weekday_date_from_yyyy_mm_dd(d: str):
+    try:
+        dt = datetime.strptime(d, "%Y-%m-%d")
+        return calendar.day_name[dt.weekday()], dt.strftime("%b %d")
     except Exception:
-      # bəzi hallarda format fərqli ola bilər
-      try:
-        dt = datetime.fromisoformat(iso_str)
-      except Exception:
-        return "", iso_str
-    return calendar.day_name[dt.weekday()], dt.strftime("%b %d")
+        return "", d
 
 
-def fetch_current(city: str):
-    """
-    Current weather (free endpoint).
-    Returns: dict(current), None on error OR (None, error_msg)
-    """
+def _fetch_weather_portfolio_shape(city: str):
     api_key = getattr(settings, "OPENWEATHER_API_KEY", "")
     if not api_key:
-        return None, "Error: API key not configured in settings.py"
+        return None, None, "Error: API key not configured in settings.py (OPENWEATHER_API_KEY)"
 
-    url = "https://api.openweathermap.org/data/2.5/weather"
-    params = {"q": city, "appid": api_key, "units": "metric"}
+    # 1) geocode city -> lat/lon
+    geo_url = "https://api.openweathermap.org/geo/1.0/direct"
+    code, geo, err = _get_json(geo_url, {"q": city, "limit": 1, "appid": api_key})
+    if err:
+        return None, None, (
+            "OpenWeather geocoding failed: "
+            f"{err}. (Network/VPN/Firewall may block api.openweathermap.org)"
+        )
+    if code != 200 or not isinstance(geo, list) or not geo:
+        return None, None, "City not found."
 
-    try:
-        resp = requests.get(url, params=params, timeout=10)
-    except requests.RequestException as e:
-        return None, f"Error: request failed ({e})"
+    lat = float(geo[0].get("lat", 0.0))
+    lon = float(geo[0].get("lon", 0.0))
+    country = geo[0].get("country", "")
+    city_name = geo[0].get("name", city)
 
-    if resp.status_code != 200:
-        try:
-            err = resp.json().get("message", resp.text)
-        except Exception:
-            err = resp.text
-        return None, f"Error: {resp.status_code} {err}"
+    # 2) current weather
+    w_url = "https://api.openweathermap.org/data/2.5/weather"
+    code, w, err = _get_json(w_url, {"lat": lat, "lon": lon, "appid": api_key, "units": "metric"})
+    if err:
+        return None, None, f"OpenWeather current weather failed: {err}."
+    if code != 200 or not isinstance(w, dict):
+        msg = (w or {}).get("message", "weather fetch failed") if isinstance(w, dict) else "weather fetch failed"
+        return None, None, msg
 
-    data = resp.json()
-    weather = (data.get("weather") or [{}])[0]
-    main = data.get("main", {})
-    wind = data.get("wind", {})
-    sys_ = data.get("sys", {})
+    weather0 = (w.get("weather") or [{}])[0]
+    main = w.get("main", {}) or {}
+    wind = w.get("wind", {}) or {}
+    sys = w.get("sys", {}) or {}
 
-    tz_offset = data.get("timezone", 0)  # seconds offset from UTC
+    tz_offset = int(w.get("timezone", 0))  # seconds
+    sunrise_ts = int(sys.get("sunrise", 0) or 0)
+    sunset_ts = int(sys.get("sunset", 0) or 0)
+
+    icon_code = weather0.get("icon")
 
     current = {
-        "city": data.get("name", city),
-        "country": sys_.get("country"),
-        "temp": round(main.get("temp", 0)),
-        "feels_like": round(main.get("feels_like", 0)),
-        "humidity": main.get("humidity", 0),
-        "wind_speed": wind.get("speed", 0),
-        "description": (weather.get("description") or "").capitalize(),
-        "icon_url": OW_ICON.format(icon=weather.get("icon")) if weather.get("icon") else None,
-        "sunrise": _fmt_hhmm_from_unix(sys_.get("sunrise"), tz_offset) if sys_.get("sunrise") else None,
-        "sunset": _fmt_hhmm_from_unix(sys_.get("sunset"), tz_offset) if sys_.get("sunset") else None,
+        "city": w.get("name", city_name),
+        "country": country or sys.get("country", ""),
+
+        "temp": round(float(main.get("temp", 0.0))),
+        "feels_like": round(float(main.get("feels_like", 0.0))),
+        "humidity": int(main.get("humidity", 0)),
+        "wind_speed": float(wind.get("speed", 0.0)),
+
+        "description": (weather0.get("description") or "—").capitalize(),
+        "icon_url": OW_ICON.format(icon=icon_code) if icon_code else None,
+
+        "sunrise": _fmt_local_hhmm(sunrise_ts, tz_offset) if sunrise_ts else None,
+        "sunset": _fmt_local_hhmm(sunset_ts, tz_offset) if sunset_ts else None,
     }
-    return current, None
 
+    # 3) forecast -> daily summaries
+    f_url = "https://api.openweathermap.org/data/2.5/forecast"
+    code, f, err = _get_json(f_url, {"lat": lat, "lon": lon, "appid": api_key, "units": "metric"})
+    if err:
+        return current, [], f"OpenWeather forecast failed: {err}."
+    if code != 200 or not isinstance(f, dict) or "list" not in f:
+        msg = (f or {}).get("message", "forecast fetch failed") if isinstance(f, dict) else "forecast fetch failed"
+        return current, [], msg
 
-def fetch_forecast_5d(city: str):
-    """
-    5-day / 3-hour forecast (free endpoint).
-    Biz 3-saatlıq blokları günə görə qruplaşdırırıq və hər gün üçün:
-      - min temp
-      - max temp
-      - dominant (ən çox görülən) icon/description
-    """
-    api_key = getattr(settings, "OPENWEATHER_API_KEY", "")
-    if not api_key:
-        return None, "Error: API key not configured in settings.py"
+    by_date = defaultdict(list)
+    for item in f.get("list", []):
+        dt_txt = item.get("dt_txt")
+        if not dt_txt or len(dt_txt) < 10:
+            continue
+        by_date[dt_txt[:10]].append(item)
 
-    url = "https://api.openweathermap.org/data/2.5/forecast"
-    params = {"q": city, "appid": api_key, "units": "metric"}
-
-    try:
-        resp = requests.get(url, params=params, timeout=10)
-    except requests.RequestException as e:
-        return None, f"Error: forecast request failed ({e})"
-
-    if resp.status_code == 401:
-        return None, "Forecast is not available for your API key."
-    if resp.status_code != 200:
-        try:
-            err = resp.json().get("message", resp.text)
-        except Exception:
-            err = resp.text
-        return None, f"Error: {resp.status_code} {err}"
-
-    data = resp.json()
-    items = data.get("list", [])
-    if not items:
-        return [], None
-
-    # Günə görə toplulaşdır
-    by_day = defaultdict(list)
-    for it in items:
-        dt_txt = it.get("dt_txt")  # 'YYYY-MM-DD HH:MM:SS'
-        if not dt_txt:
-            # bəzi cavablarda yalnız dt ola bilər
-            try:
-                dt = datetime.utcfromtimestamp(it.get("dt"))
-                dt_txt = dt.strftime("%Y-%m-%d %H:%M:%S")
-            except Exception:
-                continue
-        day_key = dt_txt.split(" ")[0]  # YYYY-MM-DD
-        by_day[day_key].append(it)
-
+    dates = sorted(by_date.keys())[:5]
     daily = []
-    for day_key in sorted(by_day.keys())[:5]:  # yalnız 5 gün
-        bucket = by_day[day_key]
-        temps = [b.get("main", {}).get("temp") for b in bucket if b.get("main")]
-        tmins = [b.get("main", {}).get("temp_min") for b in bucket if b.get("main")]
-        tmaxs = [b.get("main", {}).get("temp_max") for b in bucket if b.get("main")]
 
-        # icon/description üçün dominantı seç
+    for d in dates:
+        items = by_date[d]
+
+        temps = []
         icons = []
         descs = []
-        for b in bucket:
-            w = (b.get("weather") or [{}])[0]
-            if w.get("icon"):
-                icons.append(w.get("icon"))
-            if w.get("description"):
-                descs.append(w.get("description").capitalize())
-        icon = Counter(icons).most_common(1)[0][0] if icons else None
-        desc = Counter(descs).most_common(1)[0][0] if descs else ""
 
-        weekday, date_str = _weekday_date_from_iso(day_key + " 00:00:00")
+        for x in items:
+            t = (x.get("main") or {}).get("temp")
+            if isinstance(t, (int, float)):
+                temps.append(float(t))
+
+            w0 = (x.get("weather") or [{}])[0]
+            if w0.get("icon"):
+                icons.append(w0.get("icon"))
+            if w0.get("description"):
+                descs.append((w0.get("description") or "").capitalize())
+
+        if not temps:
+            continue
+
+        icon = Counter(icons).most_common(1)[0][0] if icons else None
+        desc = Counter(descs).most_common(1)[0][0] if descs else "—"
+
+        weekday, date_str = _weekday_date_from_yyyy_mm_dd(d)
+
         daily.append({
             "weekday": weekday,
             "date": date_str,
-            "temp_min": round(min(tmins) if tmins else (min(temps) if temps else 0)),
-            "temp_max": round(max(tmaxs) if tmaxs else (max(temps) if temps else 0)),
+            "temp_min": round(min(temps)),
+            "temp_max": round(max(temps)),
             "description": desc,
             "icon_url": OW_ICON.format(icon=icon) if icon else None,
         })
 
-    return daily, None
+    return current, daily, None
 
 
 def weather_project_view(request):
-    city = request.GET.get("city", "").strip()
+    city = (request.GET.get("city") or "").strip()
     current = None
     daily = []
     error = None
 
     if city:
-        current, error = fetch_current(city)
-        if not error:
-            daily, error = fetch_forecast_5d(city)
+        current, daily, error = _fetch_weather_portfolio_shape(city)
 
     return render(request, "weather_app.html", {
         "city": city,
@@ -175,3 +166,16 @@ def weather_project_view(request):
         "daily": daily,
         "error": error,
     })
+
+
+# optional: ajax üçün api
+def weather_api(request):
+    city = (request.GET.get("city") or "").strip()
+    if not city:
+        return JsonResponse({"error": "city is required"}, status=400)
+
+    current, daily, err = _fetch_weather_portfolio_shape(city)
+    if err:
+        return JsonResponse({"error": err}, status=503)
+
+    return JsonResponse({"current": current, "daily": daily}, status=200)

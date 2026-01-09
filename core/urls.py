@@ -16,39 +16,41 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+
 from main.views import *
 from main import views
-from main.weather_app import weather_project_view
+
+from main.weather_app import weather_project_view, weather_api
 from main.stock_predictor import stock_predictor_view
 from main.cheap_flight_finder import cheap_flight_finder_view
 
 from django.contrib.sitemaps.views import sitemap
-from main.sitemap import StaticViewSitemap 
+from main.sitemap import StaticViewSitemap
 
-
-
-
-
-sitemaps = {
-    "static": StaticViewSitemap,
-}
+sitemaps = {"static": StaticViewSitemap}
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path("", include("main.urls")),  # <-- ana səhifə BURA GƏLİR
-    path('django/',get_django, name="django"),
-    path('flask/',get_flask,name="flask"),
-    path('pandas/',get_pandas,name="pandas"),
-    path('git/',get_git,name="git"),
-    path('crud/',get_crud,name="crud"),
-    path('weather-app/', weather_project_view, name="weather_app"),
-    path('python-basics/',get_python_basics,name="python-basics"),
-    path('about/', views.about, name="about"),
-    path('4o4-page/',get4o4, name='4o4-page'),
-    path('stock-predictor/',stock_predictor_view, name="stock-predictor"),
-    path('cheap-flight-finder/', cheap_flight_finder_view, name="cheap_flight_finder"),
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
-    path('numpy/',get_numpy, name='numpy'),
-    path('matplotlib/',get_matplotlib, name='matplotlib'),
-]
+    path("admin/", admin.site.urls),
+    path("", include("main.urls")),  # ana səhifə (main.urls)
 
+    path("django/", get_django, name="django"),
+    path("flask/", get_flask, name="flask"),
+    path("pandas/", get_pandas, name="pandas"),
+    path("git/", get_git, name="git"),
+    path("crud/", get_crud, name="crud"),
+
+    path("weather-app/", weather_project_view, name="weather_app"),
+    path("weather-app/api/", weather_api, name="weather_api"),  # optional
+
+    path("python-basics/", get_python_basics, name="python-basics"),
+    path("about/", views.about, name="about"),
+    path("4o4-page/", get4o4, name="4o4-page"),
+
+    path("stock-predictor/", stock_predictor_view, name="stock-predictor"),
+    path("cheap-flight-finder/", cheap_flight_finder_view, name="cheap_flight_finder"),
+
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+
+    path("numpy/", get_numpy, name="numpy"),
+    path("matplotlib/", get_matplotlib, name="matplotlib"),
+]

@@ -1,143 +1,298 @@
 {% extends "base.html" %}
-
-{% block title %}Weather App — Elvin's CodeBase{% endblock %}
+{% block title %}GlobeWeather{% endblock %}
 
 {% block content %}
+<div class="layout">
 
-<style>
-  .hero {
-    background: linear-gradient(135deg,#eaf2ff,#f6fff4);
-    border-radius: 1rem;
-    padding: 1.25rem 1rem;
-    margin-bottom: 1.25rem;
-  }
-  .gradient-text{
-    background-image: linear-gradient(135deg,#0d6efd,#22c55e);
-    background-size: 100%; background-repeat: repeat;
-    color: transparent; -webkit-background-clip: text; background-clip: text;
-  }
-  .wx-card { border-radius: 1rem; }
-  .wx-badge { background:#eef2ff; border-radius:999px; padding:.15rem .6rem; font-size:.8rem }
-  .day-card {
-    border: 1px solid rgba(0,0,0,.06);
-    border-radius: .9rem;
-    padding: .9rem;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0,0,0,.06);
-    height: 100%;
-  }
-  .day-name { font-weight: 600; }
-  .temp-max { font-weight:700; }
-  .temp-min { color:#6c757d; }
-  .mini { font-size: .92rem; color:#6c757d; }
-</style>
+  <!-- TOP -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <b>Weather</b>
+    </div>
 
-<div class="container">
+    <!-- PREFILL: city query varsa input dolu gəlsin -->
+    <input id="q" placeholder="Search city" autocomplete="off" value="{{ city|default:'' }}" />
+    <button class="btn" id="go" type="button">Search</button>
 
-  <!-- Header -->
-  <div class="hero shadow-sm">
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-      <div>
-        <div class="text-uppercase text-muted" style="letter-spacing:.08em;font-size:.8rem;">Projects / Weather</div>
-        <h1 class="h3 mb-1"><span class="gradient-text">Weather App</span></h1>
-        <p class="text-muted mb-0">Enter a city and get the current conditions plus a 5-day forecast (3-hour intervals, aggregated per day).</p>
-      </div>
-      <div class="text-end">
-        <span class="wx-badge">OpenWeather (free)</span>
-        <span class="wx-badge ms-1">Metric (°C)</span>
-      </div>
+    <div class="statuspill" id="status">
+      <span class="spin"></span>
+      <span id="statusText">Ready</span>
     </div>
   </div>
 
-  <!-- Form -->
-  <div class="card shadow-sm wx-card mb-3">
-    <div class="card-body">
-      <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-8">
-          <label class="form-label mb-1">City name</label>
-          <input
-            type="text"
-            name="city"
-            class="form-control"
-            placeholder="e.g. Baku, Warsaw, London"
-            value="{{ city }}"
-          >
-        </div>
-        <div class="col-md-4">
-          <label class="form-label mb-1 d-none d-md-block">&nbsp;</label>
-          <button class="btn btn-primary w-100" type="submit">🔍 Check Weather</button>
-        </div>
-      </form>
+  <!-- MAP -->
+  <section class="map-panel">
+    <div id="map" aria-label="Map"></div>
+  </section>
+
+  <!-- RIGHT: Next 4 days stacked -->
+  <aside class="right">
+    <div class="right-title">
+      <b>Next 4 days</b>
+      <span class="tag" id="rtag">—</span>
     </div>
-  </div>
 
-  <!-- Errors -->
-  {% if error %}
-    <div class="alert alert-danger shadow-sm">{{ error }}</div>
-  {% endif %}
-
-  <!-- Current Weather -->
-  {% if current %}
-    <div class="card shadow-sm wx-card mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          {% if current.icon_url %}
-            <img src="{{ current.icon_url }}" alt="{{ current.description }}" width="64" height="64" class="me-3">
-          {% else %}
-            <div class="me-3" style="font-size:2rem;">🌤</div>
-          {% endif %}
-          <div>
-            <h5 class="fw-semibold mb-1">
-              {{ current.city }}{% if current.country %}, {{ current.country }}{% endif %}
-            </h5>
-            <div class="fs-5"><strong>{{ current.temp }}°C</strong> • {{ current.description }}</div>
-            <div class="mini mt-1 d-flex flex-wrap gap-3">
-              <span>Feels like {{ current.feels_like }}°C</span>
-              <span>Humidity {{ current.humidity }}%</span>
-              <span>Wind {{ current.wind_speed }} m/s</span>
-              {% if current.sunrise and current.sunset %}
-                <span>Sunrise {{ current.sunrise }}</span>
-                <span>Sunset {{ current.sunset }}</span>
-              {% endif %}
-            </div>
+    <div class="citylist" id="daylist">
+      <div class="citycard">
+        <div class="city-left">
+          <div class="ico">⛅</div>
+          <div class="city-meta">
+            <b>Search a city</b>
+            <span>We’ll show next 4 days here</span>
           </div>
         </div>
+        <div class="city-temp">—</div>
       </div>
     </div>
-  {% endif %}
+  </aside>
 
-  <!-- 5-Day Forecast (aggregated from 3h intervals) -->
-  {% if daily and daily|length > 0 %}
-    <h6 class="text-muted mb-2">5-Day forecast</h6>
-    <div class="row g-3">
-      {% for d in daily %}
-        <div class="col-6 col-sm-4 col-lg-3">
-          <div class="day-card">
-            <div class="d-flex align-items-center justify-content-between">
-              <div class="day-name">{{ d.weekday }}</div>
-              <div class="mini">{{ d.date }}</div>
-            </div>
-            <div class="text-center my-2">
-              {% if d.icon_url %}
-                <img src="{{ d.icon_url }}" alt="{{ d.description }}" width="64" height="64">
-              {% endif %}
-            </div>
-            <div class="text-center">
-              <div class="temp-max">{{ d.temp_max }}°</div>
-              <div class="temp-min">min {{ d.temp_min }}°</div>
-            </div>
-            <div class="mini mt-2 text-center" style="min-height:2.2em;">{{ d.description }}</div>
-          </div>
-        </div>
-      {% endfor %}
+  <!-- BOTTOM: Sun • Time -->
+  <section class="bottom">
+    <div class="bottom-head">
+      <b>Sun • Time</b>
+      <span class="tag" id="updated">—</span>
     </div>
-  {% endif %}
 
-  {% if not current and not error %}
-    <p class="text-muted text-center mt-4">
-      Type a city above and click <strong>Check Weather</strong>.
-    </p>
-  {% endif %}
+    <div
+      style="
+        border:1px solid rgba(255,255,255,.14);
+        background: rgba(255,255,255,.06);
+        border-radius: 16px;
+        padding: 10px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        overflow:hidden;
+      "
+    >
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <span style="font-size:12px; color:rgba(255,255,255,.62); font-family: ui-monospace,monospace;">Local time</span>
+        <b id="localtime" style="font-size:14px; letter-spacing:.2px;">—</b>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <span style="font-size:12px; color:rgba(255,255,255,.62); font-family: ui-monospace,monospace;">Sunrise</span>
+        <b id="sunrise" style="font-size:14px; letter-spacing:.2px;">—</b>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <span style="font-size:12px; color:rgba(255,255,255,.62); font-family: ui-monospace,monospace;">Sunset</span>
+        <b id="sunset" style="font-size:14px; letter-spacing:.2px;">—</b>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+        <span style="font-size:12px; color:rgba(255,255,255,.62); font-family: ui-monospace,monospace;">Day length</span>
+        <b id="daylen" style="font-size:14px; letter-spacing:.2px;">—</b>
+      </div>
+    </div>
+  </section>
+
 </div>
 
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const statusEl = $("status");
+  const statusText = $("statusText");
+
+  function setStatus(text, mode="ready"){
+    statusText.textContent = text;
+    statusEl.classList.toggle("loading", mode === "loading");
+    statusText.classList.toggle("err", mode === "error");
+  }
+
+  function nowTime(){
+    return new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }
+
+  function fmtLocalClockFromOffset(offsetSeconds){
+    const nowUtcMs = Date.now();
+    const localMs = nowUtcMs + (offsetSeconds * 1000);
+    const d = new Date(localMs);
+    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }
+
+  const map = L.map("map", {
+    zoomControl:true,
+    preferCanvas:true,
+    minZoom: 2
+  }).setView([20,10], 2);
+
+  const worldBounds = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180));
+  map.setMaxBounds(worldBounds);
+  map.on("drag", () => map.panInsideBounds(worldBounds, { animate:false }));
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  let pinMarker = null;
+
+  function makePinCard(minT, maxT, desc, hum, wind){
+    return `
+      <div class="pin-card" style="width: 180px; text-align:left; padding:12px 12px 12px;">
+        <div style="font-weight:950; font-size:22px; letter-spacing:.2px;">
+          ${Math.round(minT)}°/${Math.round(maxT)}°
+        </div>
+        <div style="margin-top:6px; font-size:12px; color:rgba(255,255,255,.78);">
+          ${desc || "—"}
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:rgba(255,255,255,.78);">
+          Hum ${hum ?? "—"}%
+        </div>
+        <div style="margin-top:4px; font-size:12px; color:rgba(255,255,255,.78);">
+          Wind ${wind ?? "—"} m/s
+        </div>
+      </div>
+    `;
+  }
+
+  function setPin(lat, lon, minT, maxT, desc, hum, wind){
+    const icon = L.divIcon({
+      className: "",
+      html: makePinCard(minT, maxT, desc, hum, wind),
+      iconSize: [180, 118],
+      iconAnchor: [90, 118]
+    });
+
+    if (pinMarker) map.removeLayer(pinMarker);
+    pinMarker = L.marker([lat, lon], { icon }).addTo(map);
+  }
+
+  async function apiSearch(city){
+ 
+    const endpoint = "{% url 'weather_api' %}";
+    const res = await fetch(`${endpoint}?city=${encodeURIComponent(city)}`);
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){
+      const msg = data?.error || "Request failed";
+      throw new Error(msg);
+    }
+    return data;
+  }
+
+  function dayLabel(iso){
+    const d = new Date(iso + "T00:00:00");
+    return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+  }
+
+  function iconFor(desc=""){
+    const t = (desc || "").toLowerCase();
+    if (t.includes("rain")) return "🌧️";
+    if (t.includes("cloud")) return "☁️";
+    if (t.includes("snow")) return "🌨️";
+    if (t.includes("storm") || t.includes("thunder")) return "⛈️";
+    if (t.includes("clear")) return "☀️";
+    return "⛅";
+  }
+
+  function renderNext4Days(daily){
+    const list = $("daylist");
+    list.innerHTML = "";
+
+    const next = (daily || []).slice(1, 5);
+
+    if (!next.length){
+      const el = document.createElement("div");
+      el.className = "citycard";
+      el.innerHTML = `
+        <div class="city-left">
+          <div class="ico">⛅</div>
+          <div class="city-meta">
+            <b>No forecast</b>
+            <span>Try another city</span>
+          </div>
+        </div>
+        <div class="city-temp">—</div>
+      `;
+      list.appendChild(el);
+      return;
+    }
+
+    next.forEach(d => {
+      const el = document.createElement("div");
+      el.className = "citycard";
+      el.innerHTML = `
+        <div class="city-left">
+          <div class="ico">${iconFor(d.description)}</div>
+          <div class="city-meta">
+            <b>${dayLabel(d.date)}</b>
+            <span>${(d.description || "—")} • Hum ${d.humidity}% • Wind ${d.wind_speed} m/s</span>
+          </div>
+        </div>
+        <div class="city-temp">${Math.round(d.min)}°/${Math.round(d.max)}°</div>
+      `;
+      list.appendChild(el);
+    });
+  }
+
+  function renderSunPanel(c, sun){
+    $("updated").textContent = `Updated ${nowTime()}`;
+
+    const offset = Number(c.timezone || 0);
+    $("localtime").textContent = fmtLocalClockFromOffset(offset);
+
+    $("sunrise").textContent = (sun && sun.sunrise) ? sun.sunrise : "—";
+    $("sunset").textContent  = (sun && sun.sunset)  ? sun.sunset  : "—";
+    $("daylen").textContent  = (sun && sun.day_length) ? sun.day_length : "—";
+  }
+
+  async function search(){
+    const city = $("q").value.trim();
+    if(!city){
+      setStatus("Type a city name");
+      return;
+    }
+
+    try{
+      setStatus("Searching…", "loading");
+      const data = await apiSearch(city);
+
+      const c = data.current;
+
+      setPin(
+        c.lat, c.lon,
+        c.temp_min, c.temp_max,
+        c.description,
+        c.humidity,
+        c.wind_speed
+      );
+
+      map.flyTo([c.lat, c.lon], 6, { animate:true, duration: 1.2 });
+
+      renderNext4Days(data.daily);
+      renderSunPanel(c, data.sun || null);
+
+      $("rtag").textContent = `${c.city}, ${c.country}`;
+      setStatus("Done");
+    }catch(e){
+      console.error(e);
+      setStatus("Error: " + (e?.message || e), "error");
+    }
+  }
+
+  $("go").addEventListener("click", () => search());
+  $("q").addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      search();
+    }
+  });
+
+  const initial = $("q").value.trim();
+  if(initial){
+    search();
+  }
+
+})();
+</script>
 {% endblock %}

@@ -132,6 +132,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 OPENWEATHER_API_KEY = config("OPENWEATHER_API_KEY", default="")
 
+OPENWEATHER_API_KEY = "0e6ce144287657c72296d77c547e0e2c"
 CHAT_API_URL = "http://127.0.0.1:8001/chat"
 
 CACHES = {
