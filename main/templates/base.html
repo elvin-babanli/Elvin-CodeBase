@@ -148,18 +148,19 @@
       .oe-heart{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .35s ease; }
       .heartWrap{ position:relative; width:44vw; max-width:640px; min-width:260px; aspect-ratio:1/1; }
       .heartSvg{
-        position:absolute; inset:0;
-        overflow: visible;
-      }
-      .heartSvg .outer{
-        filter: drop-shadow(0 6px 20px rgba(255,77,166,.18));
-        transform-origin:50% 60%;
-        opacity:.92;
-      }
-      .heartSvg .inner{
-        transform-origin:50% 60%;
-        opacity:.94;
-      }
+  position:absolute; inset:0;
+  overflow: visible;            /* raster clip izini gizlədir */
+}
+.heartSvg .outer{
+  /* drop-shadow-u ya tam sil, ya da çox zəif saxla */
+  filter: drop-shadow(0 6px 20px rgba(255,77,166,.18));
+  transform-origin:50% 60%;
+  opacity:.92;                  /* ümumi parlaqlığı yumşaldır */
+}
+.heartSvg .inner{
+  transform-origin:50% 60%;
+  opacity:.94;                  /* iç parlaqlığı da bir az azaldır */
+}
       .oe-heart-spark{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
       .mini-heart{
         position:absolute; font-size:18px; color:#ff4da6; filter: drop-shadow(0 6px 14px rgba(255,77,166,.4));
@@ -329,21 +330,8 @@
           history.forEach(msg => addBubble(msg.content, msg.role === "assistant" ? "bot" : "user"));
         }
 
-        /* ✅ CHANGED: launcher no longer disappears; toggle open/close */
-        function openPanel(){
-          panel.classList.add("open");
-          renderHistory();
-          inputEl.focus();
-        }
-
-        function closePanel(){
-          panel.classList.remove("open");
-        }
-
-        function togglePanel(){
-          if (panel.classList.contains("open")) closePanel();
-          else openPanel();
-        }
+        function openPanel(){ panel.classList.add("open"); hideLauncher(); renderHistory(); inputEl.focus(); }
+        function closePanel(){ panel.classList.remove("open"); showLauncher(); }
 
         function addBubble(text, who="bot"){
           const div = document.createElement("div");
@@ -641,10 +629,7 @@
         }
 
         setTimeout(() => { showLauncher(); }, isNaN(delay) ? 2400 : delay);
-
-        /* ✅ CHANGED: toggle instead of open only */
-        launcher?.addEventListener("click", togglePanel);
-
+        launcher?.addEventListener("click", openPanel);
         minimize?.addEventListener("click", closePanel);
         closeBtn?.addEventListener("click", closePanel);
         sendBtn?.addEventListener("click", sendMessage);
