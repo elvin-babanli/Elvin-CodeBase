@@ -8,12 +8,10 @@
 
   :root{
     --bg: #ffffff;
-    --black: #000000;
     --shadow: 0 18px 60px rgba(0,0,0,.18);
     --shadow2: 0 26px 90px rgba(0,0,0,.26);
   }
 
-  /* FULLSCREEN overlay (base.html-ı tam örtür) */
   .v-screen{
     position: fixed;
     inset: 0;
@@ -48,15 +46,19 @@
     position: relative;
     display: inline-grid;
     place-items: center;
+
     width: min(44vw, 360px);
     height: clamp(72px, 12.5vw, 110px);
+
     border-radius: 999px;
     border: 0;
     cursor: pointer;
     user-select: none;
+
     color: #fff;
     font-weight: 900;
     letter-spacing: .2px;
+
     box-shadow: var(--shadow);
     transform: translateZ(0) scale(var(--scale, 1));
     transition: transform .28s ease, box-shadow .28s ease, opacity 1.1s ease;
@@ -77,16 +79,15 @@
 
   .btn-liquid canvas{
     position: absolute;
-    inset: -60px;
+    inset: -70px; /* daha çox “spill” -> daha canlı */
     z-index: 1;
     pointer-events: none;
   }
 
-  /* Buttons color identity (gradient is drawn in canvas, but base glow helps) */
-  #yesBtn{ --scale: var(--yesScale, 1); filter: saturate(1.05); }
-  #noBtn { --scale: var(--noScale, 1); filter: saturate(1.05); }
+  /* Scale control */
+  #yesBtn{ --scale: var(--yesScale, 1); z-index: 8; }
+  #noBtn { --scale: var(--noScale, 1); z-index: 6; }
 
-  /* No absolute when teleporting */
   .no-abs{
     position: fixed !important;
     left: 50%;
@@ -96,14 +97,9 @@
     margin: 0;
   }
 
-  /* Keep YES always above NO when both visible */
-  #yesBtn{ z-index: 8; }
-
-  /* Fade helpers */
   .fade-out{ opacity: 0; transform: scale(.98); pointer-events: none; }
-  .fade-in{ opacity: 1; transform: scale(1); }
 
-  /* Fullscreen overlay darkness */
+  /* Fullscreen dark overlay */
   .ov{
     position: fixed;
     inset: 0;
@@ -115,7 +111,6 @@
   }
   .ov.show{ opacity: 1; }
 
-  /* Stars / broken hearts canvases */
   canvas.fx{
     position: fixed;
     inset: 0;
@@ -129,7 +124,6 @@
   }
   canvas.fx.show{ opacity: 1; }
 
-  /* Message */
   .msg{
     position: fixed;
     inset: 0;
@@ -149,7 +143,6 @@
   }
   .msg.show{ opacity: 1; transform: translateY(0) scale(1); }
 
-  /* Animated typography (not “straight list”) */
   .msg .line{
     display: block;
     opacity: 0;
@@ -175,7 +168,6 @@
   .msg .t2{ font-size: clamp(16px, 4.2vw, 34px); }
   .msg .t3{ font-size: clamp(14px, 3.8vw, 30px); opacity: .95; }
 
-  /* Heart scene */
   .heartScene{
     position: fixed;
     inset: 0;
@@ -209,7 +201,6 @@
     box-shadow: 0 30px 120px rgba(0,0,0,.75);
   }
 
-  /* NO click animations */
   .shake3s{ animation: shake .12s ease-in-out infinite; }
   @keyframes shake{
     0%  { transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-2px); }
@@ -259,11 +250,6 @@
 </div>
 
 <script>
-/*
-  Kod: Azərbaycan dilində.
-  UI mətnləri: yalnız Tak / Nie / final mesaj (polyakca).
-*/
-
 (function(){
   const root = document.getElementById("root");
   const row  = document.getElementById("row");
@@ -282,7 +268,6 @@
   const bctx = broken.getContext("2d");
   const hctx = heartCanvas.getContext("2d");
 
-  // Polyakca final mesaj (maraqlı, mərkəzdə, animasiyalı)
   const MESAJ_HTML = `
     <span class="line t1"><strong>Gratulacje!</strong></span>
     <span class="line l2 t2">Od teraz jesteście walentynkami…</span>
@@ -291,12 +276,20 @@
 
   let noKlik = 0;
   let yesScale = 1;
-  let noScale = 1;
-
+  let noScale = 1; // 7-8-də artıq “çox kiçiltmirik”
   let yesFlowAktiv = false;
   let stage9Aktiv = false;
 
-  // ====== Ölçü / DPR ======
+  function skalaQur(){
+    // No həmişə gözəl qalsın deyə clamp edirik
+    const clampedNo = Math.max(0.92, Math.min(1.05, noScale));
+    const clampedYes = Math.min(6, Math.max(1, yesScale));
+    root.style.setProperty("--yesScale", String(clampedYes));
+    root.style.setProperty("--noScale", String(clampedNo));
+  }
+  skalaQur();
+
+  // ===== Canvas ölçüləri =====
   function canvasOlcu(){
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const w = window.innerWidth;
@@ -320,14 +313,7 @@
   window.addEventListener("resize", canvasOlcu, { passive:true });
   canvasOlcu();
 
-  // ====== CSS scale ======
-  function skalaQur(){
-    root.style.setProperty("--yesScale", String(yesScale));
-    root.style.setProperty("--noScale", String(noScale));
-  }
-  skalaQur();
-
-  // ====== Liquid Buttons (mouse olmasa da oynasın) ======
+  // ===== Liquid Buttons (daha canlı) =====
   class LiquidButton{
     constructor(el, cfg){
       this.el = el;
@@ -340,9 +326,12 @@
       this.pointsA = [];
       this.pointsB = [];
 
-      this.fakeT = Math.random() * 1000; // “fake mouse” vaxtı
+      this.fakeT = Math.random() * 1000;
       this.relMouseX = 0;
       this.relMouseY = 0;
+
+      this.lastW = 0;
+      this.lastH = 0;
 
       this.init();
       this.render();
@@ -353,80 +342,69 @@
       const w = rect.width;
       const h = rect.height;
 
-      // canvas margin (liquid spill)
-      this.canvas.width = Math.ceil(w + 120);
-      this.canvas.height = Math.ceil(h + 120);
-      this.canvas.style.width = (w + 120) + "px";
-      this.canvas.style.height = (h + 120) + "px";
+      this.lastW = w; this.lastH = h;
 
-      this.off = 60;
+      // larger spill => more liquid visible
+      this.off = 70;
+
+      this.canvas.width = Math.ceil(w + this.off*2);
+      this.canvas.height = Math.ceil(h + this.off*2);
+      this.canvas.style.width = (w + this.off*2) + "px";
+      this.canvas.style.height = (h + this.off*2) + "px";
 
       this.pointsA.length = 0;
       this.pointsB.length = 0;
 
       const points = this.cfg.points;
-      const buttonW = w;
-      const buttonH = h;
 
-      const x0 = buttonH/2;
+      const x0 = h/2;
       const addPoint = (x,y) => {
         this.pointsA.push(new Point(this.off + x, this.off + y, 1));
         this.pointsB.push(new Point(this.off + x, this.off + y, 2));
       };
 
       for(let j=1;j<points;j++){
-        addPoint((x0 + ((buttonW-buttonH)/points)*j), 0);
+        addPoint((x0 + ((w-h)/points)*j), 0);
       }
-      addPoint(buttonW-buttonH/5, 0);
-      addPoint(buttonW+buttonH/10, buttonH/2);
-      addPoint(buttonW-buttonH/5, buttonH);
+      addPoint(w-h/5, 0);
+      addPoint(w+h/10, h/2);
+      addPoint(w-h/5, h);
       for(let j=points-1;j>0;j--){
-        addPoint((x0 + ((buttonW-buttonH)/points)*j), buttonH);
+        addPoint((x0 + ((w-h)/points)*j), h);
       }
-      addPoint(buttonH/5, buttonH);
-      addPoint(-buttonH/10, buttonH/2);
-      addPoint(buttonH/5, 0);
+      addPoint(h/5, h);
+      addPoint(-h/10, h/2);
+      addPoint(h/5, 0);
 
-      // start in center
-      this.relMouseX = this.off + buttonW/2;
-      this.relMouseY = this.off + buttonH/2;
+      this.relMouseX = this.off + w/2;
+      this.relMouseY = this.off + h/2;
     }
 
     updateFakeMouse(){
-      // Mouse olmadan da “liquid” canlı qalsın deyə sinus trayektoriya
-      this.fakeT += 0.018;
+      this.fakeT += this.cfg.speed;
 
       const rect = this.el.getBoundingClientRect();
       const w = rect.width, h = rect.height;
 
-      const ax = (Math.sin(this.fakeT) * 0.35 + Math.sin(this.fakeT*0.7)*0.15);
-      const ay = (Math.cos(this.fakeT*1.1) * 0.32 + Math.sin(this.fakeT*0.9)*0.12);
+      // bigger amplitude => more visible motion
+      const ax = (Math.sin(this.fakeT) * 0.55 + Math.sin(this.fakeT*0.7)*0.22);
+      const ay = (Math.cos(this.fakeT*1.1) * 0.50 + Math.sin(this.fakeT*0.9)*0.20);
 
-      this.relMouseX = this.off + (w/2) + ax * (w*0.45);
-      this.relMouseY = this.off + (h/2) + ay * (h*0.40);
+      this.relMouseX = this.off + (w/2) + ax * (w*0.50);
+      this.relMouseY = this.off + (h/2) + ay * (h*0.46);
 
-      // very small drift, keeps it “alive”
-      this.mouseSpeedX = Math.sin(this.fakeT*2.0) * 1.4;
-      this.mouseSpeedY = Math.cos(this.fakeT*1.7) * 1.2;
-
-      // direction
-      this.mouseDirectionX = this.mouseSpeedX > 0 ? 1 : -1;
-      this.mouseDirectionY = this.mouseSpeedY > 0 ? 1 : -1;
+      // “mouse speed” stronger => more wobble
+      this.mouseSpeedX = (Math.sin(this.fakeT*2.4) * 2.8);
+      this.mouseSpeedY = (Math.cos(this.fakeT*2.0) * 2.4);
     }
 
     render(){
       requestAnimationFrame(()=>this.render());
 
-      // base changes on resize
-      if(this._resizeTick === undefined) this._resizeTick = 0;
-      this._resizeTick++;
-      if(this._resizeTick % 25 === 0){
-        const rect = this.el.getBoundingClientRect();
-        const desiredW = Math.ceil(rect.width + 120);
-        const desiredH = Math.ceil(rect.height + 120);
-        if(this.canvas.width !== desiredW || this.canvas.height !== desiredH){
-          this.init();
-        }
+      // if size changed -> re-init immediately (prevents ugly deformation)
+      const rect = this.el.getBoundingClientRect();
+      if(Math.abs(rect.width - this.lastW) > 0.5 || Math.abs(rect.height - this.lastH) > 0.5){
+        this.init();
       }
 
       this.updateFakeMouse();
@@ -434,7 +412,6 @@
       const ctx = this.ctx;
       const cw = this.canvas.width;
       const ch = this.canvas.height;
-
       ctx.clearRect(0,0,cw,ch);
 
       // move points
@@ -443,20 +420,22 @@
         this.pointsB[i].move(this);
       }
 
-      // background layer
+      // layer 1
       ctx.beginPath();
       drawBlob(ctx, this.pointsA);
       ctx.closePath();
       ctx.fillStyle = this.cfg.back;
       ctx.fill();
 
-      // gradient layer
+      // dynamic gradient
       const gx = this.relMouseX;
       const gy = this.relMouseY;
-      const grad = ctx.createRadialGradient(gx, gy, 320, gx, gy, 0);
+      const dist = Math.sqrt(Math.pow(gx - cw/2, 2) + Math.pow(gy - ch/2, 2)) / Math.sqrt(Math.pow(cw/2, 2) + Math.pow(ch/2, 2));
+      const grad = ctx.createRadialGradient(gx, gy, 240 + 240*dist, gx, gy, 0);
       grad.addColorStop(0, this.cfg.gradA);
       grad.addColorStop(1, this.cfg.gradB);
 
+      // layer 2
       ctx.beginPath();
       drawBlob(ctx, this.pointsB);
       ctx.closePath();
@@ -478,18 +457,18 @@
     const damping = host.cfg.damping;
     const mouseDist = host.cfg.mouseDist;
 
-    // spring to origin
+    // spring back
     this.vx += (this.ix - this.x) / (viscosity * this.level);
     this.vy += (this.iy - this.y) / (viscosity * this.level);
 
-    // fake mouse influence
+    // fake mouse impact
     const dx = this.ix - host.relMouseX;
     const dy = this.iy - host.relMouseY;
     const relDist = (1 - Math.sqrt((dx*dx) + (dy*dy)) / mouseDist);
 
     if(relDist > 0 && relDist < 1){
-      this.vx += (host.mouseSpeedX / 4) * relDist;
-      this.vy += (host.mouseSpeedY / 4) * relDist;
+      this.vx += (host.mouseSpeedX / 3.2) * relDist;
+      this.vy += (host.mouseSpeedY / 3.2) * relDist;
     }
 
     this.vx *= (1 - damping);
@@ -503,56 +482,53 @@
     for(let i=0;i<pts.length;i++){
       const p = pts[i];
       const np = pts[i+1] || pts[0];
-      const cx = (p.x + np.x) / 2;
-      const cy = (p.y + np.y) / 2;
+      const cx = (p.x + np.x)/2;
+      const cy = (p.y + np.y)/2;
       ctx.quadraticCurveTo(p.x, p.y, cx, cy);
     }
   }
 
-  // Liquid button instances
-  const yesLiquid = new LiquidButton(yesBtn, {
-    points: 8,
-    viscosity: 18,
-    mouseDist: 75,
-    damping: 0.06,
+  // Instances (more movement)
+  new LiquidButton(yesBtn, {
+    points: 9,
+    viscosity: 14,   // ↓ => more elastic
+    mouseDist: 120,  // ↑ => wider influence
+    damping: 0.035,  // ↓ => more wobble
+    speed: 0.026,    // ↑ => more alive
     back:  "#1CE2D8",
     gradA: "#22c55e",
     gradB: "#7c3aed"
   });
 
-  const noLiquid = new LiquidButton(noBtn, {
-    points: 8,
-    viscosity: 18,
-    mouseDist: 75,
-    damping: 0.06,
+  new LiquidButton(noBtn, {
+    points: 9,
+    viscosity: 14,
+    mouseDist: 120,
+    damping: 0.035,
+    speed: 0.026,
     back:  "#ff9aa2",
     gradA: "#ff2d55",
     gradB: "#ef4444"
   });
 
-  // ====== NIE teleport / Tak üstə düşməsin ======
+  // ===== NO teleport (Tak üstə düşməsin) =====
   function noAbsoluteEt(){
     if(!noBtn.classList.contains("no-abs")){
       noBtn.classList.add("no-abs");
       root.appendChild(noBtn);
     }
   }
-
   function noAnimTemizle(){
     noBtn.classList.remove("shake3s");
     noBtn.classList.remove("break5s");
   }
 
   function qadağaZonaVar(x, y){
-    // Tak düyməsinin real yerinə görə qadağan zona
     const r = yesBtn.getBoundingClientRect();
     const cx = r.left + r.width/2;
-    const cy = r.top  + r.height/2;
-
+    const cy = r.top + r.height/2;
     const dx = Math.abs(x - cx);
     const dy = Math.abs(y - cy);
-
-    // Tak ətrafında “qadağan” radius (telefon üçün bir az böyük)
     return (dx < (r.width*0.85) && dy < (r.height*0.75));
   }
 
@@ -571,222 +547,132 @@
     const maxX = window.innerWidth - bw - pad;
     const maxY = window.innerHeight - bh - pad;
 
-    let x, y, guard = 0;
+    let x, y, guard=0;
     do{
       x = pad + Math.random() * Math.max(1, maxX - pad);
       y = pad + Math.random() * Math.max(1, maxY - pad);
       guard++;
-      if(guard > 60) break;
+      if(guard > 70) break;
     } while(qadağaZonaVar(x + bw/2, y + bh/2));
 
     noYerQur(x, y);
   }
 
-  // ====== Stars rain ======
-  let starsArr = [];
-  let starsRAF = null;
-
+  // ===== Stars / Broken / Heart minimal (same as before) =====
+  let starsArr=[], starsRAF=null;
   function starsHazirla(){
-    starsArr = [];
-    const w = window.innerWidth, h = window.innerHeight;
-    const say = Math.max(80, Math.floor((w*h)/22000));
+    starsArr=[];
+    const w=innerWidth,h=innerHeight;
+    const say=Math.max(80, Math.floor((w*h)/22000));
     for(let i=0;i<say;i++){
-      starsArr.push({
-        x: Math.random()*w,
-        y: Math.random()*h,
-        sp: 2 + Math.random()*5,
-        sz: 1 + Math.random()*2.4,
-        a: 0.45 + Math.random()*0.55
-      });
+      starsArr.push({x:Math.random()*w,y:Math.random()*h,sp:2+Math.random()*5,sz:1+Math.random()*2.4,a:.45+Math.random()*.55});
     }
   }
-
   function starsCek(){
-    const w = window.innerWidth, h = window.innerHeight;
+    const w=innerWidth,h=innerHeight;
     sctx.clearRect(0,0,w,h);
-
     for(const p of starsArr){
       p.y += p.sp;
-      if(p.y > h + 10){ p.y = -10; p.x = Math.random()*w; }
-      sctx.globalAlpha = p.a;
-      sctx.fillStyle = "#fff";
-      sctx.beginPath();
-      sctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
-      sctx.fill();
+      if(p.y>h+10){p.y=-10;p.x=Math.random()*w;}
+      sctx.globalAlpha=p.a;
+      sctx.fillStyle="#fff";
+      sctx.beginPath(); sctx.arc(p.x,p.y,p.sz,0,Math.PI*2); sctx.fill();
     }
-    starsRAF = requestAnimationFrame(starsCek);
+    starsRAF=requestAnimationFrame(starsCek);
   }
+  function starsStart(){ stars.classList.add("show"); starsHazirla(); if(starsRAF) cancelAnimationFrame(starsRAF); starsRAF=requestAnimationFrame(starsCek); }
+  function starsStop(){ stars.classList.remove("show"); if(starsRAF) cancelAnimationFrame(starsRAF); starsRAF=null; sctx.clearRect(0,0,innerWidth,innerHeight); }
 
-  function starsStart(){
-    stars.classList.add("show");
-    starsHazirla();
-    if(starsRAF) cancelAnimationFrame(starsRAF);
-    starsRAF = requestAnimationFrame(starsCek);
-  }
-
-  function starsStop(){
-    stars.classList.remove("show");
-    if(starsRAF) cancelAnimationFrame(starsRAF);
-    starsRAF = null;
-    sctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-  }
-
-  // ====== Broken hearts rain (stage9) ======
-  let brokenArr = [];
-  let brokenRAF = null;
-
+  let brokenArr=[], brokenRAF=null;
   function brokenHazirla(){
-    brokenArr = [];
-    const w = window.innerWidth, h = window.innerHeight;
-    const say = Math.max(90, Math.floor((w*h)/16000));
+    brokenArr=[];
+    const w=innerWidth,h=innerHeight;
+    const say=Math.max(90, Math.floor((w*h)/16000));
     for(let i=0;i<say;i++){
-      brokenArr.push({
-        x: Math.random()*w,
-        y: Math.random()*h,
-        sp: 3 + Math.random()*6.8,
-        sz: 18 + Math.random()*20,
-        rot: Math.random()*Math.PI*2,
-        vr: (-0.03 + Math.random()*0.06),
-        a: 0.65 + Math.random()*0.35,
-      });
+      brokenArr.push({x:Math.random()*w,y:Math.random()*h,sp:3+Math.random()*6.8,sz:18+Math.random()*20,rot:Math.random()*Math.PI*2,vr:(-0.03+Math.random()*0.06),a:.65+Math.random()*.35});
     }
   }
-
   function brokenCek(){
-    const w = window.innerWidth, h = window.innerHeight;
+    const w=innerWidth,h=innerHeight;
     bctx.clearRect(0,0,w,h);
-
     for(const p of brokenArr){
-      p.y += p.sp;
-      p.rot += p.vr;
-      if(p.y > h + 40){ p.y = -40; p.x = Math.random()*w; }
+      p.y+=p.sp; p.rot+=p.vr;
+      if(p.y>h+40){p.y=-40;p.x=Math.random()*w;}
       bctx.save();
-      bctx.translate(p.x, p.y);
-      bctx.rotate(p.rot);
-      bctx.globalAlpha = p.a;
-      bctx.font = `${p.sz}px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji`;
-      bctx.textAlign = "center";
-      bctx.textBaseline = "middle";
-      bctx.fillText("💔", 0, 0);
+      bctx.translate(p.x,p.y); bctx.rotate(p.rot);
+      bctx.globalAlpha=p.a;
+      bctx.font=`${p.sz}px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji`;
+      bctx.textAlign="center"; bctx.textBaseline="middle";
+      bctx.fillText("💔",0,0);
       bctx.restore();
     }
-    brokenRAF = requestAnimationFrame(brokenCek);
+    brokenRAF=requestAnimationFrame(brokenCek);
   }
+  function brokenStart(){ broken.classList.add("show"); brokenHazirla(); if(brokenRAF) cancelAnimationFrame(brokenRAF); brokenRAF=requestAnimationFrame(brokenCek); }
+  function brokenStop(){ broken.classList.remove("show"); if(brokenRAF) cancelAnimationFrame(brokenRAF); brokenRAF=null; bctx.clearRect(0,0,innerWidth,innerHeight); }
 
-  function brokenStart(){
-    broken.classList.add("show");
-    brokenHazirla();
-    if(brokenRAF) cancelAnimationFrame(brokenRAF);
-    brokenRAF = requestAnimationFrame(brokenCek);
-  }
-
-  function brokenStop(){
-    broken.classList.remove("show");
-    if(brokenRAF) cancelAnimationFrame(brokenRAF);
-    brokenRAF = null;
-    bctx.clearRect(0,0,window.innerWidth, window.innerHeight);
-  }
-
-  // ====== Liquid Heart (tam simmetrik, dalğalı) ======
-  let heartRAF = null;
-  let heartT = 0;
-
+  // Liquid heart (same symmetric wave heart)
+  let heartRAF=null, heartT=0;
   function heartStart(){
     heartScene.classList.add("show");
-    heartT = 0;
+    heartT=0;
     if(heartRAF) cancelAnimationFrame(heartRAF);
-    heartRAF = requestAnimationFrame(heartDraw);
+    heartRAF=requestAnimationFrame(heartDraw);
   }
-
   function heartStop(){
     heartScene.classList.remove("show");
     if(heartRAF) cancelAnimationFrame(heartRAF);
-    heartRAF = null;
-    hctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+    heartRAF=null;
+    hctx.clearRect(0,0,innerWidth,innerHeight);
   }
-
   function heartDraw(){
-    const w = window.innerWidth, h = window.innerHeight;
+    const w=innerWidth,h=innerHeight;
     hctx.clearRect(0,0,w,h);
-
-    // soft vignette
-    const vg = hctx.createRadialGradient(w/2, h/2, 40, w/2, h/2, Math.max(w,h)*0.7);
-    vg.addColorStop(0, "rgba(255,45,85,0.10)");
-    vg.addColorStop(1, "rgba(0,0,0,0)");
-    hctx.fillStyle = vg;
-    hctx.fillRect(0,0,w,h);
-
     heartT += 0.018;
 
-    const cx = w/2;
-    const cy = h/2;
+    const cx=w/2, cy=h/2;
+    const beat = 1 + Math.sin(heartT*2.2)*0.06;
+    const baseSize = Math.min(w,h)*0.18;
 
-    // “beat” + wave
-    const beat = 1 + Math.sin(heartT*2.2) * 0.06;
-    const baseSize = Math.min(w, h) * 0.18;
-
-    // Heart parametric points (symmetric by formula)
-    const pts = [];
-    const N = 220;
-
+    const pts=[], N=220;
     for(let i=0;i<=N;i++){
-      const t = (i / N) * Math.PI * 2;
-      // classic heart curve
-      const x = 16 * Math.pow(Math.sin(t), 3);
-      const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+      const t=(i/N)*Math.PI*2;
+      const x=16*Math.pow(Math.sin(t),3);
+      const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
 
-      // wave perturbation (still symmetric because depends on t, not x sign)
-      const wave = 1 + Math.sin(t*6 + heartT*3.0) * 0.045 + Math.cos(t*3 - heartT*2.0) * 0.03;
-
+      const wave = 1 + Math.sin(t*6 + heartT*3.0)*0.045 + Math.cos(t*3 - heartT*2.0)*0.03;
       const px = cx + (x * baseSize * 0.065) * beat * wave;
-      const py = cy - (y * baseSize * 0.065) * beat * wave; // invert y
-
-      pts.push({x:px, y:py});
+      const py = cy - (y * baseSize * 0.065) * beat * wave;
+      pts.push({x:px,y:py});
     }
 
-    // gradient fill
     const g = hctx.createRadialGradient(cx - baseSize*0.2, cy - baseSize*0.2, baseSize*0.2, cx, cy, baseSize*1.4);
-    g.addColorStop(0, "rgba(255,110,150,1)");
-    g.addColorStop(0.55, "rgba(255,45,85,1)");
-    g.addColorStop(1, "rgba(160,10,60,1)");
+    g.addColorStop(0,"rgba(255,110,150,1)");
+    g.addColorStop(0.55,"rgba(255,45,85,1)");
+    g.addColorStop(1,"rgba(160,10,60,1)");
 
-    // draw smooth curve
     hctx.beginPath();
     hctx.moveTo(pts[0].x, pts[0].y);
     for(let i=1;i<pts.length-2;i++){
-      const cpx = (pts[i].x + pts[i+1].x) / 2;
-      const cpy = (pts[i].y + pts[i+1].y) / 2;
+      const cpx=(pts[i].x+pts[i+1].x)/2;
+      const cpy=(pts[i].y+pts[i+1].y)/2;
       hctx.quadraticCurveTo(pts[i].x, pts[i].y, cpx, cpy);
     }
     hctx.closePath();
+    hctx.fillStyle=g; hctx.fill();
 
-    hctx.fillStyle = g;
-    hctx.fill();
-
-    // subtle outline
-    hctx.globalAlpha = 0.22;
-    hctx.lineWidth = Math.max(1.5, baseSize*0.02);
-    hctx.strokeStyle = "rgba(255,255,255,0.65)";
+    hctx.globalAlpha=.22;
+    hctx.lineWidth=Math.max(1.5, baseSize*0.02);
+    hctx.strokeStyle="rgba(255,255,255,0.65)";
     hctx.stroke();
-    hctx.globalAlpha = 1;
+    hctx.globalAlpha=1;
 
-    // glow
-    hctx.save();
-    hctx.globalCompositeOperation = "lighter";
-    hctx.globalAlpha = 0.10;
-    hctx.shadowColor = "rgba(255,45,85,0.85)";
-    hctx.shadowBlur = baseSize * 0.55;
-    hctx.fillStyle = "rgba(255,45,85,0.55)";
-    hctx.fill();
-    hctx.restore();
-
-    heartRAF = requestAnimationFrame(heartDraw);
+    heartRAF=requestAnimationFrame(heartDraw);
   }
 
-  // ====== Reset ======
   function resetBaslangic(){
-    yesFlowAktiv = false;
-    stage9Aktiv = false;
+    yesFlowAktiv=false;
+    stage9Aktiv=false;
 
     root.classList.remove("stage9");
     dark.classList.remove("show");
@@ -796,161 +682,129 @@
     heartStop();
 
     msg.classList.remove("show");
-    msg.innerHTML = "";
+    msg.innerHTML="";
 
     row.classList.remove("fade-out");
-    yesBtn.disabled = false;
-    noBtn.disabled = false;
+    yesBtn.disabled=false;
+    noBtn.disabled=false;
 
-    noKlik = 0;
-    yesScale = 1;
-    noScale = 1;
+    noKlik=0;
+    yesScale=1;
+    noScale=1;
     skalaQur();
 
-    // No düyməsini geri qaytar
     if(noBtn.classList.contains("no-abs")){
       noAnimTemizle();
       noBtn.classList.remove("no-abs");
-      noBtn.style.left = "";
-      noBtn.style.top = "";
+      noBtn.style.left="";
+      noBtn.style.top="";
       row.appendChild(noBtn);
     }
   }
 
-  // ====== Stage 9 ======
   function stage9Basla(){
-    stage9Aktiv = true;
+    stage9Aktiv=true;
 
-    // everything off
     starsStop();
     heartStop();
     msg.classList.remove("show");
-    msg.innerHTML = "";
+    msg.innerHTML="";
     dark.classList.remove("show");
 
     root.classList.add("stage9");
-    noBtn.disabled = true; // anyway it’s hidden
+    noBtn.disabled=true;
     brokenStart();
   }
 
-  // ====== YES flow ======
   function yesFlowBasla(){
     if(yesFlowAktiv) return;
-    yesFlowAktiv = true;
+    yesFlowAktiv=true;
 
-    // stage9 varsa dayandır
     if(stage9Aktiv){
       brokenStop();
-      stage9Aktiv = false;
+      stage9Aktiv=false;
       root.classList.remove("stage9");
     }
 
-    // buttons fade out
     row.classList.add("fade-out");
-    yesBtn.disabled = true;
-    noBtn.disabled = true;
+    yesBtn.disabled=true;
+    noBtn.disabled=true;
 
-    // full dark
     dark.classList.add("show");
-
-    // stars + message
     starsStart();
+
     msg.innerHTML = MESAJ_HTML;
     msg.classList.add("show");
 
-    // 5s sonra: message off, heart on (10s)
-    setTimeout(() => {
+    setTimeout(()=>{
       msg.classList.remove("show");
-      msg.innerHTML = "";
+      msg.innerHTML="";
       starsStop();
       heartStart();
     }, 5000);
 
-    // 15s sonra reset
-    setTimeout(() => {
-      resetBaslangic();
-    }, 15000);
+    setTimeout(()=> resetBaslangic(), 15000);
   }
 
-  // ===== Clicks =====
-  yesBtn.addEventListener("click", () => {
+  // ==== Clicks ====
+  yesBtn.addEventListener("click", ()=>{
     if(stage9Aktiv){
-      // Stage 9-da Tak basılınca: yağış dayanır və Yes flow başlayır
       brokenStop();
-      stage9Aktiv = false;
+      stage9Aktiv=false;
       root.classList.remove("stage9");
     }
     yesFlowBasla();
   });
 
-  noBtn.addEventListener("click", () => {
+  noBtn.addEventListener("click", ()=>{
     if(yesFlowAktiv) return;
+    noKlik++;
 
-    noKlik += 1;
+    if(![3,4,6,9].includes(noKlik)) randomNoYer();
+    else noAbsoluteEt();
 
-    // hər klikdə yer dəyişsin (tələbin ümumi hissəsi)
-    if(![3,4,6,9].includes(noKlik)){
-      randomNoYer();
-    }else{
-      noAbsoluteEt();
-    }
-
-    // 1: 3s shake
-    if(noKlik === 1){
+    if(noKlik===1){
       noAnimTemizle();
       noBtn.classList.add("shake3s");
-      setTimeout(()=> noBtn.classList.remove("shake3s"), 3000);
+      setTimeout(()=>noBtn.classList.remove("shake3s"), 3000);
       return;
     }
-
-    // 2: split+join 5s
-    if(noKlik === 2){
+    if(noKlik===2){
       noAnimTemizle();
       noBtn.classList.add("break5s");
-      setTimeout(()=> noBtn.classList.remove("break5s"), 5000);
+      setTimeout(()=>noBtn.classList.remove("break5s"), 5000);
+      return;
+    }
+    if(noKlik===3){ noYerQur(26,26); return; }
+    if(noKlik===4){
+      const r=noBtn.getBoundingClientRect();
+      noYerQur(innerWidth - r.width - 26, innerHeight - r.height - 26);
+      return;
+    }
+    if(noKlik===6){
+      const r=noBtn.getBoundingClientRect();
+      noYerQur((innerWidth - r.width)/2, 22);
       return;
     }
 
-    // 3: sol üst
-    if(noKlik === 3){
-      noYerQur(26, 26);
-      return;
-    }
-
-    // 4: sağ alt
-    if(noKlik === 4){
-      const r = noBtn.getBoundingClientRect();
-      noYerQur(window.innerWidth - r.width - 26, window.innerHeight - r.height - 26);
-      return;
-    }
-
-    // 6: orta yuxarı
-    if(noKlik === 6){
-      const r = noBtn.getBoundingClientRect();
-      noYerQur((window.innerWidth - r.width)/2, 22);
-      return;
-    }
-
-    // 7: No 2x kiçik, Yes 2x böyük
-    if(noKlik === 7){
-      noScale *= 0.5;
+    // 7 və 8: dizayn korlanmasın deyə No-nu kiçiltmirik.
+    // Sadəcə Yes böyüsün (2x), No eyni gözəl qalsın.
+    if(noKlik===7){
       yesScale *= 2;
+      noScale = 1; // always reset to normal => “iyrənc” olmur
+      skalaQur();
+      randomNoYer();
+      return;
+    }
+    if(noKlik===8){
+      yesScale *= 2;
+      noScale = 1;
       skalaQur();
       randomNoYer();
       return;
     }
 
-    // 8: yenə
-    if(noKlik === 8){
-      noScale *= 0.5;
-      yesScale *= 2;
-      skalaQur();
-      randomNoYer();
-      return;
-    }
-
-    // 9: qara ekran + yalnız Tak + 💔 yağışı (Tak basılana qədər)
-    if(noKlik === 9){
+    if(noKlik===9){
       stage9Basla();
       return;
     }
