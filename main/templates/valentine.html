@@ -1,831 +1,618 @@
 {% extends "base.html" %}
 
-{% block title %}Walentynki — Czy zostaniesz moją walentynką?{% endblock %}
+{% block title %}Valentine{% endblock %}
 
 {% block extra_head %}
 <style>
-  /* =========================
-     Mobil-first, tək fayl dizayn
-     ========================= */
   :root{
-    --bg1:#050816;
-    --bg2:#0b1228;
-    --card: rgba(255,255,255,.06);
-    --card2: rgba(255,255,255,.09);
-    --text:#eaf0ff;
-    --muted: rgba(234,240,255,.72);
-    --primary:#7c3aed;
-    --primary2:#22c55e;
-    --danger:#ef4444;
-    --warning:#f59e0b;
-    --stroke: rgba(255,255,255,.14);
-    --shadow: 0 24px 70px rgba(0,0,0,.45);
-    --radius: 22px;
+    --bg: #ffffff;
+    --text: #0b1020;
+    --yes: #22c55e;
+    --no: #ef4444;
   }
 
-  .valentynki-wrap{
+  /* Fullscreen, no frames */
+  .v-full {
     position: relative;
+    width: 100%;
     min-height: calc(100vh - 0px);
-    padding: 22px 0 40px;
     overflow: hidden;
-    background:
-      radial-gradient(1200px 800px at 20% 10%, rgba(124,58,237,.22), transparent 55%),
-      radial-gradient(1000px 700px at 90% 20%, rgba(34,197,94,.14), transparent 55%),
-      radial-gradient(900px 600px at 40% 90%, rgba(239,68,68,.12), transparent 55%),
-      linear-gradient(180deg, var(--bg1), var(--bg2));
+    background: var(--bg);
   }
 
-  /* parlayan “blob”lar */
-  .blob{
-    position:absolute;
-    filter: blur(38px);
-    opacity:.65;
-    border-radius:999px;
-    animation: blob 10s ease-in-out infinite;
-    pointer-events:none;
-    mix-blend-mode: screen;
-  }
-  .blob.b1{ width:280px;height:280px; left:-60px; top:70px; background: rgba(124,58,237,.55); }
-  .blob.b2{ width:240px;height:240px; right:-80px; top:120px; background: rgba(34,197,94,.40); animation-delay: -3s;}
-  .blob.b3{ width:220px;height:220px; left:30%; bottom:-90px; background: rgba(239,68,68,.30); animation-delay: -6s;}
-  @keyframes blob{
-    0%,100%{ transform: translate(0,0) scale(1); }
-    50%{ transform: translate(18px,-16px) scale(1.08); }
+  /* Center layout */
+  .v-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
   }
 
-  /* əsas card */
-  .val-card{
-    position: relative;
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 16px;
-  }
-
-  .glass{
-    border-radius: var(--radius);
-    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-    border: 1px solid var(--stroke);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-
-  .hero{
-    display:grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 18px;
-  }
-
-  .badge{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    padding: 10px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--stroke);
-    background: rgba(255,255,255,.06);
-    width: fit-content;
-  }
-  .badge .dot{
-    width:10px;height:10px;border-radius:999px;
-    background: linear-gradient(135deg, var(--primary), #60a5fa);
-    box-shadow: 0 0 0 6px rgba(124,58,237,.12);
-    animation: pulse 1.4s ease-in-out infinite;
-  }
-  @keyframes pulse{
-    0%,100%{ transform: scale(1); opacity: 1;}
-    50%{ transform: scale(1.25); opacity: .7;}
-  }
-
-  .basliq{
-    margin: 6px 0 0;
-    color: var(--text);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-    font-size: clamp(28px, 6vw, 54px);
-  }
-
-  .alt{
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-size: clamp(14px, 3.3vw, 18px);
-    line-height: 1.5;
-    max-width: 62ch;
-  }
-
-  .arena{
-    position: relative;
-    margin-top: 14px;
-    border-radius: calc(var(--radius) - 6px);
-    border: 1px solid var(--stroke);
-    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-    overflow:hidden;
-    min-height: 420px;
-  }
-
-  /* “səhnə” içində ayı dolaşacaq */
-  .sahne{
-    position:relative;
-    height: 420px;
-    overflow: hidden;
-  }
-
-  /* yuxarıda status mesajı */
-  .status{
-    position:absolute;
-    left: 14px;
-    right: 14px;
-    top: 14px;
-    z-index: 5;
-    display:flex;
-    gap: 10px;
-    align-items:center;
-    justify-content: space-between;
-  }
-  .status-box{
-    flex: 1;
-    padding: 10px 12px;
-    border-radius: 14px;
-    border: 1px solid var(--stroke);
-    background: rgba(0,0,0,.18);
-    backdrop-filter: blur(8px);
-    color: var(--muted);
-    font-size: 13px;
-    display:flex;
-    align-items:center;
-    gap: 10px;
-  }
-  .status-emoji{
-    width: 34px; height: 34px;
-    border-radius: 12px;
-    display:grid;
-    place-items:center;
-    background: rgba(255,255,255,.08);
-    border: 1px solid var(--stroke);
-  }
-
-  /* düymələr */
-  .duymeler{
-    position:absolute;
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
-    z-index: 6;
-    display:flex;
-    gap: 12px;
+  .v-buttons {
+    display: flex;
+    gap: 18px;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    padding: 12px;
-    border-radius: 16px;
-    border: 1px solid var(--stroke);
-    background: rgba(0,0,0,.18);
-    backdrop-filter: blur(10px);
+    padding: 20px;
+    width: 100%;
   }
 
-  .btn-val{
-    appearance:none;
-    border: 1px solid var(--stroke);
-    border-radius: 16px;
-    padding: 13px 16px;
-    min-width: 140px;
-    font-weight: 800;
-    letter-spacing: .2px;
-    color: var(--text);
-    background: rgba(255,255,255,.08);
-    box-shadow: 0 10px 28px rgba(0,0,0,.22);
-    transform: translateZ(0);
-    transition: transform .16s ease, background .16s ease, box-shadow .16s ease, border-color .16s ease;
-    user-select:none;
+  /* Big buttons, mobile-first */
+  .v-btn {
+    appearance: none;
+    border: 0;
+    border-radius: 22px;
+    padding: 18px 26px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    font-size: clamp(22px, 7vw, 44px);
+    line-height: 1;
+    color: #fff;
+    box-shadow: 0 18px 45px rgba(0,0,0,.18);
+    transform: translateZ(0) scale(1);
+    transition: transform .35s ease, filter .35s ease, opacity .35s ease;
+    user-select: none;
     touch-action: manipulation;
-  }
-  .btn-val:hover{ transform: translateY(-2px); background: rgba(255,255,255,.11); }
-  .btn-val:active{ transform: translateY(1px) scale(.99); }
-
-  .btn-yes{
-    border-color: rgba(34,197,94,.35);
-    background: linear-gradient(135deg, rgba(34,197,94,.22), rgba(124,58,237,.18));
-  }
-  .btn-no{
-    border-color: rgba(239,68,68,.35);
-    background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(245,158,11,.12));
-  }
-  .btn-val[disabled]{
-    opacity:.55;
-    cursor:not-allowed;
-    transform:none !important;
+    min-width: min(44vw, 260px);
+    max-width: 420px;
   }
 
-  /* ayı container */
-  .ayi-qutu{
-    position:absolute;
+  .v-btn:active { transform: translateZ(0) scale(.98); }
+
+  .v-yes { background: linear-gradient(135deg, rgba(34,197,94,1), rgba(16,185,129,1)); }
+  .v-no  { background: linear-gradient(135deg, rgba(239,68,68,1), rgba(244,63,94,1)); }
+
+  /* No button will be absolutely positioned after some stages */
+  .v-no.abs {
+    position: absolute;
     left: 50%;
-    top: 52%;
-    transform: translate(-50%, -50%);
-    width: min(240px, 70vw);
-    height: auto;
-    z-index: 4;
-    transition: transform .3s ease;
-    will-change: transform;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--noScale, 1));
+    margin: 0;
+    min-width: min(40vw, 240px);
   }
 
-  /* ayının “yer kölgəsi” */
-  .kölge{
-    position:absolute;
-    left: 50%;
-    top: 68%;
-    transform: translateX(-50%);
-    width: 62%;
-    height: 18px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.35);
-    filter: blur(8px);
-    opacity:.55;
-    z-index: 2;
-  }
+  /* Yes scaling via CSS variable */
+  .v-yes { transform: translateZ(0) scale(var(--yesScale, 1)); }
+  .v-yes:active { transform: translateZ(0) scale(calc(var(--yesScale, 1) * .98)); }
 
-  /* canvas (konfetti/atəşfəşanlıq) */
-  #konfettiCanvas{
-    position:absolute;
-    inset:0;
-    z-index: 3;
-    pointer-events:none;
+  /* Overlays */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
     opacity: 0;
-    transition: opacity .35s ease;
+    transition: opacity 1.3s ease;
   }
-  .konfetti-aktif #konfettiCanvas{
+
+  .overlay.dark {
+    background: #000;
+  }
+
+  .overlay.show {
     opacity: 1;
   }
 
-  /* nəticə paneli */
-  .netice{
-    display:none;
-    margin-top: 14px;
-    padding: 16px 16px;
-    border-radius: var(--radius);
-    border: 1px solid rgba(34,197,94,.35);
-    background: linear-gradient(135deg, rgba(34,197,94,.12), rgba(124,58,237,.10));
-    color: var(--text);
-  }
-  .netice h2{
-    margin:0;
-    font-size: 18px;
+  /* Center message */
+  .msg {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 26px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1s ease, transform 1s ease;
+    color: #fff;
     font-weight: 900;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    font-size: clamp(16px, 4.8vw, 36px);
+    line-height: 1.25;
   }
-  .netice p{
-    margin: 8px 0 0;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  /* responsive grid (tablet/pc) */
-  @media (min-width: 860px){
-    .hero{
-      grid-template-columns: 1.1fr .9fr;
-      align-items: center;
-      padding: 26px;
-      gap: 18px;
-    }
-    .arena{ min-height: 520px; }
-    .sahne{ height: 520px; }
-    .ayi-qutu{ width: 260px; }
+  .msg.show {
+    opacity: 1;
+    transform: translateY(0);
   }
 
-  /* =========================
-     SVG animasyon sinifləri
-     ========================= */
-  .ayi-anim .goz{ transform-origin: center; animation: goz 5.8s ease-in-out infinite; }
-  @keyframes goz{
-    0%,96%,100%{ transform: scaleY(1); }
-    97%{ transform: scaleY(.15); }
+  /* Heart scene */
+  .heart-scene {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .heart-scene.show { opacity: 1; }
+
+  .heart {
+    width: min(220px, 55vw);
+    aspect-ratio: 1/1;
+    filter: drop-shadow(0 16px 40px rgba(255,0,80,.18));
+    animation: beat 0.95s ease-in-out infinite;
+  }
+  @keyframes beat {
+    0%,100%{ transform: scale(1); }
+    35%{ transform: scale(1.13); }
+    55%{ transform: scale(0.98); }
   }
 
-  .ayi-anim .breathe{ transform-origin: center; animation: nefes 2.6s ease-in-out infinite; }
-  @keyframes nefes{
-    0%,100%{ transform: translateY(0) scale(1); }
-    50%{ transform: translateY(1px) scale(1.015); }
+  /* Rain canvases */
+  canvas.rain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
   }
 
-  /* “göstərmə” (barmaq/əl) */
-  .ayi-goster .el-sag{
-    transform-origin: 170px 160px;
-    animation: goster 1s ease-in-out infinite;
+  /* No: shake 3s */
+  .shake3s {
+    animation: shake .12s ease-in-out infinite;
   }
-  @keyframes goster{
-    0%,100%{ transform: rotate(0deg) translateY(0); }
-    50%{ transform: rotate(-10deg) translateY(-2px); }
-  }
-
-  /* əsəbi titrəmə */
-  .ayi-esebi{
-    animation: sarsil .14s ease-in-out infinite;
-    filter: drop-shadow(0 18px 30px rgba(239,68,68,.12));
-  }
-  @keyframes sarsil{
-    0%{ transform: translate(-50%, -50%) translateX(-1px); }
-    50%{ transform: translate(-50%, -50%) translateX(1px); }
-    100%{ transform: translate(-50%, -50%) translateX(-1px); }
+  @keyframes shake {
+    0%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(-2px); }
+    50%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(2px); }
+    100%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(-2px); }
   }
 
-  /* sevinc rəqsi */
-  .ayi-sevin{
-    animation: sevin 1.1s ease-in-out infinite;
-    filter: drop-shadow(0 18px 30px rgba(34,197,94,.14));
+  /* No: break + rejoin (5s) */
+  .break5s {
+    animation: breakAnim 5s ease-in-out forwards;
   }
-  @keyframes sevin{
-    0%,100%{ transform: translate(-50%, -50%) rotate(-2deg) scale(1.02); }
-    50%{ transform: translate(-50%, -52%) rotate(3deg) scale(1.05); }
+  @keyframes breakAnim {
+    0%   { clip-path: inset(0 0 0 0); filter: none; }
+    12%  { clip-path: inset(0 50% 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-14px) rotate(-2deg); }
+    24%  { clip-path: inset(0 0 0 50%); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(14px) rotate(2deg); }
+    40%  { clip-path: inset(0 50% 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-18px) rotate(-3deg); }
+    62%  { clip-path: inset(0 0 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(0) rotate(0deg); }
+    100% { clip-path: inset(0 0 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)); }
   }
 
-  /* No düyməsinin qaçması üçün */
-  .qacan{
-    position:absolute !important;
+  /* Soft fade helpers */
+  .fade-out {
+    opacity: 0;
+    transition: opacity 1.1s ease;
+  }
+  .fade-in {
+    opacity: 1;
+    transition: opacity 1.1s ease;
+  }
+
+  /* Stage 9: only huge yes on black */
+  .stage9 {
+    background: #000 !important;
+  }
+  .stage9 .v-no { opacity: 0 !important; pointer-events: none !important; }
+  .stage9 .v-yes {
+    position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 7;
+    transform: translate(-50%,-50%) scale(var(--yesScale, 1)) !important;
+    min-width: min(78vw, 520px);
+    border-radius: 28px;
+    box-shadow: 0 26px 70px rgba(0,0,0,.65);
+    z-index: 5;
   }
 
-  /* kiçik kömək mətni */
-  .kicik{
-    margin-top: 8px;
-    color: rgba(234,240,255,.55);
-    font-size: 12px;
-  }
+  /* Ensure no scrollbars on mobile */
+  body { overflow-x: hidden; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="valentynki-wrap">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
-
-  <div class="container">
-    <div class="val-card">
-      <div class="glass">
-        <div class="hero">
-          <div>
-            <div class="badge">
-              <span class="dot"></span>
-              <span style="color: rgba(234,240,255,.82); font-weight: 700; font-size: 13px;">
-                Tryb: Walentynkowy (misiek w akcji)
-              </span>
-            </div>
-
-            <h1 class="basliq">Czy zostaniesz moją walentynką?</h1>
-            <p class="alt">
-              Mały miś czeka na odpowiedź… i może się trochę zdenerwować, jeśli będziesz klikać „Nie”.
-            </p>
-            <div class="kicik">Tip: „Nie” jest bardzo niegrzeczne dzisiaj 😄</div>
-          </div>
-
-          <div class="arena">
-            <canvas id="konfettiCanvas"></canvas>
-
-            <div class="sahne" id="sahne">
-              <div class="status">
-                <div class="status-box" id="statusBox">
-                  <div class="status-emoji" id="statusEmoji">🐻</div>
-                  <div>
-                    <div style="font-weight:800; color: rgba(234,240,255,.9); font-size: 13px;">
-                      Status misia
-                    </div>
-                    <div id="statusMetn">
-                      Spaceruje i czeka na odpowiedź…
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="kölge"></div>
-
-              <!-- Ayı (SVG) -->
-              <div class="ayi-qutu ayi-anim ayi-goster" id="ayiQutu" aria-hidden="true">
-                <svg viewBox="0 0 240 240" width="100%" height="100%">
-                  <!-- qulaq -->
-                  <circle cx="62" cy="66" r="26" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-                  <circle cx="178" cy="66" r="26" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-                  <circle cx="62" cy="66" r="14" fill="rgba(255,255,255,.06)"/>
-                  <circle cx="178" cy="66" r="14" fill="rgba(255,255,255,.06)"/>
-
-                  <!-- bədən -->
-                  <g class="breathe">
-                    <path d="M120 56
-                             C170 56 200 92 200 136
-                             C200 185 165 206 120 206
-                             C75 206 40 185 40 136
-                             C40 92 70 56 120 56Z"
-                          fill="rgba(255,255,255,.08)"
-                          stroke="rgba(255,255,255,.14)"
-                          stroke-width="2" />
-
-                    <!-- qarın -->
-                    <path d="M120 98
-                             C152 98 172 122 172 150
-                             C172 178 150 190 120 190
-                             C90 190 68 178 68 150
-                             C68 122 88 98 120 98Z"
-                          fill="rgba(255,255,255,.06)"
-                          stroke="rgba(255,255,255,.10)"/>
-
-                    <!-- üz -->
-                    <circle cx="120" cy="115" r="48" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.12)"/>
-
-                    <!-- gözlər -->
-                    <g class="goz">
-                      <ellipse cx="102" cy="112" rx="6" ry="8" fill="rgba(234,240,255,.92)"/>
-                      <ellipse cx="138" cy="112" rx="6" ry="8" fill="rgba(234,240,255,.92)"/>
-                      <circle cx="102" cy="114" r="2.5" fill="rgba(0,0,0,.55)"/>
-                      <circle cx="138" cy="114" r="2.5" fill="rgba(0,0,0,.55)"/>
-                    </g>
-
-                    <!-- yanaqlar -->
-                    <circle cx="92" cy="130" r="8" fill="rgba(239,68,68,.22)"/>
-                    <circle cx="148" cy="130" r="8" fill="rgba(239,68,68,.22)"/>
-
-                    <!-- burun+ağız -->
-                    <path d="M120 124
-                             C128 124 134 130 134 138
-                             C134 147 127 152 120 152
-                             C113 152 106 147 106 138
-                             C106 130 112 124 120 124Z"
-                          fill="rgba(0,0,0,.32)"/>
-                    <path d="M120 152
-                             C114 156 110 160 108 165
-                             M120 152
-                             C126 156 130 160 132 165"
-                          stroke="rgba(234,240,255,.75)"
-                          stroke-width="3"
-                          stroke-linecap="round"/>
-
-                    <!-- sol əl -->
-                    <path d="M52 150
-                             C36 150 30 134 40 124
-                             C52 112 64 122 68 134
-                             C72 146 64 150 52 150Z"
-                          fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-
-                    <!-- sağ əl (göstərən) -->
-                    <g class="el-sag">
-                      <path d="M188 150
-                               C204 150 210 134 200 124
-                               C188 112 176 122 172 134
-                               C168 146 176 150 188 150Z"
-                            fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-                      <!-- kiçik ox işarəsi -->
-                      <path d="M195 128 L220 128 L212 121 M220 128 L212 135"
-                            stroke="rgba(234,240,255,.72)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </g>
-
-                    <!-- ayaqlar -->
-                    <path d="M92 200 C72 208 68 226 90 228 C108 230 112 214 92 200Z"
-                          fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-                    <path d="M148 200 C168 208 172 226 150 228 C132 230 128 214 148 200Z"
-                          fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-                  </g>
-                </svg>
-              </div>
-
-              <div class="duymeler" id="duymeler">
-                <button class="btn-val btn-yes" id="btnYes" type="button">Tak ❤️</button>
-                <button class="btn-val btn-no" id="btnNo" type="button">Nie 😅</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- nəticə -->
-      <div class="netice" id="netice">
-        <h2>Awwwww… 💜</h2>
-        <p id="neticeMetn">
-          Jesteś oficjalnie walentynką Elvina — kochana Ola hehe 😄
-        </p>
-      </div>
+<div class="v-full" id="root">
+  <div class="v-center" id="center">
+    <div class="v-buttons" id="btnRow">
+      <button class="v-btn v-yes" id="yesBtn" type="button">Tak</button>
+      <button class="v-btn v-no" id="noBtn" type="button">Nie</button>
     </div>
   </div>
+
+  <!-- Dark overlay + star rain (Yes flow) -->
+  <div class="overlay dark" id="dark1"></div>
+  <canvas class="rain" id="starsCanvas"></canvas>
+  <div class="msg" id="msg">
+    Awwwww. Siz rəsmi olaraq Elvin in valentinesiziniz Sevgili Ola hehe
+  </div>
+
+  <!-- Heart scene (after 5s) -->
+  <div class="overlay dark" id="dark2"></div>
+  <div class="heart-scene" id="heartScene">
+    <svg class="heart" viewBox="0 0 64 64" aria-hidden="true">
+      <path fill="#ff2d55" d="M47.5,6.5c-5.4,0-9.3,3.1-11.5,6.2C33.8,9.6,29.9,6.5,24.5,6.5
+      C16.9,6.5,11,12.7,11,20.3c0,12.3,21,28.8,21,28.8s21-16.5,21-28.8C53,12.7,47.1,6.5,47.5,6.5z"/>
+    </svg>
+  </div>
+
+  <!-- Broken hearts rain (Stage 9) -->
+  <canvas class="rain" id="brokenCanvas"></canvas>
 </div>
 
 <script>
 /*
-  Azərbaycan dilində kod/şərhlər.
-  Mətnlər (UI) polyakça.
+  Kod dili Azərbaycan dilində (dəyişən adları və şərhlər).
+  UI mətni polyakça: Tak / Nie, və final mesaj.
 */
 
 (function(){
-  // ==== elementlər ====
-  const sahne = document.getElementById("sahne");
-  const duymeler = document.getElementById("duymeler");
-  const btnYes = document.getElementById("btnYes");
-  const btnNo  = document.getElementById("btnNo");
-  const statusMetn = document.getElementById("statusMetn");
-  const statusEmoji = document.getElementById("statusEmoji");
-  const ayiQutu = document.getElementById("ayiQutu");
-  const netice = document.getElementById("netice");
+  const root = document.getElementById("root");
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const btnRow = document.getElementById("btnRow");
 
-  const canvas = document.getElementById("konfettiCanvas");
-  const ctx = canvas.getContext("2d", { alpha: true });
+  const dark1 = document.getElementById("dark1");
+  const dark2 = document.getElementById("dark2");
+  const msg = document.getElementById("msg");
+  const heartScene = document.getElementById("heartScene");
 
-  // ==== vəziyyət ====
-  let noSay = 0;
-  let qaçmaAktiv = false;
-  let noBloklandi = false;
-  let valentineBitdi = false;
+  const starsCanvas = document.getElementById("starsCanvas");
+  const brokenCanvas = document.getElementById("brokenCanvas");
+  const sctx = starsCanvas.getContext("2d");
+  const bctx = brokenCanvas.getContext("2d");
 
-  // ayının dolaşması üçün
-  let hedefX = 0;
-  let hedefY = 0;
-  let cariX = 0;
-  let cariY = 0;
+  let noKlik = 0;
+  let yesScale = 1;
+  let noScale = 1;
 
-  // mobil/desktop ölçü yenilənməsi
+  let valentineAkti = false;
+  let stage9Akti = false;
+
+  // ====== Ölçülər ======
   function canvasOlcu(){
-    const r = sahne.getBoundingClientRect();
-    canvas.width = Math.floor(r.width * devicePixelRatio);
-    canvas.height = Math.floor(r.height * devicePixelRatio);
-    canvas.style.width = r.width + "px";
-    canvas.style.height = r.height + "px";
-    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+    const r = root.getBoundingClientRect();
+
+    [starsCanvas, brokenCanvas].forEach(c => {
+      c.width = Math.floor(r.width * dpr);
+      c.height = Math.floor(r.height * dpr);
+      c.style.width = r.width + "px";
+      c.style.height = r.height + "px";
+    });
+
+    sctx.setTransform(dpr,0,0,dpr,0,0);
+    bctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  window.addEventListener("resize", canvasOlcu, { passive:true });
+  window.addEventListener("resize", canvasOlcu, { passive: true });
   canvasOlcu();
 
-  // ==== random köməkçi ====
-  const rnd = (a,b)=> a + Math.random()*(b-a);
-
-  // ==== ayı gəzsin (smooth follow) ====
-  function yeniHedefSec(){
-    const r = sahne.getBoundingClientRect();
-    // düymələr zolağını çox basmasın deyə yuxarı hissədə hədəf seçək
-    hedefX = rnd(40, r.width - 40);
-    hedefY = rnd(120, r.height - 160);
+  // ====== No düyməsini absolute edib istənən yerə qoymaq ======
+  function noAbsoluteEt(){
+    if(!noBtn.classList.contains("abs")){
+      noBtn.classList.add("abs");
+      // btnRow içindən çıxarıb root-a ataq ki sərbəst hərəkət etsin
+      root.appendChild(noBtn);
+    }
   }
-  yeniHedefSec();
 
-  function ayiGuncelle(){
-    if(valentineBitdi) return;
+  function noYerQur(xPerc, yPerc){
+    // xPerc,yPerc: 0..100
+    noAbsoluteEt();
+    noBtn.style.left = xPerc + "%";
+    noBtn.style.top  = yPerc + "%";
+  }
 
-    // yavaş-yavaş hədəfə yaxınlaşsın
-    cariX += (hedefX - cariX) * 0.02;
-    cariY += (hedefY - cariY) * 0.02;
+  function skalaQur(){
+    root.style.setProperty("--yesScale", String(yesScale));
+    root.style.setProperty("--noScale", String(noScale));
+  }
+  skalaQur();
 
-    // hədəfə çatanda yenisini seç
-    const dx = hedefX - cariX;
-    const dy = hedefY - cariY;
-    if(Math.hypot(dx,dy) < 10){
-      yeniHedefSec();
+  // ====== Anim siniflərini təmizlə ======
+  function noAnimTemizle(){
+    noBtn.classList.remove("shake3s");
+    noBtn.classList.remove("break5s");
+  }
+
+  // ====== No click mərhələləri ======
+  noBtn.addEventListener("click", () => {
+    if(valentineAkti) return;
+
+    noKlik += 1;
+
+    // hər klikdə fərqli yerə “keçsin” (tələbin ümumi hissəsi)
+    // amma xüsusi mərhələlərdə konkret yer istəyirsən — onları aşağıda override edirik.
+    const randomX = 20 + Math.random() * 60;
+    const randomY = 25 + Math.random() * 55;
+
+    // xüsusi mərhələlərdən əvvəl ümumi random teleport
+    if(![3,4,6].includes(noKlik)){
+      noYerQur(randomX, randomY);
     }
 
-    // ayı qutusunu səhnədə hərəkət etdir
-    ayiQutu.style.left = cariX + "px";
-    ayiQutu.style.top  = cariY + "px";
-    ayiQutu.style.transform = "translate(-50%, -50%)";
-
-    requestAnimationFrame(ayiGuncelle);
-  }
-  // start
-  const r0 = sahne.getBoundingClientRect();
-  cariX = r0.width/2;
-  cariY = r0.height/2;
-  requestAnimationFrame(ayiGuncelle);
-
-  // ==== status dəyişən mesajlar ====
-  function statusYaz(emoji, metn){
-    statusEmoji.textContent = emoji;
-    statusMetn.textContent = metn;
-  }
-
-  // ==== No düyməsinin “şuluqlu” ideyaları ====
-  const noMesajlar = [
-    "Ej… serio? 😶",
-    "Misiek się krzywi…",
-    "Okej, ale dlaczego „Nie”? 🥺",
-    "Misiek zaczyna się denerwować…",
-    "Jeszcze raz klikniesz „Nie”? 😤",
-    "To już przesada…",
-    "Uwaga: Misiek w trybie chaosu 🌀",
-    "Ostatnie ostrzeżenie… 😈"
-  ];
-
-  function ayiEsəbilesin(guclu=false){
-    ayiQutu.classList.add("ayi-esebi");
-    ayiQutu.classList.remove("ayi-sevin");
-    ayiQutu.classList.remove("ayi-goster");
-    statusYaz("😾", guclu ? "Misiek jest WŚCIEKŁY!" : "Misiek się denerwuje…");
-
-    // titrəməni qısa saxla
-    setTimeout(()=> {
-      if(!valentineBitdi){
-        ayiQutu.classList.remove("ayi-esebi");
-        ayiQutu.classList.add("ayi-goster");
-        statusYaz("🐻", "Spaceruje i czeka na odpowiedź…");
-      }
-    }, guclu ? 900 : 650);
-  }
-
-  // No qaçdırma (random pozisiya)
-  function noQacsin(){
-    if(noBloklandi || valentineBitdi) return;
-
-    const r = sahne.getBoundingClientRect();
-    const btnR = btnNo.getBoundingClientRect();
-
-    // sahnə içində təsadüfi yer
-    const maxX = r.width - btnR.width - 20;
-    const maxY = r.height - btnR.height - 120; // alt düymələr sahəsi ilə çakışmasın
-    const x = rnd(20, Math.max(20, maxX));
-    const y = rnd(90, Math.max(90, maxY));
-
-    btnNo.classList.add("qacan");
-    btnNo.style.left = x + "px";
-    btnNo.style.top  = y + "px";
-  }
-
-  // sonda ayı gəlib No-nu “qorusun”
-  function ayiNoQorusun(){
-    noBloklandi = true;
-
-    // No düyməsini səhnədə sabit bir yerə qoyaq
-    btnNo.classList.add("qacan");
-    btnNo.style.left = "50%";
-    btnNo.style.top  = "56%";
-    btnNo.style.transform = "translate(-50%, -50%)";
-    btnNo.disabled = true;
-
-    // ayını da No qarşısına gətirək
-    const r = sahne.getBoundingClientRect();
-    hedefX = r.width/2;
-    hedefY = r.height*0.44;
-
-    ayiQutu.classList.remove("ayi-goster");
-    statusYaz("🧸", "Misiek usiadł przed „Nie”. Teraz masz tylko jedną opcję 😌");
-  }
-
-  // ==== No hadisələri ====
-  btnNo.addEventListener("click", () => {
-    if(valentineBitdi) return;
-
-    noSay++;
-
-    // ayı əsəbiləşsin (getdikcə daha güclü)
-    ayiEsəbilesin(noSay >= 5);
-
-    // status mətnini artır
-    const idx = Math.min(noSay-1, noMesajlar.length-1);
-    statusYaz("😤", noMesajlar[idx]);
-
-    // “No” düyməsinin davranış mərhələləri
-    if(noSay === 2){
-      // “No” böyüyüb-kiçilsin (şuluq)
-      btnNo.animate([
-        { transform: "translateY(0) rotate(0deg)" },
-        { transform: "translateY(-6px) rotate(-3deg)" },
-        { transform: "translateY(2px) rotate(3deg)" },
-        { transform: "translateY(0) rotate(0deg)" }
-      ], { duration: 520, easing: "ease-in-out" });
+    // No-1: 3 saniyə titrəsin
+    if(noKlik === 1){
+      noAbsoluteEt();
+      noAnimTemizle();
+      noBtn.classList.add("shake3s");
+      setTimeout(()=> noBtn.classList.remove("shake3s"), 3000);
+      return;
     }
 
-    if(noSay === 3){
-      // Yes düyməsini azca “cazibədar” et (böyüt)
-      btnYes.animate([
-        { transform: "scale(1)" },
-        { transform: "scale(1.06)" },
-        { transform: "scale(1)" }
-      ], { duration: 520, easing:"ease-in-out" });
-      statusYaz("🐻", "Misiek pokazuje: kliknij „Tak” 🙂👉");
+    // No-2: ortadan qırılsın-birləşsin 5 saniyə
+    if(noKlik === 2){
+      noAbsoluteEt();
+      noAnimTemizle();
+      noBtn.classList.add("break5s");
+      setTimeout(()=> noBtn.classList.remove("break5s"), 5000);
+      return;
     }
 
-    if(noSay >= 4 && !qaçmaAktiv && !noBloklandi){
-      qaçmaAktiv = true;
-      statusYaz("🌀", "„Nie” zaczyna uciekać… spróbuj złapać!");
-      noQacsin();
+    // No-3: sol üst
+    if(noKlik === 3){
+      noYerQur(16, 18);
+      return;
     }
 
-    if(noSay >= 6 && !noBloklandi){
-      // artıq “No” çox kliklənib — ayı gəlib otursun
-      ayiNoQorusun();
+    // No-4: sağ alt
+    if(noKlik === 4){
+      noYerQur(84, 84);
+      return;
+    }
+
+    // No-6: orta yuxarı
+    if(noKlik === 6){
+      noYerQur(50, 18);
+      return;
+    }
+
+    // No-7: No 2x kiçik, Yes 2x böyük
+    if(noKlik === 7){
+      noScale *= 0.5;
+      yesScale *= 2;
+      skalaQur();
+      return;
+    }
+
+    // No-8: yenə No 2x kiçik, Yes yenə 2x böyük
+    if(noKlik === 8){
+      noScale *= 0.5;
+      yesScale *= 2;
+      skalaQur();
+      return;
+    }
+
+    // No-9: ekran qapqara + yalnız böyük Yes + qırıq ürək yağışı (Yes basılana qədər)
+    if(noKlik === 9){
+      stage9Basla();
+      return;
     }
   });
 
-  // qaçma aktivdirsə, üzərinə gələndə qaçsın
-  btnNo.addEventListener("pointerenter", () => {
-    if(valentineBitdi) return;
-    if(qaçmaAktiv && !noBloklandi){
-      noQacsin();
-      // ayı “dəli” reaksiya
-      statusYaz("😵‍💫", "Za wolno! „Nie” uciekło.");
+  // ====== Yes click ======
+  yesBtn.addEventListener("click", () => {
+    if(stage9Akti){
+      // Stage 9-da basılınca normal “Yes” flow başlasın (qaralma+ulduz+mesaj+ürək+geri)
+      stopBrokenRain();
+      stage9Akti = false;
+      root.classList.remove("stage9");
+      // No-nu geri gətirmirik; onsuz artıq tələbə uyğun Yes qalır.
     }
-  }, { passive:true });
-
-  // ==== Yes basılanda ====
-  btnYes.addEventListener("click", () => {
-    if(valentineBitdi) return;
-    valentineBitdi = true;
-
-    // düymələri söndür
-    btnYes.disabled = true;
-    btnNo.disabled = true;
-
-    // nəticə göstər
-    netice.style.display = "block";
-    netice.scrollIntoView({ behavior:"smooth", block:"start" });
-
-    // ayı sevinsin
-    ayiQutu.classList.remove("ayi-esebi");
-    ayiQutu.classList.remove("ayi-goster");
-    ayiQutu.classList.add("ayi-sevin");
-
-    statusYaz("🎉", "Yesss! Misiek tańczy z radości!");
-
-    // konfetti/atəşfəşanlıq start
-    sahne.parentElement.classList.add("konfetti-aktif");
-    baslaKonfetti(4200);
+    if(valentineAkti) return;
+    yesAxiBasla();
   });
 
-  // ==== Konfetti / atəşfəşanlıq (lightweight canvas) ====
-  let hissəciklər = [];
-  function yaradin(){
-    const r = sahne.getBoundingClientRect();
-    const say = 120;
+  // =======================
+  // YES FLOW: ağ -> qara -> ulduz yağışı + mesaj (5s) -> tam qara + döyünən ürək (10s) -> başlanğıc
+  // =======================
+  let stars = [];
+  let starsRAF = null;
+
+  function ulduzlarHazirla(){
+    stars = [];
+    const r = root.getBoundingClientRect();
+    const say = Math.max(60, Math.floor(r.width * r.height / 22000)); // adaptiv
     for(let i=0;i<say;i++){
-      hissəciklər.push({
-        x: rnd(0, r.width),
-        y: rnd(-40, r.height*0.2),
-        vx: rnd(-1.2, 1.2),
-        vy: rnd(2.0, 5.5),
-        w: rnd(4, 10),
-        h: rnd(6, 14),
-        rot: rnd(0, Math.PI*2),
-        vr: rnd(-0.12, 0.12),
-        alfa: rnd(0.65, 1),
-        // rəngi hardcode etmədən, HSL ilə random
-        hue: rnd(0, 360),
-        tip: Math.random() < 0.18 ? "dairə" : "düz"
+      stars.push({
+        x: Math.random() * r.width,
+        y: Math.random() * r.height,
+        sp: 2 + Math.random() * 5,
+        sz: 1 + Math.random() * 2.2,
+        a: 0.45 + Math.random() * 0.55,
       });
     }
   }
 
-  function cek(){
-    const r = sahne.getBoundingClientRect();
-    ctx.clearRect(0,0,r.width,r.height);
+  function ulduzCek(){
+    const r = root.getBoundingClientRect();
+    sctx.clearRect(0,0,r.width,r.height);
 
-    for(const p of hissəciklər){
-      p.x += p.vx;
-      p.y += p.vy;
-      p.rot += p.vr;
-      p.vy *= 0.997;
-
-      // sərhədlər
-      if(p.x < -30) p.x = r.width + 30;
-      if(p.x > r.width + 30) p.x = -30;
-
-      // çiz
-      ctx.save();
-      ctx.globalAlpha = p.alfa;
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = `hsla(${p.hue}, 90%, 62%, ${p.alfa})`;
-
-      if(p.tip === "dairə"){
-        ctx.beginPath();
-        ctx.arc(0,0, p.w*0.5, 0, Math.PI*2);
-        ctx.fill();
-      }else{
-        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+    // qara fonda ulduzlar
+    for(const p of stars){
+      p.y += p.sp;
+      if(p.y > r.height + 10){
+        p.y = -10;
+        p.x = Math.random() * r.width;
       }
-      ctx.restore();
+      sctx.globalAlpha = p.a;
+      sctx.fillStyle = "#ffffff";
+      sctx.beginPath();
+      sctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
+      sctx.fill();
     }
 
-    // aşağı düşənləri sil
-    hissəciklər = hissəciklər.filter(p => p.y < r.height + 40);
-    if(hissəciklər.length > 0){
-      requestAnimationFrame(cek);
+    starsRAF = requestAnimationFrame(ulduzCek);
+  }
+
+  function ulduzStart(){
+    ulduzlarHazirla();
+    if(starsRAF) cancelAnimationFrame(starsRAF);
+    starsRAF = requestAnimationFrame(ulduzCek);
+  }
+
+  function ulduzStop(){
+    if(starsRAF) cancelAnimationFrame(starsRAF);
+    starsRAF = null;
+    const r = root.getBoundingClientRect();
+    sctx.clearRect(0,0,r.width,r.height);
+  }
+
+  function yesAxiBasla(){
+    valentineAkti = true;
+
+    // başlanğıc düymələri yumşaq sönsün
+    btnRow.classList.add("fade-out");
+
+    // ekran yavaş qaralsın
+    dark1.classList.add("show");
+
+    // ulduz yağışı + mesaj
+    ulduzStart();
+    msg.classList.add("show");
+
+    // 5 saniyə sonra: tam qara ekran + ürək (10 saniyə)
+    setTimeout(() => {
+      msg.classList.remove("show");
+      dark2.classList.add("show");
+      heartScene.classList.add("show");
+    }, 5000);
+
+    // 15 saniyə sonra: başlanğıca qayıt
+    setTimeout(() => {
+      sifirlaBaslangic();
+    }, 15000);
+  }
+
+  function sifirlaBaslangic(){
+    // hər şeyi yumşaq sıfırla
+    valentineAkti = false;
+
+    // ulduzları dayandır
+    ulduzStop();
+
+    // overlay-lər yavaş sönsün
+    dark1.classList.remove("show");
+    dark2.classList.remove("show");
+
+    // ürəyi gizlət
+    heartScene.classList.remove("show");
+
+    // mesaj gizli qalsın
+    msg.classList.remove("show");
+
+    // stage9 varsa söndür
+    stopBrokenRain();
+    stage9Akti = false;
+    root.classList.remove("stage9");
+
+    // düymələri geri gətir
+    btnRow.classList.remove("fade-out");
+
+    // No click state reset (istədin deyə: başlanğıc ekrana tam qayıtsın)
+    noKlik = 0;
+    yesScale = 1;
+    noScale = 1;
+    skalaQur();
+
+    // No düyməsini yenidən row-a qaytar
+    if(noBtn.classList.contains("abs")){
+      noBtn.classList.remove("abs");
+      noBtn.style.left = "";
+      noBtn.style.top = "";
+      noBtn.style.transform = "";
+      noAnimTemizle();
+      // root-dan çıxarıb yenidən row-a ataq
+      btnRow.appendChild(noBtn);
+    }
+
+    // Yes düyməsinin mövqeyi normal olsun
+    yesBtn.disabled = false;
+    noBtn.disabled = false;
+
+    // fon ağ qalsın
+    root.style.background = "#ffffff";
+
+    // broken canvas təmiz
+    const r = root.getBoundingClientRect();
+    bctx.clearRect(0,0,r.width,r.height);
+  }
+
+  // =======================
+  // STAGE 9: qara ekran + yalnız böyük Yes + qırıq ürək yağışı (Yes basılana qədər)
+  // =======================
+  let broken = [];
+  let brokenRAF = null;
+
+  function brokenHazirla(){
+    broken = [];
+    const r = root.getBoundingClientRect();
+    const say = Math.max(70, Math.floor(r.width * r.height / 18000));
+    for(let i=0;i<say;i++){
+      broken.push({
+        x: Math.random() * r.width,
+        y: Math.random() * r.height,
+        sp: 3 + Math.random() * 6.5,
+        sz: 18 + Math.random() * 16,
+        rot: Math.random() * Math.PI*2,
+        vr: (-0.03 + Math.random()*0.06),
+        a: 0.65 + Math.random()*0.35,
+      });
     }
   }
 
-  function baslaKonfetti(ms){
-    hissəciklər = [];
-    yaradin();
-    cek();
+  function brokenCek(){
+    const r = root.getBoundingClientRect();
+    bctx.clearRect(0,0,r.width,r.height);
 
-    // bir az “fıs-fıs” əlavə dalğa
-    const interval = setInterval(()=> {
-      if(hissəciklər.length < 80){
-        yaradin();
+    for(const p of broken){
+      p.y += p.sp;
+      p.rot += p.vr;
+      if(p.y > r.height + 40){
+        p.y = -40;
+        p.x = Math.random() * r.width;
       }
-    }, 380);
 
-    setTimeout(()=> {
-      clearInterval(interval);
-    }, ms);
+      bctx.save();
+      bctx.translate(p.x, p.y);
+      bctx.rotate(p.rot);
+      bctx.globalAlpha = p.a;
+      // emoji draw
+      bctx.font = `${p.sz}px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji`;
+      bctx.textAlign = "center";
+      bctx.textBaseline = "middle";
+      bctx.fillText("💔", 0, 0);
+      bctx.restore();
+    }
 
-    setTimeout(()=> {
-      // bitişdə yavaş sönsün
-      sahne.parentElement.classList.remove("konfetti-aktif");
-    }, ms + 900);
+    brokenRAF = requestAnimationFrame(brokenCek);
+  }
+
+  function startBrokenRain(){
+    brokenHazirla();
+    if(brokenRAF) cancelAnimationFrame(brokenRAF);
+    brokenRAF = requestAnimationFrame(brokenCek);
+  }
+
+  function stopBrokenRain(){
+    if(brokenRAF) cancelAnimationFrame(brokenRAF);
+    brokenRAF = null;
+    const r = root.getBoundingClientRect();
+    bctx.clearRect(0,0,r.width,r.height);
+  }
+
+  function stage9Basla(){
+    stage9Akti = true;
+
+    // qara ekran + yalnız yes
+    root.classList.add("stage9");
+
+    // ulduz və digər overlay-ləri söndür (ani yox, soft)
+    dark1.classList.remove("show");
+    dark2.classList.remove("show");
+    msg.classList.remove("show");
+    heartScene.classList.remove("show");
+    ulduzStop();
+
+    // No-nu disable elə (tələbdə No görünməsin)
+    noBtn.disabled = true;
+
+    // broken hearts rain start
+    startBrokenRain();
   }
 })();
 </script>
