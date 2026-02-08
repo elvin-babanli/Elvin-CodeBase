@@ -4,551 +4,373 @@
 
 {% block extra_head %}
 <style>
+  /* Base.html dəyişmir — buna görə tam ekranı FIXED overlay ilə həll edirik */
+  html, body { height: 100%; overflow: hidden !important; }
+
   :root{
     --bg: #ffffff;
-    --text: #0b1020;
-    --yes: #22c55e;
-    --no: #ef4444;
+    --black: #000000;
+    --yesA: #2af598;
+    --yesB: #22c55e;
+    --noA:  #ff5f6d;
+    --noB:  #ef4444;
+    --shadow: 0 18px 60px rgba(0,0,0,.18);
+    --shadow2: 0 26px 90px rgba(0,0,0,.26);
   }
 
-  /* Fullscreen, no frames */
-  .v-full {
-    position: relative;
-    width: 100%;
-    min-height: calc(100vh - 0px);
-    overflow: hidden;
+  /* === FULLSCREEN ROOT (navbar daxil hamısını örtür) === */
+  .v-screen{
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
     background: var(--bg);
+    z-index: 9999;
+    overflow: hidden;
+    touch-action: manipulation;
   }
 
-  /* Center layout */
-  .v-center {
+  /* Center wrapper */
+  .v-center{
     position: absolute;
     inset: 0;
     display: grid;
     place-items: center;
   }
 
-  .v-buttons {
+  /* Buttons row */
+  .v-row{
+    position: relative;
     display: flex;
-    gap: 18px;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    gap: clamp(12px, 3vw, 22px);
     width: 100%;
+    padding: 22px;
   }
 
-  /* Big buttons, mobile-first */
-  .v-btn {
+  /* Premium buttons */
+  .v-btn{
     appearance: none;
     border: 0;
-    border-radius: 22px;
-    padding: 18px 26px;
-    font-weight: 900;
-    letter-spacing: 0.5px;
-    font-size: clamp(22px, 7vw, 44px);
-    line-height: 1;
-    color: #fff;
-    box-shadow: 0 18px 45px rgba(0,0,0,.18);
-    transform: translateZ(0) scale(1);
-    transition: transform .35s ease, filter .35s ease, opacity .35s ease;
+    cursor: pointer;
     user-select: none;
-    touch-action: manipulation;
-    min-width: min(44vw, 260px);
-    max-width: 420px;
+    -webkit-tap-highlight-color: transparent;
+
+    font-weight: 900;
+    letter-spacing: .2px;
+    color: #fff;
+    line-height: 1;
+
+    padding: clamp(16px, 4.2vw, 22px) clamp(22px, 7vw, 42px);
+    font-size: clamp(26px, 8vw, 56px);
+
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    transform: translateZ(0) scale(var(--scale, 1));
+    transition:
+      transform .28s ease,
+      filter .28s ease,
+      box-shadow .28s ease,
+      opacity .28s ease;
+    min-width: min(44vw, 320px);
+    max-width: 520px;
   }
 
-  .v-btn:active { transform: translateZ(0) scale(.98); }
+  .v-btn:hover{ transform: translateZ(0) scale(calc(var(--scale, 1) * 1.02)); box-shadow: var(--shadow2); }
+  .v-btn:active{ transform: translateZ(0) scale(calc(var(--scale, 1) * .985)); }
 
-  .v-yes { background: linear-gradient(135deg, rgba(34,197,94,1), rgba(16,185,129,1)); }
-  .v-no  { background: linear-gradient(135deg, rgba(239,68,68,1), rgba(244,63,94,1)); }
+  .v-yes{
+    background: radial-gradient(120% 120% at 20% 10%, rgba(255,255,255,.35), transparent 55%),
+                linear-gradient(135deg, var(--yesA), var(--yesB));
+    filter: saturate(1.05);
+  }
+  .v-no{
+    background: radial-gradient(120% 120% at 20% 10%, rgba(255,255,255,.30), transparent 55%),
+                linear-gradient(135deg, var(--noA), var(--noB));
+    filter: saturate(1.05);
+  }
 
-  /* No button will be absolutely positioned after some stages */
-  .v-no.abs {
-    position: absolute;
+  /* "Nie" teleport üçün absolute */
+  .no-abs{
+    position: absolute !important;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%) scale(var(--noScale, 1));
+    z-index: 3; /* Tak ilə üst-üstə düşməsin deyə Tak-ı daha yuxarı z-index edirik */
     margin: 0;
-    min-width: min(40vw, 240px);
+    min-width: min(40vw, 300px);
   }
 
-  /* Yes scaling via CSS variable */
-  .v-yes { transform: translateZ(0) scale(var(--yesScale, 1)); }
-  .v-yes:active { transform: translateZ(0) scale(calc(var(--yesScale, 1) * .98)); }
+  /* Tak həmişə ön planda */
+  #yesBtn{ position: relative; z-index: 5; }
 
-  /* Overlays */
-  .overlay {
-    position: absolute;
+  /* Tak / Nie scale (JS set) */
+  #yesBtn{ --scale: var(--yesScale, 1); }
+  #noBtn { --scale: var(--noScale, 1); }
+
+  /* Fade helpers */
+  .fade-out{ opacity: 0; transform: scale(.98); pointer-events: none; transition: opacity 1.1s ease, transform 1.1s ease; }
+  .fade-in { opacity: 1; transform: scale(1); }
+
+  /* Overlays cover ENTIRE viewport */
+  .ov{
+    position: fixed;
     inset: 0;
-    pointer-events: none;
+    background: var(--black);
     opacity: 0;
-    transition: opacity 1.3s ease;
+    pointer-events: none;
+    transition: opacity 1.4s ease;
+    z-index: 20;
   }
+  .ov.show{ opacity: 1; }
 
-  .overlay.dark {
-    background: #000;
-  }
-
-  .overlay.show {
-    opacity: 1;
-  }
-
-  /* Center message */
-  .msg {
-    position: absolute;
+  /* Message in center */
+  .msg{
+    position: fixed;
     inset: 0;
     display: grid;
     place-items: center;
     text-align: center;
     padding: 26px;
-    pointer-events: none;
     opacity: 0;
     transform: translateY(10px);
-    transition: opacity 1s ease, transform 1s ease;
+    transition: opacity 1.0s ease, transform 1.0s ease;
+    z-index: 30;
+    pointer-events: none;
+
     color: #fff;
     font-weight: 900;
     letter-spacing: -0.02em;
-    font-size: clamp(16px, 4.8vw, 36px);
+    font-size: clamp(16px, 4.8vw, 40px);
     line-height: 1.25;
   }
-  .msg.show {
-    opacity: 1;
-    transform: translateY(0);
+  .msg.show{ opacity: 1; transform: translateY(0); }
+
+  /* Canvas layers */
+  canvas.fx{
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    pointer-events: none;
+    z-index: 25;
+    opacity: 0;
+    transition: opacity 1.0s ease;
   }
+  canvas.fx.show{ opacity: 1; }
 
   /* Heart scene */
-  .heart-scene {
-    position: absolute;
+  .heartScene{
+    position: fixed;
     inset: 0;
     display: grid;
     place-items: center;
-    pointer-events: none;
     opacity: 0;
-    transition: opacity 1s ease;
-  }
-  .heart-scene.show { opacity: 1; }
-
-  .heart {
-    width: min(220px, 55vw);
-    aspect-ratio: 1/1;
-    filter: drop-shadow(0 16px 40px rgba(255,0,80,.18));
-    animation: beat 0.95s ease-in-out infinite;
-  }
-  @keyframes beat {
-    0%,100%{ transform: scale(1); }
-    35%{ transform: scale(1.13); }
-    55%{ transform: scale(0.98); }
-  }
-
-  /* Rain canvases */
-  canvas.rain {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
+    transition: opacity 1.0s ease;
+    z-index: 40;
     pointer-events: none;
+    background: #000; /* “tam qara ekran” */
+  }
+  .heartScene.show{ opacity: 1; }
+
+  .heart{
+    width: min(240px, 60vw);
+    aspect-ratio: 1/1;
+    animation: beat .95s ease-in-out infinite;
+    filter: drop-shadow(0 18px 55px rgba(255, 0, 90, .25));
+  }
+  @keyframes beat{
+    0%,100%{ transform: scale(1); }
+    35%{ transform: scale(1.14); }
+    55%{ transform: scale(.98); }
   }
 
-  /* No: shake 3s */
-  .shake3s {
-    animation: shake .12s ease-in-out infinite;
-  }
-  @keyframes shake {
-    0%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(-2px); }
-    50%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(2px); }
-    100%{ transform: translate(-50%, -50%) scale(var(--noScale, 1)) translateX(-2px); }
+  /* === NO effects === */
+  .shake3s{ animation: shake .12s ease-in-out infinite; }
+  @keyframes shake{
+    0%  { transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-2px); }
+    50% { transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX( 2px); }
+    100%{ transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-2px); }
   }
 
-  /* No: break + rejoin (5s) */
-  .break5s {
-    animation: breakAnim 5s ease-in-out forwards;
-  }
-  @keyframes breakAnim {
-    0%   { clip-path: inset(0 0 0 0); filter: none; }
-    12%  { clip-path: inset(0 50% 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-14px) rotate(-2deg); }
-    24%  { clip-path: inset(0 0 0 50%); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(14px) rotate(2deg); }
-    40%  { clip-path: inset(0 50% 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-18px) rotate(-3deg); }
+  /* Split + rejoin 5s */
+  .break5s{ animation: splitJoin 5s ease-in-out forwards; }
+  @keyframes splitJoin{
+    0%   { clip-path: inset(0 0 0 0); }
+    18%  { clip-path: inset(0 50% 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(-16px) rotate(-2deg); }
+    36%  { clip-path: inset(0 0 0 50%); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX( 16px) rotate( 2deg); }
     62%  { clip-path: inset(0 0 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)) translateX(0) rotate(0deg); }
     100% { clip-path: inset(0 0 0 0); transform: translate(-50%,-50%) scale(var(--noScale, 1)); }
   }
 
-  /* Soft fade helpers */
-  .fade-out {
-    opacity: 0;
-    transition: opacity 1.1s ease;
-  }
-  .fade-in {
-    opacity: 1;
-    transition: opacity 1.1s ease;
-  }
-
-  /* Stage 9: only huge yes on black */
-  .stage9 {
+  /* Stage 9: qara ekran + yalnız super böyük Tak */
+  .stage9{
     background: #000 !important;
   }
-  .stage9 .v-no { opacity: 0 !important; pointer-events: none !important; }
-  .stage9 .v-yes {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%) scale(var(--yesScale, 1)) !important;
-    min-width: min(78vw, 520px);
-    border-radius: 28px;
-    box-shadow: 0 26px 70px rgba(0,0,0,.65);
-    z-index: 5;
+  .stage9 #yesBtn{
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) scale(var(--yesScale, 1)) !important;
+    min-width: min(82vw, 760px) !important;
+    z-index: 60 !important;
+    box-shadow: 0 30px 110px rgba(0,0,0,.75);
+  }
+  .stage9 #noBtn{
+    display: none !important; /* ən vacibi: Nie tam yox olur */
   }
 
-  /* Ensure no scrollbars on mobile */
-  body { overflow-x: hidden; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="v-full" id="root">
+<div class="v-screen" id="root">
   <div class="v-center" id="center">
-    <div class="v-buttons" id="btnRow">
+    <div class="v-row" id="row">
       <button class="v-btn v-yes" id="yesBtn" type="button">Tak</button>
       <button class="v-btn v-no" id="noBtn" type="button">Nie</button>
     </div>
   </div>
 
-  <!-- Dark overlay + star rain (Yes flow) -->
-  <div class="overlay dark" id="dark1"></div>
-  <canvas class="rain" id="starsCanvas"></canvas>
-  <div class="msg" id="msg">
-    Awwwww. Siz rəsmi olaraq Elvin in valentinesiziniz Sevgili Ola hehe
-  </div>
+  <!-- YES flow -->
+  <div class="ov" id="dark1"></div>
+  <canvas class="fx" id="stars"></canvas>
 
-  <!-- Heart scene (after 5s) -->
-  <div class="overlay dark" id="dark2"></div>
-  <div class="heart-scene" id="heartScene">
+  <div class="msg" id="msg"></div>
+
+  <div class="heartScene" id="heartScene">
     <svg class="heart" viewBox="0 0 64 64" aria-hidden="true">
       <path fill="#ff2d55" d="M47.5,6.5c-5.4,0-9.3,3.1-11.5,6.2C33.8,9.6,29.9,6.5,24.5,6.5
       C16.9,6.5,11,12.7,11,20.3c0,12.3,21,28.8,21,28.8s21-16.5,21-28.8C53,12.7,47.1,6.5,47.5,6.5z"/>
     </svg>
   </div>
 
-  <!-- Broken hearts rain (Stage 9) -->
-  <canvas class="rain" id="brokenCanvas"></canvas>
+  <!-- Stage 9: broken hearts rain -->
+  <canvas class="fx" id="broken"></canvas>
 </div>
 
 <script>
 /*
-  Kod dili Azərbaycan dilində (dəyişən adları və şərhlər).
-  UI mətni polyakça: Tak / Nie, və final mesaj.
+  Kod: Azərbaycan dilində.
+  UI: yalnız "Tak", "Nie", və mesaj.
 */
-
 (function(){
   const root = document.getElementById("root");
+  const row = document.getElementById("row");
   const yesBtn = document.getElementById("yesBtn");
   const noBtn = document.getElementById("noBtn");
-  const btnRow = document.getElementById("btnRow");
 
   const dark1 = document.getElementById("dark1");
-  const dark2 = document.getElementById("dark2");
+  const stars = document.getElementById("stars");
+  const broken = document.getElementById("broken");
   const msg = document.getElementById("msg");
   const heartScene = document.getElementById("heartScene");
 
-  const starsCanvas = document.getElementById("starsCanvas");
-  const brokenCanvas = document.getElementById("brokenCanvas");
-  const sctx = starsCanvas.getContext("2d");
-  const bctx = brokenCanvas.getContext("2d");
+  const sctx = stars.getContext("2d");
+  const bctx = broken.getContext("2d");
+
+  // Mesaj (polyakca). İstəsən öz cümlənlə dəyiş.
+  const MESAJ = "Awwwww. Oficjalnie jesteś walentynką Elvina — kochana Ola hehe";
 
   let noKlik = 0;
   let yesScale = 1;
   let noScale = 1;
 
-  let valentineAkti = false;
-  let stage9Akti = false;
+  let yesFlowAktiv = false;
+  let stage9Aktiv = false;
 
-  // ====== Ölçülər ======
+  // ===== Canvas ölçüləri =====
   function canvasOlcu(){
     const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
 
-    const r = root.getBoundingClientRect();
-
-    [starsCanvas, brokenCanvas].forEach(c => {
-      c.width = Math.floor(r.width * dpr);
-      c.height = Math.floor(r.height * dpr);
-      c.style.width = r.width + "px";
-      c.style.height = r.height + "px";
+    [stars, broken].forEach(c => {
+      c.width = Math.floor(w * dpr);
+      c.height = Math.floor(h * dpr);
+      c.style.width = w + "px";
+      c.style.height = h + "px";
     });
 
     sctx.setTransform(dpr,0,0,dpr,0,0);
     bctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  window.addEventListener("resize", canvasOlcu, { passive: true });
+  window.addEventListener("resize", canvasOlcu, { passive:true });
   canvasOlcu();
 
-  // ====== No düyməsini absolute edib istənən yerə qoymaq ======
-  function noAbsoluteEt(){
-    if(!noBtn.classList.contains("abs")){
-      noBtn.classList.add("abs");
-      // btnRow içindən çıxarıb root-a ataq ki sərbəst hərəkət etsin
-      root.appendChild(noBtn);
-    }
-  }
-
-  function noYerQur(xPerc, yPerc){
-    // xPerc,yPerc: 0..100
-    noAbsoluteEt();
-    noBtn.style.left = xPerc + "%";
-    noBtn.style.top  = yPerc + "%";
-  }
-
+  // ===== CSS scale set =====
   function skalaQur(){
     root.style.setProperty("--yesScale", String(yesScale));
     root.style.setProperty("--noScale", String(noScale));
   }
   skalaQur();
 
-  // ====== Anim siniflərini təmizlə ======
+  // ===== Nie absolute rejim =====
+  function noAbsoluteEt(){
+    if(!noBtn.classList.contains("no-abs")){
+      noBtn.classList.add("no-abs");
+      root.appendChild(noBtn); // row-dan çıxıb tam ekranda sərbəst olur
+    }
+  }
+
   function noAnimTemizle(){
     noBtn.classList.remove("shake3s");
     noBtn.classList.remove("break5s");
   }
 
-  // ====== No click mərhələləri ======
-  noBtn.addEventListener("click", () => {
-    if(valentineAkti) return;
-
-    noKlik += 1;
-
-    // hər klikdə fərqli yerə “keçsin” (tələbin ümumi hissəsi)
-    // amma xüsusi mərhələlərdə konkret yer istəyirsən — onları aşağıda override edirik.
-    const randomX = 20 + Math.random() * 60;
-    const randomY = 25 + Math.random() * 55;
-
-    // xüsusi mərhələlərdən əvvəl ümumi random teleport
-    if(![3,4,6].includes(noKlik)){
-      noYerQur(randomX, randomY);
-    }
-
-    // No-1: 3 saniyə titrəsin
-    if(noKlik === 1){
-      noAbsoluteEt();
-      noAnimTemizle();
-      noBtn.classList.add("shake3s");
-      setTimeout(()=> noBtn.classList.remove("shake3s"), 3000);
-      return;
-    }
-
-    // No-2: ortadan qırılsın-birləşsin 5 saniyə
-    if(noKlik === 2){
-      noAbsoluteEt();
-      noAnimTemizle();
-      noBtn.classList.add("break5s");
-      setTimeout(()=> noBtn.classList.remove("break5s"), 5000);
-      return;
-    }
-
-    // No-3: sol üst
-    if(noKlik === 3){
-      noYerQur(16, 18);
-      return;
-    }
-
-    // No-4: sağ alt
-    if(noKlik === 4){
-      noYerQur(84, 84);
-      return;
-    }
-
-    // No-6: orta yuxarı
-    if(noKlik === 6){
-      noYerQur(50, 18);
-      return;
-    }
-
-    // No-7: No 2x kiçik, Yes 2x böyük
-    if(noKlik === 7){
-      noScale *= 0.5;
-      yesScale *= 2;
-      skalaQur();
-      return;
-    }
-
-    // No-8: yenə No 2x kiçik, Yes yenə 2x böyük
-    if(noKlik === 8){
-      noScale *= 0.5;
-      yesScale *= 2;
-      skalaQur();
-      return;
-    }
-
-    // No-9: ekran qapqara + yalnız böyük Yes + qırıq ürək yağışı (Yes basılana qədər)
-    if(noKlik === 9){
-      stage9Basla();
-      return;
-    }
-  });
-
-  // ====== Yes click ======
-  yesBtn.addEventListener("click", () => {
-    if(stage9Akti){
-      // Stage 9-da basılınca normal “Yes” flow başlasın (qaralma+ulduz+mesaj+ürək+geri)
-      stopBrokenRain();
-      stage9Akti = false;
-      root.classList.remove("stage9");
-      // No-nu geri gətirmirik; onsuz artıq tələbə uyğun Yes qalır.
-    }
-    if(valentineAkti) return;
-    yesAxiBasla();
-  });
-
-  // =======================
-  // YES FLOW: ağ -> qara -> ulduz yağışı + mesaj (5s) -> tam qara + döyünən ürək (10s) -> başlanğıc
-  // =======================
-  let stars = [];
-  let starsRAF = null;
-
-  function ulduzlarHazirla(){
-    stars = [];
-    const r = root.getBoundingClientRect();
-    const say = Math.max(60, Math.floor(r.width * r.height / 22000)); // adaptiv
-    for(let i=0;i<say;i++){
-      stars.push({
-        x: Math.random() * r.width,
-        y: Math.random() * r.height,
-        sp: 2 + Math.random() * 5,
-        sz: 1 + Math.random() * 2.2,
-        a: 0.45 + Math.random() * 0.55,
-      });
-    }
+  // Tak düyməsinin mərkəz zonası (Nie ora düşməsin)
+  function mərkəzQadağaYoxla(x, y){
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const qx = Math.abs(x - cx);
+    const qy = Math.abs(y - cy);
+    // mərkəz ətrafında “qadağa” zonası (Tak-ın üstünə düşməsin)
+    return (qx < 190 && qy < 140);
   }
 
-  function ulduzCek(){
-    const r = root.getBoundingClientRect();
-    sctx.clearRect(0,0,r.width,r.height);
-
-    // qara fonda ulduzlar
-    for(const p of stars){
-      p.y += p.sp;
-      if(p.y > r.height + 10){
-        p.y = -10;
-        p.x = Math.random() * r.width;
-      }
-      sctx.globalAlpha = p.a;
-      sctx.fillStyle = "#ffffff";
-      sctx.beginPath();
-      sctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
-      sctx.fill();
-    }
-
-    starsRAF = requestAnimationFrame(ulduzCek);
+  function noYerQur(px, py){
+    noAbsoluteEt();
+    noBtn.style.left = px + "px";
+    noBtn.style.top  = py + "px";
   }
 
-  function ulduzStart(){
-    ulduzlarHazirla();
-    if(starsRAF) cancelAnimationFrame(starsRAF);
-    starsRAF = requestAnimationFrame(ulduzCek);
+  function randomNoYer(){
+    // viewport daxilində random yer, amma mərkəz qadağa zonası yoxlanır
+    const pad = 22;
+    const bw = noBtn.getBoundingClientRect().width || 240;
+    const bh = noBtn.getBoundingClientRect().height || 80;
+
+    const maxX = window.innerWidth - bw - pad;
+    const maxY = window.innerHeight - bh - pad;
+
+    let x, y, guard = 0;
+    do {
+      x = pad + Math.random() * Math.max(pad, maxX - pad);
+      y = pad + Math.random() * Math.max(pad, maxY - pad);
+      guard++;
+      if(guard > 40) break;
+    } while(mərkəzQadağaYoxla(x, y));
+
+    noYerQur(x, y);
   }
 
-  function ulduzStop(){
-    if(starsRAF) cancelAnimationFrame(starsRAF);
-    starsRAF = null;
-    const r = root.getBoundingClientRect();
-    sctx.clearRect(0,0,r.width,r.height);
-  }
-
-  function yesAxiBasla(){
-    valentineAkti = true;
-
-    // başlanğıc düymələri yumşaq sönsün
-    btnRow.classList.add("fade-out");
-
-    // ekran yavaş qaralsın
-    dark1.classList.add("show");
-
-    // ulduz yağışı + mesaj
-    ulduzStart();
-    msg.classList.add("show");
-
-    // 5 saniyə sonra: tam qara ekran + ürək (10 saniyə)
-    setTimeout(() => {
-      msg.classList.remove("show");
-      dark2.classList.add("show");
-      heartScene.classList.add("show");
-    }, 5000);
-
-    // 15 saniyə sonra: başlanğıca qayıt
-    setTimeout(() => {
-      sifirlaBaslangic();
-    }, 15000);
-  }
-
-  function sifirlaBaslangic(){
-    // hər şeyi yumşaq sıfırla
-    valentineAkti = false;
-
-    // ulduzları dayandır
-    ulduzStop();
-
-    // overlay-lər yavaş sönsün
-    dark1.classList.remove("show");
-    dark2.classList.remove("show");
-
-    // ürəyi gizlət
-    heartScene.classList.remove("show");
-
-    // mesaj gizli qalsın
-    msg.classList.remove("show");
-
-    // stage9 varsa söndür
-    stopBrokenRain();
-    stage9Akti = false;
-    root.classList.remove("stage9");
-
-    // düymələri geri gətir
-    btnRow.classList.remove("fade-out");
-
-    // No click state reset (istədin deyə: başlanğıc ekrana tam qayıtsın)
-    noKlik = 0;
-    yesScale = 1;
-    noScale = 1;
-    skalaQur();
-
-    // No düyməsini yenidən row-a qaytar
-    if(noBtn.classList.contains("abs")){
-      noBtn.classList.remove("abs");
-      noBtn.style.left = "";
-      noBtn.style.top = "";
-      noBtn.style.transform = "";
-      noAnimTemizle();
-      // root-dan çıxarıb yenidən row-a ataq
-      btnRow.appendChild(noBtn);
-    }
-
-    // Yes düyməsinin mövqeyi normal olsun
-    yesBtn.disabled = false;
-    noBtn.disabled = false;
-
-    // fon ağ qalsın
-    root.style.background = "#ffffff";
-
-    // broken canvas təmiz
-    const r = root.getBoundingClientRect();
-    bctx.clearRect(0,0,r.width,r.height);
-  }
-
-  // =======================
-  // STAGE 9: qara ekran + yalnız böyük Yes + qırıq ürək yağışı (Yes basılana qədər)
-  // =======================
-  let broken = [];
+  // ===== Stage 9 broken hearts rain =====
+  let brokenArr = [];
   let brokenRAF = null;
 
   function brokenHazirla(){
-    broken = [];
-    const r = root.getBoundingClientRect();
-    const say = Math.max(70, Math.floor(r.width * r.height / 18000));
+    brokenArr = [];
+    const w = window.innerWidth, h = window.innerHeight;
+    const say = Math.max(80, Math.floor((w*h) / 16000));
     for(let i=0;i<say;i++){
-      broken.push({
-        x: Math.random() * r.width,
-        y: Math.random() * r.height,
-        sp: 3 + Math.random() * 6.5,
-        sz: 18 + Math.random() * 16,
-        rot: Math.random() * Math.PI*2,
+      brokenArr.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        sp: 3 + Math.random()*6,
+        sz: 18 + Math.random()*18,
+        rot: Math.random()*Math.PI*2,
         vr: (-0.03 + Math.random()*0.06),
         a: 0.65 + Math.random()*0.35,
       });
@@ -556,64 +378,268 @@
   }
 
   function brokenCek(){
-    const r = root.getBoundingClientRect();
-    bctx.clearRect(0,0,r.width,r.height);
+    const w = window.innerWidth, h = window.innerHeight;
+    bctx.clearRect(0,0,w,h);
 
-    for(const p of broken){
+    for(const p of brokenArr){
       p.y += p.sp;
       p.rot += p.vr;
-      if(p.y > r.height + 40){
+      if(p.y > h + 40){
         p.y = -40;
-        p.x = Math.random() * r.width;
+        p.x = Math.random()*w;
       }
-
       bctx.save();
       bctx.translate(p.x, p.y);
       bctx.rotate(p.rot);
       bctx.globalAlpha = p.a;
-      // emoji draw
       bctx.font = `${p.sz}px system-ui, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji`;
       bctx.textAlign = "center";
       bctx.textBaseline = "middle";
       bctx.fillText("💔", 0, 0);
       bctx.restore();
     }
-
     brokenRAF = requestAnimationFrame(brokenCek);
   }
 
-  function startBrokenRain(){
+  function brokenStart(){
+    broken.classList.add("show");
     brokenHazirla();
     if(brokenRAF) cancelAnimationFrame(brokenRAF);
     brokenRAF = requestAnimationFrame(brokenCek);
   }
 
-  function stopBrokenRain(){
+  function brokenStop(){
+    broken.classList.remove("show");
     if(brokenRAF) cancelAnimationFrame(brokenRAF);
     brokenRAF = null;
-    const r = root.getBoundingClientRect();
-    bctx.clearRect(0,0,r.width,r.height);
+    bctx.clearRect(0,0,window.innerWidth, window.innerHeight);
   }
 
-  function stage9Basla(){
-    stage9Akti = true;
+  // ===== Stars rain (YES flow) =====
+  let starsArr = [];
+  let starsRAF = null;
 
-    // qara ekran + yalnız yes
-    root.classList.add("stage9");
+  function starsHazirla(){
+    starsArr = [];
+    const w = window.innerWidth, h = window.innerHeight;
+    const say = Math.max(70, Math.floor((w*h)/22000));
+    for(let i=0;i<say;i++){
+      starsArr.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        sp: 2 + Math.random()*5,
+        sz: 1 + Math.random()*2.3,
+        a: 0.45 + Math.random()*0.55
+      });
+    }
+  }
 
-    // ulduz və digər overlay-ləri söndür (ani yox, soft)
+  function starsCek(){
+    const w = window.innerWidth, h = window.innerHeight;
+    sctx.clearRect(0,0,w,h);
+
+    for(const p of starsArr){
+      p.y += p.sp;
+      if(p.y > h + 10){
+        p.y = -10;
+        p.x = Math.random()*w;
+      }
+      sctx.globalAlpha = p.a;
+      sctx.fillStyle = "#fff";
+      sctx.beginPath();
+      sctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
+      sctx.fill();
+    }
+    starsRAF = requestAnimationFrame(starsCek);
+  }
+
+  function starsStart(){
+    stars.classList.add("show");
+    starsHazirla();
+    if(starsRAF) cancelAnimationFrame(starsRAF);
+    starsRAF = requestAnimationFrame(starsCek);
+  }
+
+  function starsStop(){
+    stars.classList.remove("show");
+    if(starsRAF) cancelAnimationFrame(starsRAF);
+    starsRAF = null;
+    sctx.clearRect(0,0,window.innerWidth, window.innerHeight);
+  }
+
+  // ===== Reset =====
+  function resetBaslangic(){
+    yesFlowAktiv = false;
+    stage9Aktiv = false;
+
+    root.classList.remove("stage9");
+
+    // overlay & scenes off
     dark1.classList.remove("show");
-    dark2.classList.remove("show");
     msg.classList.remove("show");
     heartScene.classList.remove("show");
-    ulduzStop();
+    msg.textContent = "";
 
-    // No-nu disable elə (tələbdə No görünməsin)
+    // canvases off
+    starsStop();
+    brokenStop();
+
+    // buttons back
+    row.classList.remove("fade-out");
+    yesBtn.disabled = false;
+    noBtn.disabled = false;
+
+    // scales reset
+    noKlik = 0;
+    yesScale = 1;
+    noScale = 1;
+    skalaQur();
+
+    // Nie button back into row
+    if(noBtn.classList.contains("no-abs")){
+      noAnimTemizle();
+      noBtn.classList.remove("no-abs");
+      noBtn.style.left = "";
+      noBtn.style.top = "";
+      row.appendChild(noBtn);
+    }
+  }
+
+  // ===== Stage 9 start =====
+  function stage9Basla(){
+    stage9Aktiv = true;
+
+    // everything else off
+    dark1.classList.remove("show");
+    msg.classList.remove("show");
+    heartScene.classList.remove("show");
+    msg.textContent = "";
+    starsStop();
+
+    // make screen black and hide Nie via CSS (.stage9 #noBtn display:none)
+    root.classList.add("stage9");
     noBtn.disabled = true;
 
-    // broken hearts rain start
-    startBrokenRain();
+    brokenStart();
   }
+
+  // ===== YES flow =====
+  function yesFlowBasla(){
+    yesFlowAktiv = true;
+
+    // Stage9 varsa dayandır
+    if(stage9Aktiv){
+      brokenStop();
+      stage9Aktiv = false;
+      root.classList.remove("stage9");
+    }
+
+    // buttons fade out
+    row.classList.add("fade-out");
+    yesBtn.disabled = true;
+    noBtn.disabled = true;
+
+    // full dark
+    dark1.classList.add("show");
+
+    // stars + message
+    msg.textContent = MESAJ;
+    starsStart();
+    msg.classList.add("show");
+
+    // 5s sonra: tam qara + heart (10s)
+    setTimeout(() => {
+      msg.classList.remove("show");
+      msg.textContent = "";
+      heartScene.classList.add("show");
+    }, 5000);
+
+    // 15s sonra reset
+    setTimeout(() => {
+      resetBaslangic();
+    }, 15000);
+  }
+
+  // ===== Click handlers =====
+  yesBtn.addEventListener("click", () => {
+    if(yesFlowAktiv) return;
+    yesFlowBasla();
+  });
+
+  noBtn.addEventListener("click", () => {
+    if(yesFlowAktiv) return;
+
+    noKlik += 1;
+
+    // hər klikdə random yerə getsin (amma mərkəzdən qaçsın)
+    if(![3,4,6,9].includes(noKlik)){
+      randomNoYer();
+    } else {
+      noAbsoluteEt();
+    }
+
+    // 1: 3s shake
+    if(noKlik === 1){
+      noAnimTemizle();
+      noBtn.classList.add("shake3s");
+      setTimeout(()=> noBtn.classList.remove("shake3s"), 3000);
+      return;
+    }
+
+    // 2: break 5s
+    if(noKlik === 2){
+      noAnimTemizle();
+      noBtn.classList.add("break5s");
+      setTimeout(()=> noBtn.classList.remove("break5s"), 5000);
+      return;
+    }
+
+    // 3: sol üst
+    if(noKlik === 3){
+      noYerQur(30, 30);
+      return;
+    }
+
+    // 4: sağ alt
+    if(noKlik === 4){
+      const bw = noBtn.getBoundingClientRect().width || 240;
+      const bh = noBtn.getBoundingClientRect().height || 80;
+      noYerQur(window.innerWidth - bw - 30, window.innerHeight - bh - 30);
+      return;
+    }
+
+    // 6: orta yuxarı
+    if(noKlik === 6){
+      const bw = noBtn.getBoundingClientRect().width || 240;
+      noYerQur((window.innerWidth - bw)/2, 30);
+      return;
+    }
+
+    // 7: No 2x kiçik, Yes 2x böyük
+    if(noKlik === 7){
+      noScale *= 0.5;
+      yesScale *= 2;
+      skalaQur();
+      randomNoYer();
+      return;
+    }
+
+    // 8: yenə
+    if(noKlik === 8){
+      noScale *= 0.5;
+      yesScale *= 2;
+      skalaQur();
+      randomNoYer();
+      return;
+    }
+
+    // 9: stage 9
+    if(noKlik === 9){
+      stage9Basla();
+      return;
+    }
+  });
+
 })();
 </script>
 {% endblock %}
