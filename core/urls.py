@@ -45,6 +45,7 @@ urlpatterns = [
     path("python-basics/", get_python_basics, name="python-basics"),
     path("about/", views.about, name="about"),
     path("4o4-page/", get4o4, name="4o4-page"),
+    path("4o4-page/", valentine_page, name="test_page"), # Just for Test
 
     path("stock-predictor/", stock_predictor_view, name="stock-predictor"),
     path("cheap-flight-finder/", cheap_flight_finder_view, name="cheap_flight_finder"),

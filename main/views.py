@@ -47,6 +47,10 @@ def get_crud(request):
 def get_python_basics(request):
     return render(request,"python_basics.html")
 
+def valentine_page(request):
+    return render(request,"valentine.html")
+
+
 # Projects______________________________________________
 
 # def weather_app(request):
