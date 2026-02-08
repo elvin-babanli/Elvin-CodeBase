@@ -10,6 +10,7 @@
     --bg: #ffffff;
     --shadow: 0 18px 60px rgba(0,0,0,.18);
     --shadow2: 0 26px 90px rgba(0,0,0,.26);
+    --text: #0b1020;
   }
 
   .v-screen{
@@ -29,6 +30,26 @@
     inset: 0;
     display: grid;
     place-items: center;
+    padding: 20px;
+  }
+
+  .v-stack{
+    display: grid;
+    gap: clamp(14px, 3.2vw, 22px);
+    place-items: center;
+    width: 100%;
+  }
+
+  /* Question text (Polish) */
+  .v-question{
+    margin: 0;
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--text);
+    font-size: clamp(22px, 6.2vw, 54px);
+    padding: 0 10px;
   }
 
   .v-row{
@@ -38,7 +59,6 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 22px;
   }
 
   /* Liquid button base */
@@ -79,7 +99,7 @@
 
   .btn-liquid canvas{
     position: absolute;
-    inset: -70px; /* daha çox “spill” -> daha canlı */
+    inset: -70px;
     z-index: 1;
     pointer-events: none;
   }
@@ -226,14 +246,18 @@
 {% block content %}
 <div class="v-screen" id="root">
   <div class="v-center">
-    <div class="v-row" id="row">
-      <button class="btn-liquid" id="yesBtn" type="button">
-        <span class="inner">Tak</span>
-      </button>
+    <div class="v-stack" id="stack">
+      <h1 class="v-question" id="question">Czy zostaniesz moją walentynką?</h1>
 
-      <button class="btn-liquid" id="noBtn" type="button">
-        <span class="inner">Nie</span>
-      </button>
+      <div class="v-row" id="row">
+        <button class="btn-liquid" id="yesBtn" type="button">
+          <span class="inner">Tak</span>
+        </button>
+
+        <button class="btn-liquid" id="noBtn" type="button">
+          <span class="inner">Nie</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -252,6 +276,7 @@
 <script>
 (function(){
   const root = document.getElementById("root");
+  const stack = document.getElementById("stack");
   const row  = document.getElementById("row");
   const yesBtn = document.getElementById("yesBtn");
   const noBtn  = document.getElementById("noBtn");
@@ -276,12 +301,11 @@
 
   let noKlik = 0;
   let yesScale = 1;
-  let noScale = 1; // 7-8-də artıq “çox kiçiltmirik”
+  let noScale = 1;
   let yesFlowAktiv = false;
   let stage9Aktiv = false;
 
   function skalaQur(){
-    // No həmişə gözəl qalsın deyə clamp edirik
     const clampedNo = Math.max(0.92, Math.min(1.05, noScale));
     const clampedYes = Math.min(6, Math.max(1, yesScale));
     root.style.setProperty("--yesScale", String(clampedYes));
@@ -289,7 +313,6 @@
   }
   skalaQur();
 
-  // ===== Canvas ölçüləri =====
   function canvasOlcu(){
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const w = window.innerWidth;
@@ -313,7 +336,7 @@
   window.addEventListener("resize", canvasOlcu, { passive:true });
   canvasOlcu();
 
-  // ===== Liquid Buttons (daha canlı) =====
+  // ===== Liquid Buttons (always moving) =====
   class LiquidButton{
     constructor(el, cfg){
       this.el = el;
@@ -344,7 +367,6 @@
 
       this.lastW = w; this.lastH = h;
 
-      // larger spill => more liquid visible
       this.off = 70;
 
       this.canvas.width = Math.ceil(w + this.off*2);
@@ -386,14 +408,12 @@
       const rect = this.el.getBoundingClientRect();
       const w = rect.width, h = rect.height;
 
-      // bigger amplitude => more visible motion
       const ax = (Math.sin(this.fakeT) * 0.55 + Math.sin(this.fakeT*0.7)*0.22);
       const ay = (Math.cos(this.fakeT*1.1) * 0.50 + Math.sin(this.fakeT*0.9)*0.20);
 
       this.relMouseX = this.off + (w/2) + ax * (w*0.50);
       this.relMouseY = this.off + (h/2) + ay * (h*0.46);
 
-      // “mouse speed” stronger => more wobble
       this.mouseSpeedX = (Math.sin(this.fakeT*2.4) * 2.8);
       this.mouseSpeedY = (Math.cos(this.fakeT*2.0) * 2.4);
     }
@@ -401,7 +421,6 @@
     render(){
       requestAnimationFrame(()=>this.render());
 
-      // if size changed -> re-init immediately (prevents ugly deformation)
       const rect = this.el.getBoundingClientRect();
       if(Math.abs(rect.width - this.lastW) > 0.5 || Math.abs(rect.height - this.lastH) > 0.5){
         this.init();
@@ -414,28 +433,25 @@
       const ch = this.canvas.height;
       ctx.clearRect(0,0,cw,ch);
 
-      // move points
       for(let i=0;i<this.pointsA.length;i++){
         this.pointsA[i].move(this);
         this.pointsB[i].move(this);
       }
 
-      // layer 1
       ctx.beginPath();
       drawBlob(ctx, this.pointsA);
       ctx.closePath();
       ctx.fillStyle = this.cfg.back;
       ctx.fill();
 
-      // dynamic gradient
       const gx = this.relMouseX;
       const gy = this.relMouseY;
-      const dist = Math.sqrt(Math.pow(gx - cw/2, 2) + Math.pow(gy - ch/2, 2)) / Math.sqrt(Math.pow(cw/2, 2) + Math.pow(ch/2, 2));
+      const dist = Math.sqrt(Math.pow(gx - cw/2, 2) + Math.pow(gy - ch/2, 2)) /
+                   Math.sqrt(Math.pow(cw/2, 2) + Math.pow(ch/2, 2));
       const grad = ctx.createRadialGradient(gx, gy, 240 + 240*dist, gx, gy, 0);
       grad.addColorStop(0, this.cfg.gradA);
       grad.addColorStop(1, this.cfg.gradB);
 
-      // layer 2
       ctx.beginPath();
       drawBlob(ctx, this.pointsB);
       ctx.closePath();
@@ -457,11 +473,9 @@
     const damping = host.cfg.damping;
     const mouseDist = host.cfg.mouseDist;
 
-    // spring back
     this.vx += (this.ix - this.x) / (viscosity * this.level);
     this.vy += (this.iy - this.y) / (viscosity * this.level);
 
-    // fake mouse impact
     const dx = this.ix - host.relMouseX;
     const dy = this.iy - host.relMouseY;
     const relDist = (1 - Math.sqrt((dx*dx) + (dy*dy)) / mouseDist);
@@ -488,13 +502,12 @@
     }
   }
 
-  // Instances (more movement)
   new LiquidButton(yesBtn, {
     points: 9,
-    viscosity: 14,   // ↓ => more elastic
-    mouseDist: 120,  // ↑ => wider influence
-    damping: 0.035,  // ↓ => more wobble
-    speed: 0.026,    // ↑ => more alive
+    viscosity: 14,
+    mouseDist: 120,
+    damping: 0.035,
+    speed: 0.026,
     back:  "#1CE2D8",
     gradA: "#22c55e",
     gradB: "#7c3aed"
@@ -511,7 +524,7 @@
     gradB: "#ef4444"
   });
 
-  // ===== NO teleport (Tak üstə düşməsin) =====
+  // NO teleport (Tak üstə düşməsin)
   function noAbsoluteEt(){
     if(!noBtn.classList.contains("no-abs")){
       noBtn.classList.add("no-abs");
@@ -558,7 +571,7 @@
     noYerQur(x, y);
   }
 
-  // ===== Stars / Broken / Heart minimal (same as before) =====
+  // Stars / Broken / Heart
   let starsArr=[], starsRAF=null;
   function starsHazirla(){
     starsArr=[];
@@ -611,7 +624,6 @@
   function brokenStart(){ broken.classList.add("show"); brokenHazirla(); if(brokenRAF) cancelAnimationFrame(brokenRAF); brokenRAF=requestAnimationFrame(brokenCek); }
   function brokenStop(){ broken.classList.remove("show"); if(brokenRAF) cancelAnimationFrame(brokenRAF); brokenRAF=null; bctx.clearRect(0,0,innerWidth,innerHeight); }
 
-  // Liquid heart (same symmetric wave heart)
   let heartRAF=null, heartT=0;
   function heartStart(){
     heartScene.classList.add("show");
@@ -639,7 +651,6 @@
       const t=(i/N)*Math.PI*2;
       const x=16*Math.pow(Math.sin(t),3);
       const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
-
       const wave = 1 + Math.sin(t*6 + heartT*3.0)*0.045 + Math.cos(t*3 - heartT*2.0)*0.03;
       const px = cx + (x * baseSize * 0.065) * beat * wave;
       const py = cy - (y * baseSize * 0.065) * beat * wave;
@@ -685,6 +696,7 @@
     msg.innerHTML="";
 
     row.classList.remove("fade-out");
+    stack.classList.remove("fade-out");
     yesBtn.disabled=false;
     noBtn.disabled=false;
 
@@ -726,7 +738,8 @@
       root.classList.remove("stage9");
     }
 
-    row.classList.add("fade-out");
+    // hide question + buttons softly
+    stack.classList.add("fade-out");
     yesBtn.disabled=true;
     noBtn.disabled=true;
 
@@ -746,7 +759,7 @@
     setTimeout(()=> resetBaslangic(), 15000);
   }
 
-  // ==== Clicks ====
+  // Clicks
   yesBtn.addEventListener("click", ()=>{
     if(stage9Aktiv){
       brokenStop();
@@ -787,11 +800,10 @@
       return;
     }
 
-    // 7 və 8: dizayn korlanmasın deyə No-nu kiçiltmirik.
-    // Sadəcə Yes böyüsün (2x), No eyni gözəl qalsın.
+    // 7-8: only YES grows; NO stays same nice look
     if(noKlik===7){
       yesScale *= 2;
-      noScale = 1; // always reset to normal => “iyrənc” olmur
+      noScale = 1;
       skalaQur();
       randomNoYer();
       return;
