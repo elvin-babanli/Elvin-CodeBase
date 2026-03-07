@@ -143,14 +143,27 @@ CACHES = {
 }
 
 # ==================== EMAIL ====================
+# Gmail: EMAIL_HOST=smtp.gmail.com, EMAIL_HOST_USER=elvinbabanli0@gmail.com, GMAIL_APP_PASSWORD=...
+# Local: leave unset → console backend (prints to terminal)
 _email_backend = config("EMAIL_BACKEND", default="")
-EMAIL_BACKEND = _email_backend or "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@codebase.local")
-EMAIL_HOST = config("EMAIL_HOST", default="")
-EMAIL_PORT = config("EMAIL_PORT", default="587")
+_email_host = config("EMAIL_HOST", default="")
+_email_user = config("EMAIL_HOST_USER", default="")
+_email_pwd = config("EMAIL_HOST_PASSWORD", default="") or config("GMAIL_APP_PASSWORD", default="")
+_use_smtp = _email_host and _email_user and _email_pwd
+
+if _email_backend:
+    EMAIL_BACKEND = _email_backend
+elif _use_smtp:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_HOST = _email_host or ""
+EMAIL_PORT = int(config("EMAIL_PORT", default="587"))
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default="True") == "True"
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_HOST_USER = _email_user
+EMAIL_HOST_PASSWORD = _email_pwd
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="elvinbabanli0@gmail.com")
 
 # ==================== LOGGING ====================
 LOGGING = {

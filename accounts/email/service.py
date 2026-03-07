@@ -1,5 +1,6 @@
 """
 Modular email service. Template-based, future-ready for branded HTML and images.
+Production-ready: Gmail SMTP, error handling, logging.
 """
 import logging
 from django.core.mail import EmailMultiAlternatives
@@ -11,47 +12,37 @@ logger = logging.getLogger(__name__)
 
 
 def _get_from_email():
-    """Use DEFAULT_FROM_EMAIL; fallback for development."""
-    return getattr(
-        settings,
-        "DEFAULT_FROM_EMAIL",
-        "noreply@localhost",
-    )
+    return getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@localhost")
 
 
-def send_templated_email(
-    to_emails,
-    subject,
-    template_name,
-    context=None,
-    html_template_name=None,
-):
+def _is_smtp_configured():
+    """Check if SMTP is properly configured for real email sending."""
+    backend = getattr(settings, "EMAIL_BACKEND", "")
+    if "console" in backend:
+        return False
+    if "smtp" not in backend:
+        return False
+    host = getattr(settings, "EMAIL_HOST", "")
+    user = getattr(settings, "EMAIL_HOST_USER", "")
+    pwd = getattr(settings, "EMAIL_HOST_PASSWORD", "")
+    return bool(host and user and pwd)
+
+
+def send_templated_email(to_emails, subject, template_name, context=None, html_template_name=None):
     """
-    Send email from a template. Future-ready for branded HTML templates and images.
-
-    Args:
-        to_emails: list of recipient emails
-        subject: email subject
-        template_name: path to text/HTML template (e.g. 'accounts/emails/password_reset_code.html')
-        context: dict for template rendering
-        html_template_name: optional separate HTML template (if different from main)
-
-    Returns:
-        True on success, False on failure
+    Send email from a template. Returns True on success, False on failure.
     """
     if context is None:
         context = {}
 
     try:
-        html_content = render_to_string(
-            html_template_name or template_name,
-            context,
-        )
-        text_content = strip_tags(html_content)
+        html_template = html_template_name or template_name
+        html_content = render_to_string(html_template, context)
     except Exception as e:
-        logger.exception("Email template render failed: %s", e)
+        logger.exception("Email template render failed (template=%s): %s", template_name, e)
         return False
 
+    text_content = strip_tags(html_content)
     from_email = _get_from_email()
     if isinstance(to_emails, str):
         to_emails = [to_emails]
@@ -69,18 +60,26 @@ def send_templated_email(
         logger.info("Email sent to %s: %s", to_emails, subject)
         return True
     except Exception as e:
-        logger.exception("Email send failed: %s", e)
+        err_msg = str(e).lower()
+        if "authentication" in err_msg or "535" in str(e):
+            logger.error("Email SMTP auth failed (check EMAIL_HOST_USER / GMAIL_APP_PASSWORD): %s", e)
+        elif "connection" in err_msg or "timed out" in err_msg:
+            logger.error("Email SMTP connection failed (check EMAIL_HOST, EMAIL_PORT, firewall): %s", e)
+        else:
+            logger.exception("Email send failed: %s", e)
         return False
 
 
 def send_password_reset_code(to_email: str, code: str) -> bool:
     """
-    Send password reset verification code. Uses templated email service.
-    Easy to swap template later for branded HTML/images.
+    Send password reset verification code. Subject: Your Verification Code.
     """
+    if not _is_smtp_configured():
+        logger.warning("SMTP not configured; email would go to console. Set EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD (or GMAIL_APP_PASSWORD).")
+
     return send_templated_email(
         to_emails=[to_email],
-        subject="Password Reset Verification Code",
+        subject="Your Verification Code",
         template_name="accounts/emails/password_reset_code.html",
         context={"code": code},
     )

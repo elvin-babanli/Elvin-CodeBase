@@ -36,6 +36,11 @@ gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 
 ---
 
+### Email (Forgot Password)
+Gmail: `EMAIL_HOST=smtp.gmail.com`, `EMAIL_HOST_USER=elvinbabanli0@gmail.com`, `GMAIL_APP_PASSWORD=...` — Detay: `EMAIL_SETUP.md`
+
+---
+
 ## Sorun Giderme
 
 | Sorun | Çözüm |
@@ -43,3 +48,4 @@ gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 | Beyaz ekran / site açılmıyor | Start Command’da sadece gunicorn olmalı; migrate Build’de |
 | auth_user yok | Build Command’a `python manage.py migrate --noinput` ekle |
 | robots.txt / favicon 404 | Son commit deploy edildi mi kontrol et |
+| Doğrulama kodu gelmiyor | EMAIL_HOST, EMAIL_HOST_USER, GMAIL_APP_PASSWORD ayarla; `EMAIL_SETUP.md` |
