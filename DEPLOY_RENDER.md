@@ -1,57 +1,41 @@
-# Deploy to Render — Production Checklist
+# Deploy to Render
 
-## 1. Create PostgreSQL Database
+## ÖNEMLİ: Render Dashboard Ayarları
 
-1. In Render Dashboard → **New** → **PostgreSQL**
-2. Create database (e.g. `django-codebase-db`)
-3. Copy the **Internal Database URL** (or External if needed)
+### 1. Build Command
+```
+pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
+```
 
-## 2. Create Web Service
+### 2. Start Command (KRİTİK – migrate burada çalışır)
+```
+bash start.sh
+```
+veya direkt:
+```
+python manage.py migrate --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+```
 
-1. **New** → **Web Service**
-2. Connect your GitHub repo
-3. **Build Command:**
-   ```
-   pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear
-   ```
-   Or use: `./build.sh` (ensure build.sh is committed)
-
-4. **Start Command:**
-   ```
-   gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
-   ```
-
-## 3. Environment Variables
+### 3. Environment Variables
 
 | Key | Value |
 |-----|-------|
-| `SECRET_KEY` | Generate a random 50-char string |
+| `SECRET_KEY` | Rastgele 50 karakter (örn. `python -c "import secrets; print(secrets.token_hex(25))"`) |
 | `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `your-app.onrender.com` (add custom domain too if needed) |
-| `DATABASE_URL` | From Render PostgreSQL (auto-set if linked) |
-| `CSRF_TRUSTED_ORIGINS` | `https://your-app.onrender.com` |
+| `ALLOWED_HOSTS` | `elvin-babanli.com,www.elvin-babanli.com,.onrender.com` |
+| `CSRF_TRUSTED_ORIGINS` | `https://elvin-babanli.com,https://www.elvin-babanli.com` |
 
-### Email (for Forgot Password)
-| Key | Value |
-|-----|-------|
-| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` |
-| `EMAIL_HOST` | e.g. `smtp.gmail.com` |
-| `EMAIL_PORT` | `587` |
-| `EMAIL_USE_TLS` | `True` |
-| `EMAIL_HOST_USER` | your email |
-| `EMAIL_HOST_PASSWORD` | app password |
-| `DEFAULT_FROM_EMAIL` | `noreply@yourdomain.com` |
+### 4. PostgreSQL (Önerilen – veri kalıcı olur)
 
-## 4. Link Database
+1. Render → **New** → **PostgreSQL**
+2. Database oluştur
+3. Web Service → **Environment** → **Add**
+4. `DATABASE_URL` = PostgreSQL **Internal Database URL** (Dashboard’dan kopyala)
 
-- In Web Service → **Environment** → **Add Environment Variable**
-- Add `DATABASE_URL` and paste the Internal Database URL from step 1
-- Or use Render's "Link Database" if available
+PostgreSQL olmadan SQLite kullanılır; Render’da her deploy’da veri sıfırlanır.
 
-## 5. Deploy
+## Sorun Giderme
 
-Push to main branch. Render will:
-1. Install dependencies
-2. Run migrations (creates auth_user, user_profiles, etc.)
-3. Collect static files
-4. Start gunicorn
+- **auth_user tablosu yok**: Start Command’da `migrate` çalıştığından emin olun
+- **robots.txt / favicon 404**: Son commit’in deploy edildiğini kontrol edin
+- **500 error**: Logs’da traceback’e bakın; çoğunlukla DATABASE_URL veya migrate ile ilgilidir

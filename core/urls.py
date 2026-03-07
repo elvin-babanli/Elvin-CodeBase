@@ -32,6 +32,8 @@ from main.sitemap import StaticViewSitemap
 sitemaps = {"static": StaticViewSitemap}
 
 urlpatterns = [
+    path("robots.txt", robots_txt),
+    path("favicon.ico", favicon_redirect),
     path("admin/", admin.site.urls),
     path("auth/", include("accounts.urls")),
     path("accounts/", include("allauth.urls")),
@@ -62,9 +64,6 @@ urlpatterns = [
 
     path("numpy/", get_numpy, name="numpy"),
     path("matplotlib/", get_matplotlib, name="matplotlib"),
-
-    path("robots.txt", robots_txt),
-    path("favicon.ico", favicon_redirect),
 ]
 
 handler500 = "main.views_extra.server_error"

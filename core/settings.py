@@ -16,11 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-key-change-in-production")
 DEBUG = config("DEBUG", default="False") == "True"
 
-_hosts = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,.onrender.com")
+_hosts = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,.onrender.com,elvin-babanli.com,www.elvin-babanli.com")
 ALLOWED_HOSTS = [h.strip() for h in _hosts.split(",") if h.strip()]
 
 # CSRF for production (Render, custom domains)
-_csrf_origins = config("CSRF_TRUSTED_ORIGINS", default="")
+_csrf_origins = config("CSRF_TRUSTED_ORIGINS", default="https://elvin-babanli.com,https://www.elvin-babanli.com")
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(",") if o.strip()]
 
 # Render/proxy: trust X-Forwarded-Proto for HTTPS

@@ -6,8 +6,8 @@ services:
     env: python
     region: oregon
 
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn core.wsgi:application --bind 0.0.0.0:$PORT"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput --clear"
+    startCommand: "bash start.sh"
 
     envVars:
       - key: PYTHON_VERSION
