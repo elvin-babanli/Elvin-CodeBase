@@ -143,13 +143,15 @@ CACHES = {
 }
 
 # ==================== EMAIL ====================
-# Gmail: EMAIL_HOST=smtp.gmail.com, EMAIL_HOST_USER=elvinbabanli0@gmail.com, GMAIL_APP_PASSWORD=...
+# B Labs: updates@elvin-babanli.com (Google Workspace)
+# Production: set EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD via env
+# Primary: EMAIL_HOST_PASSWORD. Legacy fallback: GMAIL_APP_PASSWORD
 # Local: leave unset → console backend (prints to terminal)
 _email_backend = config("EMAIL_BACKEND", default="")
 _email_host = config("EMAIL_HOST", default="")
 _email_user = config("EMAIL_HOST_USER", default="")
 _email_pwd = config("EMAIL_HOST_PASSWORD", default="") or config("GMAIL_APP_PASSWORD", default="")
-_use_smtp = _email_host and _email_user and _email_pwd
+_use_smtp = bool(_email_host and _email_user and _email_pwd)
 
 if _email_backend:
     EMAIL_BACKEND = _email_backend
@@ -161,9 +163,13 @@ else:
 EMAIL_HOST = _email_host or ""
 EMAIL_PORT = int(config("EMAIL_PORT", default="587"))
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default="True") == "True"
-EMAIL_HOST_USER = _email_user
+EMAIL_HOST_USER = _email_user or ""
 EMAIL_HOST_PASSWORD = _email_pwd
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="elvinbabanli0@gmail.com")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="B Labs <updates@elvin-babanli.com>",
+)
+SERVER_EMAIL = config("SERVER_EMAIL", default="updates@elvin-babanli.com")
 
 # ==================== LOGGING ====================
 LOGGING = {

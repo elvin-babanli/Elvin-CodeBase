@@ -1,37 +1,55 @@
-# Email Setup — Verification Code (Forgot Password)
+# Email Setup — B Labs
 
-## Gmail SMTP (Production)
+All system emails (welcome, OTP, forgot password, updates) are sent from:
 
-### 1. Gmail App Password
+- **Sender:** B Labs &lt;updates@elvin-babanli.com&gt;
+- **Domain:** elvin-babanli.com
+- **Workspace:** Google Workspace
 
-1. Google Account → Security → 2-Step Verification (açık olmalı)
-2. Security → App passwords → Create
-3. Uygulama: Mail, Cihaz: Other → "Django" yazın
-4. Oluşan 16 haneli şifreyi kopyalayın
+## 1. Google Workspace App Password
 
-### 2. Environment Variables
+1. Sign in to [Google Admin](https://admin.google.com) (or the workspace account)
+2. Security → 2-Step Verification (must be enabled)
+3. App passwords → Generate
+4. App: Mail, Device: Other → name it "Django B Labs"
+5. Copy the 16-character password
 
-Render Dashboard veya `.env` dosyasında:
+## 2. Environment Variables
 
-| Key | Value |
-|-----|-------|
-| `EMAIL_HOST` | `smtp.gmail.com` |
-| `EMAIL_HOST_USER` | `elvinbabanli0@gmail.com` |
-| `EMAIL_HOST_PASSWORD` | 16 haneli App Password |
-| veya `GMAIL_APP_PASSWORD` | 16 haneli App Password |
-| `DEFAULT_FROM_EMAIL` | `elvinbabanli0@gmail.com` |
-| `EMAIL_PORT` | `587` (opsiyonel, varsayılan) |
-| `EMAIL_USE_TLS` | `True` (opsiyonel) |
+Set these in Render Dashboard or `.env`:
 
-### 3. Örnek (.env)
+| Key | Value | Required |
+|-----|-------|----------|
+| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | No (auto when SMTP configured) |
+| `EMAIL_HOST` | `smtp.gmail.com` | Yes (for SMTP) |
+| `EMAIL_PORT` | `587` | No (default) |
+| `EMAIL_USE_TLS` | `True` | No (default) |
+| `EMAIL_HOST_USER` | `updates@elvin-babanli.com` | Yes |
+| `EMAIL_HOST_PASSWORD` | App password (16 chars) | Yes |
+| `DEFAULT_FROM_EMAIL` | `B Labs <updates@elvin-babanli.com>` | No (has default) |
+| `SERVER_EMAIL` | `updates@elvin-babanli.com` | No (has default) |
+
+Legacy: `GMAIL_APP_PASSWORD` can be used as fallback for `EMAIL_HOST_PASSWORD` if set.
+
+## 3. Example `.env` (Production)
 
 ```
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.gmail.com
-EMAIL_HOST_USER=elvinbabanli0@gmail.com
-GMAIL_APP_PASSWORD=abcd efgh ijkl mnop
-DEFAULT_FROM_EMAIL=elvinbabanli0@gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=updates@elvin-babanli.com
+EMAIL_HOST_PASSWORD=xxxx xxxx xxxx xxxx
+DEFAULT_FROM_EMAIL=B Labs <updates@elvin-babanli.com>
+SERVER_EMAIL=updates@elvin-babanli.com
 ```
 
-### 4. Local Development
+## 4. Local Development
 
-Env değişkenleri ayarlanmazsa e-posta **konsola** yazılır (gerçek gönderim yok). Doğrulama kodunu terminal çıktısından alabilirsiniz.
+If env vars are not set, emails are printed to the console (no real delivery). Check terminal output for verification codes and welcome messages.
+
+## 5. Security
+
+- Never commit passwords or app passwords
+- Use only environment variables
+- `EMAIL_HOST_USER` and the address in `DEFAULT_FROM_EMAIL` must match for SMTP auth

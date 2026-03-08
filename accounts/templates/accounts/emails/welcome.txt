@@ -1,0 +1,15 @@
+Welcome to {{ brand_name }}
+
+Your account has been successfully created.
+
+Hi {{ first_name }},
+
+Thank you for joining {{ brand_name }}. Your account is now active and ready to use.
+
+Security tip: Keep your password safe and never share it. We will never ask for your password via email.
+
+You can sign in anytime to access your account. If you need help, feel free to reach out.
+
+Best regards,
+{{ brand_name }} Team
+elvin-babanli.com

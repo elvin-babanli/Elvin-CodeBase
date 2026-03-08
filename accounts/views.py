@@ -108,8 +108,13 @@ def forgot_password_view(request):
             messages.error(request, "No account found with this email address.")
             return render(request, "accounts/forgot_password.html", _auth_context({"form": form}))
 
-        verification = PasswordResetVerification.generate_code_for_email(email)
-        ok = send_password_reset_code(email, verification.code)
+        try:
+            verification = PasswordResetVerification.generate_code_for_email(email)
+            ok = send_password_reset_code(email, verification.code)
+        except Exception:
+            messages.error(request, "We could not send the verification code. Please try again.")
+            return render(request, "accounts/forgot_password.html", _auth_context({"form": form}))
+
         if not ok:
             messages.error(request, "We could not send the verification code. Please try again.")
             return render(request, "accounts/forgot_password.html", _auth_context({"form": form}))
@@ -139,8 +144,11 @@ def verify_code_view(request):
             if verification and not verification.is_expired:
                 messages.info(request, "Please wait for the current code to expire before requesting a new one.")
             else:
-                new_v = PasswordResetVerification.generate_code_for_email(email)
-                ok = send_password_reset_code(email, new_v.code)
+                try:
+                    new_v = PasswordResetVerification.generate_code_for_email(email)
+                    ok = send_password_reset_code(email, new_v.code)
+                except Exception:
+                    ok = False
                 if ok:
                     messages.success(request, "A new verification code has been sent.")
                 else:

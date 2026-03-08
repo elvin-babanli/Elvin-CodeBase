@@ -1,51 +1,51 @@
 # Render Deploy — Portfolio Site
 
-## Önerilen Ayarlar
+## Build Command
 
-### Build Command
 ```
 pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput
 ```
-veya `./build.sh` (build.sh varsa)
 
-### Start Command
+## Start Command
+
 ```
 gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
 ```
-**Önemli:** Sadece gunicorn. `start.sh` veya migrate kullanma.
-
-### Neden?
-- **migrate** Build sırasında çalışır; tablolar oluşturulur
-- **Start** sadece gunicorn başlatır; site hemen açılır
-- `start.sh` ile migrate, hata alırsa gunicorn hiç başlamaz → beyaz ekran
-
----
 
 ## Environment Variables
 
 | Key | Value |
 |-----|-------|
-| `SECRET_KEY` | Rastgele 50 karakter |
+| `SECRET_KEY` | Random 50+ characters |
 | `DEBUG` | `False` |
 | `ALLOWED_HOSTS` | `elvin-babanli.com,www.elvin-babanli.com,.onrender.com` |
 | `CSRF_TRUSTED_ORIGINS` | `https://elvin-babanli.com,https://www.elvin-babanli.com` |
 
-### PostgreSQL (kalıcı veri için)
-- New → PostgreSQL
-- Web service’e bağla → `DATABASE_URL` otomatik gelir
+### PostgreSQL
 
----
+- Create PostgreSQL instance
+- Connect to web service → `DATABASE_URL` is set automatically
 
-### Email (Forgot Password)
-Gmail: `EMAIL_HOST=smtp.gmail.com`, `EMAIL_HOST_USER=elvinbabanli0@gmail.com`, `GMAIL_APP_PASSWORD=...` — Detay: `EMAIL_SETUP.md`
+### Email (B Labs)
 
----
+| Key | Value | Required |
+|-----|-------|----------|
+| `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | No (auto when SMTP set) |
+| `EMAIL_HOST` | `smtp.gmail.com` | Yes |
+| `EMAIL_PORT` | `587` | No |
+| `EMAIL_USE_TLS` | `True` | No |
+| `EMAIL_HOST_USER` | `updates@elvin-babanli.com` | Yes |
+| `EMAIL_HOST_PASSWORD` | Google Workspace app password | Yes |
+| `DEFAULT_FROM_EMAIL` | `B Labs <updates@elvin-babanli.com>` | No |
+| `SERVER_EMAIL` | `updates@elvin-babanli.com` | No |
 
-## Sorun Giderme
+See `EMAIL_SETUP.md` for details.
 
-| Sorun | Çözüm |
-|-------|--------|
-| Beyaz ekran / site açılmıyor | Start Command’da sadece gunicorn olmalı; migrate Build’de |
-| auth_user yok | Build Command’a `python manage.py migrate --noinput` ekle |
-| robots.txt / favicon 404 | Son commit deploy edildi mi kontrol et |
-| Doğrulama kodu gelmiyor | EMAIL_HOST, EMAIL_HOST_USER, GMAIL_APP_PASSWORD ayarla; `EMAIL_SETUP.md` |
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Blank page / site not loading | Use only gunicorn in Start Command; run migrate in Build |
+| auth_user table missing | Add `python manage.py migrate --noinput` to Build Command |
+| Verification code not received | Set `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`; see `EMAIL_SETUP.md` |
+| 500 on email send | Check logs; ensure app password is valid and 2FA is enabled |

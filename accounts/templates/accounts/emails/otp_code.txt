@@ -1,0 +1,13 @@
+Your Verification Code
+
+We received a request for {{ purpose }}.
+
+Your 6-digit verification code is: {{ code }}
+
+This code is valid for 1 minute only. Do not share it with anyone.
+
+If you did not make this request, you can safely ignore this email.
+
+Best regards,
+{{ brand_name }} Team
+elvin-babanli.com
