@@ -69,7 +69,7 @@
     {% if form.password2.errors %}<div class="auth-err">{{ form.password2.errors.0 }}</div>{% endif %}
   </div>
 
-  <button type="submit" class="auth-btn auth-btn-primary" id="authSubmitBtn" data-loading-text="Creating account...">
+  <button type="submit" class="auth-btn auth-btn-primary" id="authSubmitBtn" data-loading-text="Creating account..." data-track="register_submit">
     <span class="auth-btn-text">Create account</span>
   </button>
 </form>

@@ -36,6 +36,7 @@ urlpatterns = [
     path("favicon.ico", favicon_redirect),
     path("admin/", admin.site.urls),
     path("auth/", include("accounts.urls")),
+    path("admin-dashboard/", include("analytics.urls")),
     path("accounts/", include("allauth.urls")),
     path("", include("main.urls")),
 

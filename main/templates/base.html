@@ -333,19 +333,22 @@
             </li>
 
             <li class="nav-item"><a class="nav-link" href="/4o4-page/">Notes & Tasks</a></li>
+            {% if show_admin_dashboard %}
+            <li class="nav-item">
+              <a class="nav-link fw-600" href="{% url 'analytics:dashboard' %}" style="color:#059669;" data-track="admin_dashboard_click">Admin</a>
+            </li>
+            {% endif %}
             {% if user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Account</a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{% url 'accounts:auth_profile' %}">Profile</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="{% url 'accounts:auth_logout' %}">Log out</a></li>
-              </ul>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:auth_profile' %}">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'accounts:auth_logout' %}">Log out</a>
             </li>
             {% else %}
             <li class="nav-item nav-auth-wrap">
-              <a class="nav-cta-login" href="{% url 'accounts:auth_login' %}?next={{ request.path }}">Log in</a>
-              <a class="nav-cta-register" href="{% url 'accounts:auth_register' %}">Register</a>
+              <a class="nav-cta-login" href="{% url 'accounts:auth_login' %}?next={{ request.path }}" data-track="login_click">Log in</a>
+              <a class="nav-cta-register" href="{% url 'accounts:auth_register' %}" data-track="register_click">Register</a>
             </li>
             {% endif %}
             <li class="nav-item"><a class="nav-link" href="/about/">About Me</a></li>
@@ -405,6 +408,23 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Analytics click tracking -->
+    <script>
+    (function(){
+      function getCookie(n){var m=document.cookie.match('(^|;) ?'+n+'=([^;]*)(;|$)');return m?m[2]:null;}
+      document.addEventListener('click',function(e){
+        var t=e.target.closest('[data-track]');
+        if(!t) return;
+        var et=t.getAttribute('data-track')||'click';
+        var fd=new FormData();
+        fd.append('csrfmiddlewaretoken',getCookie('csrftoken')||'');
+        fd.append('event_type',et);
+        fd.append('page_path',location.pathname);
+        fetch('/admin-dashboard/api/click/',{method:'POST',body:fd,headers:{'X-CSRFToken':getCookie('csrftoken')||''},keepalive:true});
+      },true);
+    })();
+    </script>
 
     <script>
     (function(){

@@ -1,0 +1,39 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card online"><div class="label">Online now</div><div class="value">{{ online_count }}</div><div class="stat-desc">Active in last 5 min</div></div>
+  <div class="stat-card"><div class="label">Total visitors</div><div class="value">{{ total_visitors }}</div><div class="stat-desc">All unique visitors</div></div>
+  <div class="stat-card"><div class="label">Registered</div><div class="value">{{ registered_count }}</div><div class="stat-desc">Logged-in users</div></div>
+  <div class="stat-card"><div class="label">Guests</div><div class="value">{{ guest_count }}</div><div class="stat-desc">Anonymous visitors</div></div>
+  <div class="stat-card views"><div class="label">Page views</div><div class="value">{{ total_page_views }}</div><div class="stat-desc">Total page loads</div></div>
+  <div class="stat-card"><div class="label">Today visitors</div><div class="value">{{ today_visitors }}</div><div class="stat-desc">Visitors today</div></div>
+  <div class="stat-card"><div class="label">Today views</div><div class="value">{{ today_views }}</div><div class="stat-desc">Page views today</div></div>
+  <div class="stat-card"><div class="label">Week visitors</div><div class="value">{{ week_visitors }}</div><div class="stat-desc">Last 7 days</div></div>
+</div>
+<h2 class="overview-heading"><span class="overview-score">{{ top_pages_views|default:0 }}</span> Top pages</h2>
+<p class="overview-desc">Most viewed paths · total views in top 10</p>
+<table class="dash-table">
+  <thead><tr><th>Path</th><th>Views</th></tr></thead>
+  <tbody>
+    {% for p in top_pages %}<tr><td>{{ p.path|truncatechars:60 }}</td><td>{{ p.c }}</td></tr>{% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+  </tbody>
+</table>
+<h2 class="overview-heading" style="margin-top:24px;"><span class="overview-score">{{ top_countries_sessions|default:0 }}</span> Top countries</h2>
+<p class="overview-desc">Sessions by country · total in top 8</p>
+<table class="dash-table">
+  <thead><tr><th>Country</th><th>Sessions</th></tr></thead>
+  <tbody>
+    {% for c in top_countries %}<tr><td>{{ c.country }}</td><td>{{ c.c }}</td></tr>{% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block extra_head %}
+<style>
+.stat-desc { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+.overview-heading { font-size: 1.1rem; margin: 0 0 4px; color: var(--muted); }
+.overview-heading .overview-score { font-weight: 800; color: var(--text); margin-right: 8px; }
+.overview-desc { font-size: 0.85rem; color: var(--muted); margin: 0 0 16px; }
+</style>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}User Management{% endblock %}
+{% block page_title %}User management{% endblock %}
+{% block content %}
+<table class="dash-table">
+  <thead><tr><th>Email</th><th>Name</th><th>Joined</th><th>Action</th></tr></thead>
+  <tbody>{% for u in users %}<tr><td>{{ u.email }}</td><td>{{ u.get_full_name|default:"—" }}</td><td>{{ u.date_joined|date:"M d, Y" }}</td><td>{% if u.email|lower != "elvinbabanli0@gmail.com" %}<button class="btn-delete" data-id="{{ u.id }}" data-email="{{ u.email }}">Delete</button>{% else %}<span class="badge badge-success">Admin</span>{% endif %}</td></tr>{% empty %}<tr><td colspan="4">No users</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.btn-delete').forEach(function(btn){
+  btn.onclick=function(){ if(!confirm('Delete '+this.dataset.email+'?')) return;
+    var fd=new FormData(); fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
+    fetch('/admin-dashboard/api/user/delete/'+this.dataset.id+'/',{method:'POST',body:fd,headers:{'X-CSRFToken':'{{ csrf_token }}'}}).then(x=>x.json()).then(d=>{
+      if(d.ok){ showToast(d.message,'success'); this.closest('tr').remove(); }
+      else{ showToast(d.message||'Error','error'); }
+    });
+  };
+});
+</script>
+{% endblock %}

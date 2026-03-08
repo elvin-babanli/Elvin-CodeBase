@@ -1,0 +1,10 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}Guests{% endblock %}
+{% block page_title %}Guests{% endblock %}
+{% block content %}
+<div class="stat-card" style="margin-bottom:24px;"><div class="label">Total</div><div class="value">{{ guests|length }}</div></div>
+<table class="dash-table">
+  <thead><tr><th>Visitor ID</th><th>Sessions</th><th>Page views</th><th>Last seen</th></tr></thead>
+  <tbody>{% for g in guests %}<tr><td><span class="badge badge-muted">{{ g.anonymous_id|slice:":12" }}</span></td><td>{{ g.total_sessions }}</td><td>{{ g.total_page_views }}</td><td>{{ g.last_seen|timesince }} ago</td></tr>{% empty %}<tr><td colspan="4">No guests</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

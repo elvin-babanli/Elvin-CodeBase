@@ -1,0 +1,11 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}Devices{% endblock %}
+{% block page_title %}Devices & browsers{% endblock %}
+{% block content %}
+<h2 style="font-size:1.1rem;margin:0 0 16px;color:var(--muted);">Device types</h2>
+<table class="dash-table" style="margin-bottom:24px;"><thead><tr><th>Device</th><th>Count</th></tr></thead><tbody>{% for d in devices %}<tr><td>{{ d.device_type }}</td><td>{{ d.c }}</td></tr>{% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}</tbody></table>
+<h2 style="font-size:1.1rem;margin:0 0 16px;color:var(--muted);">Browsers</h2>
+<table class="dash-table" style="margin-bottom:24px;"><thead><tr><th>Browser</th><th>Count</th></tr></thead><tbody>{% for b in browsers %}<tr><td>{{ b.browser }}</td><td>{{ b.c }}</td></tr>{% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}</tbody></table>
+<h2 style="font-size:1.1rem;margin:0 0 16px;color:var(--muted);">Operating systems</h2>
+<table class="dash-table"><thead><tr><th>OS</th><th>Count</th></tr></thead><tbody>{% for o in os_list %}<tr><td>{{ o.os }}</td><td>{{ o.c }}</td></tr>{% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.linkedin_oauth2",
+    "analytics",
 ]
 
 SITE_ID = 1
@@ -87,7 +88,14 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "analytics.services.tracker.AnalyticsMiddleware",
+    "analytics.middleware.AdminDashboardMiddleware",
 ]
+
+# Admin dashboard: only these emails can see and access the analytics panel
+ADMIN_DASHBOARD_EMAILS = ["elvinbabanli0@gmail.com"]
+ADMIN_REPORT_EMAIL = "elvinbabanli0@gmail.com"
+OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 
 ROOT_URLCONF = "core.urls"
 
@@ -102,6 +110,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "main.context_processors.chat_settings",
+                "main.context_processors.admin_dashboard",
             ],
         },
     },

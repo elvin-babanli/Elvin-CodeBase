@@ -51,14 +51,14 @@
     {% if form.password.errors %}<div class="auth-err">{{ form.password.errors.0 }}</div>{% endif %}
   </div>
 
-  <a href="{% url 'accounts:auth_forgot_password' %}" class="auth-forgot">Forgot your password?</a>
+  <a href="{% url 'accounts:auth_forgot_password' %}" class="auth-forgot" data-track="forgot_password_click">Forgot your password?</a>
 
-  <button type="submit" class="auth-btn auth-btn-primary" id="authSubmitBtn" data-loading-text="Signing in...">
+  <button type="submit" class="auth-btn auth-btn-primary" id="authSubmitBtn" data-loading-text="Signing in..." data-track="login_submit">
     <span class="auth-btn-text">Sign in</span>
   </button>
 </form>
 
 <p class="auth-link-wrap">
-  Don't have an account? <a href="{% url 'accounts:auth_register' %}">Create one</a>
+  Don't have an account? <a href="{% url 'accounts:auth_register' %}" data-track="register_click">Create one</a>
 </p>
 {% endblock %}

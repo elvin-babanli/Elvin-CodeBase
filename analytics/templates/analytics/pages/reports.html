@@ -1,0 +1,9 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+<table class="dash-table">
+  <thead><tr><th>Type</th><th>Sent to</th><th>Date range</th><th>Time</th><th>Status</th></tr></thead>
+  <tbody>{% for r in report_logs %}<tr><td>{{ r.report_type }}</td><td>{{ r.sent_to }}</td><td>{{ r.date_range }}</td><td>{{ r.sent_at|date:"M d, H:i" }}</td><td>{% if r.success %}✓{% else %}✗{% endif %}</td></tr>{% empty %}<tr><td colspan="5">No reports sent yet</td></tr>{% endfor %}</tbody>
+</table>
+{% endblock %}

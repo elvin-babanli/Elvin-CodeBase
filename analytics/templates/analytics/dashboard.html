@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard — Analytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .dash-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .dash-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .dash-header a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .dash-header a:hover { color: #60a5fa; }
+    .dash-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .dash-tab {
+      padding: 12px 16px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .dash-tab:hover { color: var(--text); }
+    .dash-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .dash-body { padding: 24px; max-width: 1400px; margin: 0 auto; }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .stat-card .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .stat-card .value { font-size: 1.75rem; font-weight: 800; }
+    .stat-card.online .value { color: var(--success); }
+    .stat-card.views .value { color: var(--accent); }
+    .dash-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .dash-table th, .dash-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+    .dash-table th { background: rgba(0,0,0,.2); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .dash-table tr:last-child td { border-bottom: none; }
+    .dash-table tr:hover td { background: rgba(255,255,255,.02); }
+    .dash-chart-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      height: 280px;
+    }
+    .dash-section { margin-bottom: 32px; }
+    .dash-section h2 { font-size: 1.1rem; margin: 0 0 16px; color: var(--muted); font-weight: 600; }
+    .badge-guest { background: var(--muted); color: var(--bg); }
+    .badge-user { background: var(--success); color: #fff; }
+    @media (max-width: 768px) {
+      .dash-body { padding: 16px; }
+      .dash-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="dash-header">
+    <h1>📊 Admin Dashboard</h1>
+    <a href="/">← Back to site</a>
+  </header>
+  <nav class="dash-tabs">
+    <a href="?tab=overview" class="dash-tab {% if tab == 'overview' %}active{% endif %}">Overview</a>
+    <a href="?tab=live" class="dash-tab {% if tab == 'live' %}active{% endif %}">Live</a>
+    <a href="?tab=users" class="dash-tab {% if tab == 'users' %}active{% endif %}">Registered</a>
+    <a href="?tab=guests" class="dash-tab {% if tab == 'guests' %}active{% endif %}">Guests</a>
+    <a href="?tab=traffic" class="dash-tab {% if tab == 'traffic' %}active{% endif %}">Traffic</a>
+    <a href="?tab=events" class="dash-tab {% if tab == 'events' %}active{% endif %}">Events</a>
+  </nav>
+  <main class="dash-body">
+    <div class="dash-grid">
+      <div class="stat-card online">
+        <div class="label">Online now</div>
+        <div class="value">{{ stats.online_visitors }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total visitors</div>
+        <div class="value">{{ stats.total_visitors }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Registered</div>
+        <div class="value">{{ stats.registered_visitors }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Guests</div>
+        <div class="value">{{ stats.guest_visitors }}</div>
+      </div>
+      <div class="stat-card views">
+        <div class="label">Page views</div>
+        <div class="value">{{ stats.total_page_views }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Today views</div>
+        <div class="value">{{ stats.today_page_views }}</div>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <h2>Traffic (last 7 days)</h2>
+      <div class="dash-chart-wrap">
+        <canvas id="trafficChart"></canvas>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <h2>Top pages</h2>
+      <table class="dash-table">
+        <thead>
+          <tr><th>Path</th><th>Views</th></tr>
+        </thead>
+        <tbody>
+          {% for p in top_pages %}
+          <tr><td>{{ p.path|truncatechars:60 }}</td><td>{{ p.count }}</td></tr>
+          {% empty %}
+          <tr><td colspan="2">No data yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dash-section">
+      <h2>Live visitors</h2>
+      <table class="dash-table">
+        <thead>
+          <tr><th>Visitor</th><th>Page</th><th>Country</th><th>Device</th></tr>
+        </thead>
+        <tbody>
+          {% for s in live_sessions %}
+          <tr>
+            <td><span class="badge badge-user">{{ s.visitor.anonymous_id|slice:":12" }}</span></td>
+            <td>{{ s.landing_page|default:"/"|truncatechars:40 }}</td>
+            <td>{{ s.country|default:"—" }}</td>
+            <td>{{ s.device_type|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No one online right now</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dash-section">
+      <h2>Registered users</h2>
+      <table class="dash-table">
+        <thead>
+          <tr><th>Email</th><th>Name</th><th>Joined</th></tr>
+        </thead>
+        <tbody>
+          {% for u in registered_users %}
+          <tr>
+            <td>{{ u.email }}</td>
+            <td>{{ u.get_full_name|default:"—" }}</td>
+            <td>{{ u.date_joined|date:"M d, Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No registered users</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    (function(){
+      var ctx = document.getElementById('trafficChart');
+      if (ctx) {
+        fetch('/analytics/api/traffic/?days=7')
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if (data.ok && data.data && data.data.length) {
+              new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: data.data.map(function(d){ return d.date; }),
+                  datasets: [{
+                    label: 'Page views',
+                    data: data.data.map(function(d){ return d.count; }),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.1)',
+                    fill: true,
+                    tension: 0.3
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                  }
+                }
+              });
+            }
+          });
+      }
+    })();
+  </script>
+</body>
+</html>

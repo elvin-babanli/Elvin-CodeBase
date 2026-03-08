@@ -9,6 +9,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_GET
+from django.conf import settings
 from django.utils import timezone
 
 from .forms import (
@@ -44,6 +46,18 @@ def _auth_context(base=None):
     return ctx
 
 
+@require_GET
+def dev_auto_login_view(request):
+    """Dev only: auto-login as elvinbabanli0@gmail.com. Only when DEBUG=True."""
+    if not getattr(settings, "DEBUG", False):
+        return redirect("accounts:auth_login")
+    user = User.objects.filter(email__iexact="elvinbabanli0@gmail.com").first()
+    if not user:
+        return redirect("accounts:auth_login")
+    login(request, user)
+    return redirect(reverse("home"))
+
+
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.user.is_authenticated:
@@ -51,13 +65,21 @@ def login_view(request):
 
     form = LoginForm(request, data=request.POST or None)
 
-    if request.method == "POST" and form.is_valid():
-        user = form.get_user()
-        login(request, user)
-        display_name = user.get_full_name() or user.email or user.username
-        messages.success(request, f"Welcome back, {display_name}!")
-        next_url = request.GET.get("next") or reverse("home")
-        return redirect(next_url)
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            display_name = user.get_full_name() or user.email or user.username
+            messages.success(request, f"Welcome back, {display_name}!")
+            next_url = request.GET.get("next") or reverse("home")
+            return redirect(next_url)
+        else:
+            try:
+                from analytics.services.tracker import track_auth_event
+                email_attempted = (request.POST.get("username") or "")[:254]
+                track_auth_event(request, "login_failed", email_attempted=email_attempted, success=False)
+            except Exception:
+                pass
 
     # Ensure register success message shows when redirected with ?registered=1
     if request.method == "GET" and request.GET.get("registered") == "1":
@@ -81,7 +103,12 @@ def register_view(request):
     form = RegisterForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
-        form.save()
+        user = form.save()
+        try:
+            from analytics.services.tracker import track_auth_event
+            track_auth_event(request, "register_success", user=user, success=True)
+        except Exception:
+            pass
         return redirect(reverse("accounts:auth_login") + "?registered=1")
 
     return render(

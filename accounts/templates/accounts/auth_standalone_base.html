@@ -407,6 +407,13 @@
     });
   })();
   </script>
+  <script>
+  (function(){function g(n){var m=document.cookie.match('(^|;) ?'+n+'=([^;]*)(;|$)');return m?m[2]:null;}
+  document.addEventListener('click',function(e){var t=e.target.closest('[data-track]');if(!t)return;
+  var fd=new FormData();fd.append('csrfmiddlewaretoken',g('csrftoken')||'');fd.append('event_type',t.getAttribute('data-track')||'click');fd.append('page_path',location.pathname);
+  fetch('/admin-dashboard/api/click/',{method:'POST',body:fd,headers:{'X-CSRFToken':g('csrftoken')||''},keepalive:true});},true);
+  })();
+  </script>
   {% block auth_scripts %}{% endblock %}
 </body>
 </html>

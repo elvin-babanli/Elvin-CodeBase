@@ -1,0 +1,230 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}AI Analysis{% endblock %}
+{% block page_title %}AI Analysis{% endblock %}
+{% block extra_head %}
+<style>
+.ai-section { margin-bottom: 32px; }
+.ai-section h2 { font-size: 1rem; font-weight: 700; color: var(--muted); margin: 0 0 16px; letter-spacing: 0.03em; }
+.ai-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 16px 20px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  margin-bottom: 10px; transition: all 0.2s;
+}
+.ai-row:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+.ai-row.expanded { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+.ai-row-main { flex: 1; min-width: 0; }
+.ai-row-id { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+.ai-row-meta { font-size: 0.8rem; color: var(--muted); }
+.ai-row-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.ai-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; }
+.ai-badge-low { background: #d1fae5; color: #059669; }
+.ai-badge-med { background: #fef3c7; color: #b45309; }
+.ai-badge-high { background: #fee2e2; color: #dc2626; }
+.ai-badge-none { background: #f1f5f9; color: var(--muted); }
+.btn-analyze-sm {
+  padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8rem;
+  border: none; cursor: pointer; transition: all 0.2s;
+  background: linear-gradient(135deg,#2563eb,#3b82f6); color: #fff;
+}
+.btn-analyze-sm:hover { background: linear-gradient(135deg,#1d4ed8,#2563eb); color: #fff; box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+.btn-analyze-sm.loading { opacity: 0.7; pointer-events: none; }
+.ai-footprint-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.ai-footprint-card {
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; animation: cardSlide 0.35s ease;
+}
+@keyframes cardSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.ai-footprint-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
+.ai-footprint-card .kv { font-size: 0.85rem; margin-bottom: 6px; }
+.ai-footprint-card .kv span:first-child { color: var(--muted); }
+.ai-loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,.92); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ai-loading-stages { display: flex; flex-direction: column; gap: 20px; align-items: center; max-width: 360px; }
+.ai-loading-stage { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.08); width: 100%; opacity: 0.5; transition: opacity 0.3s; }
+.ai-loading-stage.active { opacity: 1; }
+.ai-loading-stage.done { opacity: 1; }
+.ai-loading-dots { display: flex; gap: 6px; }
+.ai-loading-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: dotPulse 1.2s ease-in-out infinite; }
+.ai-loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ai-loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+.ai-result-area { margin-top: 32px; }
+.ai-result-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 24px; margin-bottom: 16px;
+  animation: resultReveal 0.5s cubic-bezier(0.34,1.56,0.64,1) backwards;
+}
+.ai-result-card:nth-child(1){ animation-delay: 0.05s; }
+.ai-result-card:nth-child(2){ animation-delay: 0.1s; }
+.ai-result-card:nth-child(3){ animation-delay: 0.15s; }
+.ai-result-card:nth-child(4){ animation-delay: 0.2s; }
+.ai-result-card:nth-child(5){ animation-delay: 0.25s; }
+.ai-result-card:nth-child(6){ animation-delay: 0.3s; }
+.ai-result-card:nth-child(7){ animation-delay: 0.35s; }
+.ai-result-card:nth-child(8){ animation-delay: 0.4s; }
+.ai-risk-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.ai-risk-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+@keyframes resultReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.ai-result-card h3 { font-size: 0.85rem; font-weight: 700; color: var(--muted); margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.ai-risk-ring {
+  width: 80px; height: 80px; border-radius: 50%; border: 6px solid #e2e8f0;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem;
+}
+.ai-risk-ring.low { border-color: #059669; color: #059669; }
+.ai-risk-ring.med { border-color: #d97706; color: #d97706; }
+.ai-risk-ring.high { border-color: #dc2626; color: #dc2626; }
+.ai-past { font-size: 0.8rem; color: var(--muted); margin-top: 16px; }
+.ai-past-item { padding: 8px 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 6px; cursor: pointer; }
+.ai-past-item:hover { background: #f1f5f9; }
+@media (max-width: 768px) {
+  .ai-row { flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 12px; }
+  .ai-row-main { min-width: 0; }
+  .ai-row-id { font-size: 0.9rem; word-break: break-all; }
+  .ai-row-actions { flex-wrap: wrap; gap: 8px; }
+  .btn-analyze-sm { padding: 10px 16px; font-size: 0.85rem; width: 100%; }
+  .ai-result-card { padding: 18px 16px; }
+  .ai-risk-ring { width: 64px; height: 64px; font-size: 1rem; }
+  .ai-loading-stages { width: 100%; padding: 0 16px; }
+  .ai-loading-stage { font-size: 0.9rem; padding: 12px 16px; }
+}
+@media (max-width: 480px) {
+  .ai-section h2 { font-size: 0.95rem; }
+  .ai-row-id { font-size: 0.85rem; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="ai-section">
+  <h2>Registered users</h2>
+  {% for u in users %}
+  <div class="ai-row" data-type="user" data-id="{{ u.id }}" data-email="{{ u.email }}">
+    <div class="ai-row-main">
+      <div class="ai-row-id">{{ u.email }}</div>
+      <div class="ai-row-meta">{% with v=u.analytics_visitors.first %}Last active: {% if v %}{{ v.last_seen|timesince }} ago{% else %}—{% endif %}{% endwith %}</div>
+    </div>
+    <div class="ai-row-actions">
+      <span class="ai-badge ai-badge-none risk-badge">—</span>
+      <button type="button" class="btn-analyze-sm">Analyze</button>
+    </div>
+  </div>
+  {% empty %}
+  <div class="ai-row"><div class="ai-row-main"><div class="ai-row-meta">No users</div></div></div>
+  {% endfor %}
+</div>
+
+<div class="ai-section">
+  <h2>Guests / unregistered visitors</h2>
+  {% for g in guests %}
+  <div class="ai-row" data-type="visitor" data-id="{{ g.anonymous_id }}">
+    <div class="ai-row-main">
+      <div class="ai-row-id">{{ g.anonymous_id|slice:":16" }}…</div>
+      <div class="ai-row-meta">{{ g.total_sessions }} sessions, {{ g.total_page_views }} views · {{ g.last_seen|timesince }} ago</div>
+    </div>
+    <div class="ai-row-actions">
+      <span class="ai-badge ai-badge-none risk-badge">—</span>
+      <button type="button" class="btn-analyze-sm">Analyze</button>
+    </div>
+  </div>
+  {% empty %}
+  <div class="ai-row"><div class="ai-row-main"><div class="ai-row-meta">No guests</div></div></div>
+  {% endfor %}
+</div>
+
+<div id="aiResultArea" class="ai-result-area" style="display:none;"></div>
+<div id="aiLoadingOverlay" class="ai-loading-overlay" style="display:none;">
+  <div class="ai-loading-stages">
+    <div class="ai-loading-stage" id="stage1"><div class="ai-loading-dots"><span></span><span></span><span></span></div>Collecting footprint data...</div>
+    <div class="ai-loading-stage" id="stage2"><div class="ai-loading-dots"><span></span><span></span><span></span></div>Analyzing activity patterns...</div>
+    <div class="ai-loading-stage" id="stage3"><div class="ai-loading-dots"><span></span><span></span><span></span></div>Generating AI insights...</div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function(){
+  var base = '/admin-dashboard';
+  function getCookie(n){var m=document.cookie.match('(^|;) ?'+n+'=([^;]*)(;|$)');return m?m[2]:null;}
+  function csrf(){ return getCookie('csrftoken')||''; }
+
+  function esc(s){ return (s==null||s===undefined) ? '' : String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function renderResult(r){
+    var score = r.risk_score_0_to_100!=null ? Number(r.risk_score_0_to_100) : null;
+    var riskClass = 'med';
+    if(score!=null){ if(score<30) riskClass='low'; else if(score>60) riskClass='high'; }
+    var riskPct = score!=null ? Math.round(score) : '—';
+    var html = '<div class="ai-result-card"><h3>Overview</h3>';
+    html += '<div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:20px;">';
+    html += '<div class="ai-risk-ring '+riskClass+'">'+riskPct+'</div>';
+    html += '<div style="flex:1;min-width:200px;"><div style="font-weight:600;margin-bottom:4px;">Risk score (0-100)</div>';
+    html += '<div class="ai-risk-bar"><div class="ai-risk-bar-fill '+riskClass+'" style="width:'+(score!=null?score:0)+'%;background:'+(riskClass==='low'?'#059669':riskClass==='med'?'#d97706':'#dc2626')+';"></div></div>';
+    html += '<div style="font-size:0.9rem;color:var(--muted);margin-top:8px;">'+esc(r.risk_reasoning)+'</div></div>';
+    html += '</div>';
+    html += '<div style="margin-bottom:16px;"><strong>Behavior:</strong> '+esc(r.behavior_summary)+'</div>';
+    html += '<div class="ai-result-card"><h3>Risk Assessment</h3><p>'+esc(r.suspicious_activity_assessment)+'</p><p>Bot/spam: '+esc(r.bot_or_spam_probability)+'</p></div>';
+    html += '<div class="ai-result-card"><h3>Session & Activity Patterns</h3><p>'+esc(r.session_pattern_analysis)+'</p><p>'+esc(r.device_pattern_analysis)+'</p><p>'+esc(r.geo_pattern_analysis)+'</p></div>';
+    html += '<div class="ai-result-card"><h3>Auth Pattern</h3><p>'+esc(r.auth_pattern_analysis)+'</p></div>';
+    html += '<div class="ai-result-card"><h3>Admin Recommendation</h3><p>'+esc(r.recommended_admin_action)+'</p></div>';
+    html += '<div class="ai-result-card"><h3>Verdict</h3><p style="font-weight:600;">'+esc(r.concise_final_verdict)+'</p></div>';
+    return html;
+  }
+
+  function riskBadgeClass(score){
+    if(score==null) return 'ai-badge-none';
+    if(score<30) return 'ai-badge-low';
+    if(score<=60) return 'ai-badge-med';
+    return 'ai-badge-high';
+  }
+
+  document.querySelectorAll('.ai-row').forEach(function(row){
+    if(!row.dataset.type) return;
+    var type = row.dataset.type, id = row.dataset.id;
+    var analyzeBtn = row.querySelector('.btn-analyze-sm');
+    var riskBadge = row.querySelector('.risk-badge');
+
+    analyzeBtn.onclick = function(e){ e.stopPropagation();
+      var overlay = document.getElementById('aiLoadingOverlay');
+      var resultArea = document.getElementById('aiResultArea');
+      overlay.style.display = 'flex';
+      document.getElementById('stage1').classList.add('active');
+      document.getElementById('stage2').classList.remove('active');
+      document.getElementById('stage3').classList.remove('active');
+      analyzeBtn.classList.add('loading');
+
+      setTimeout(function(){ document.getElementById('stage2').classList.add('active'); }, 600);
+      setTimeout(function(){ document.getElementById('stage3').classList.add('active'); }, 1200);
+
+      var fd = new FormData();
+      fd.append('csrfmiddlewaretoken', csrf());
+      if(type==='user') fd.append('user_id', id); else fd.append('visitor_id', id);
+
+      fetch(base+'/api/analyze/', { method: 'POST', body: fd, headers: { 'X-CSRFToken': csrf() } })
+        .then(function(x){ return x.json(); })
+        .then(function(d){
+          overlay.style.display = 'none';
+          analyzeBtn.classList.remove('loading');
+          if(d.ok){
+            var res = d.result;
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = renderResult(res);
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+            var sc = res.risk_score_0_to_100;
+            riskBadge.textContent = sc!=null ? Math.round(sc) : '—';
+            riskBadge.className = 'ai-badge '+riskBadgeClass(sc);
+          } else {
+            if(typeof showToast==='function') showToast(d.error||'Error', 'error');
+          }
+        })
+        .catch(function(err){
+          overlay.style.display = 'none';
+          analyzeBtn.classList.remove('loading');
+          if(typeof showToast==='function') showToast('Analysis failed', 'error');
+        });
+    };
+  });
+})();
+</script>
+{% endblock %}

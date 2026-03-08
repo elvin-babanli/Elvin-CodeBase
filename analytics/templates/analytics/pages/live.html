@@ -1,0 +1,12 @@
+{% extends "analytics/base_dashboard.html" %}
+{% block title %}Live{% endblock %}
+{% block page_title %}Live visitors{% endblock %}
+{% block content %}
+<div class="stat-card online" style="margin-bottom:24px;"><div class="label">Online now</div><div class="value">{{ online_count }}</div></div>
+<table class="dash-table">
+  <thead><tr><th>Visitor</th><th>Page</th><th>Country</th><th>Device</th><th>Browser</th></tr></thead>
+  <tbody>
+    {% for s in sessions %}<tr><td><span class="badge badge-success">{{ s.visitor.anonymous_id|slice:":12" }}</span></td><td>{{ s.landing_page|default:"/"|truncatechars:40 }}</td><td>{{ s.country|default:"—" }}</td><td>{{ s.device_type|default:"—" }}</td><td>{{ s.browser|default:"—" }}</td></tr>{% empty %}<tr><td colspan="5">No one online</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
