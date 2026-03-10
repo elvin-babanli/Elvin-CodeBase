@@ -118,6 +118,28 @@
   .cff-hero-visual.has-img {
     background-image: url('{% static "main/img/cheap-flight-finder/hero-plane.svg" %}'), linear-gradient(135deg, #e8e8f8 0%, #ddddef 100%);
   }
+  /* Mobile: wider cards, less side padding, fix overlaps */
+  @media (max-width: 768px) {
+    .cff-root { padding: 1rem 0.75rem; }
+    .cff-centered { padding: 0 0.5rem; }
+    .cff-form-card { padding: 1.25rem 1rem; margin-bottom: 1.5rem; }
+    .cff-form-card .row { --bs-gutter-x: 0.75rem; --bs-gutter-y: 1rem; }
+    .cff-form-card .col-6,
+    .cff-form-card .col-4,
+    .cff-form-card .col-md-2,
+    .cff-form-card .col-md-3,
+    .cff-form-card .col-md-1 { flex: 0 0 100%; max-width: 100%; }
+    .cff-form-card .col-12 { flex: 0 0 100%; max-width: 100%; }
+    .cff-return-wrap { margin-top: 0; }
+    .cff-trip-toggle { width: 100%; margin-bottom: 0.5rem; position: relative; z-index: 1; }
+    .cff-trip-toggle button { padding: 0.5rem 1rem; font-size: 0.85rem; }
+    .cff-results-section { padding: 0 0.25rem; }
+    .cff-flight-card { margin-left: 0; margin-right: 0; padding: 1rem 1rem; }
+    .cff-place-card-body { padding: 1.25rem 1rem; }
+    .cff-ai-card { margin-left: 0; margin-right: 0; }
+    .cff-carousel-wrap { gap: 0.5rem; }
+    .cff-carousel-btn { width: 38px; height: 38px; font-size: 1rem; }
+  }
   @media (max-width: 768px) {
     .cff-hero { padding: 2rem 1.5rem; }
     .cff-hero-inner { flex-direction: column; gap: 2rem; }
@@ -475,7 +497,7 @@
 
   <div class="cff-centered">
   <div class="cff-form-card">
-    <form id="cffSearchForm" class="row g-3">
+    <form id="cffSearchForm" class="row g-3">{% csrf_token %}
       <div class="col-md-3 col-6">
         <label class="cff-label"><span class="cff-icon"><img src="{% static 'main/icons/cheap-flight-finder/icon-origin.svg' %}" alt="" aria-hidden="true"></span>Origin</label>
         <div class="cff-input-wrap" data-autocomplete="origin">
@@ -596,21 +618,6 @@
     <div class="cff-detail-modal-scroll">
       <div class="cff-detail-modal-body" id="cffDetailModalBody"></div>
       <div id="cffDetailModalAi" class="cff-detail-modal-body cff-city-guide-section" style="border-top:2px solid var(--cff-border);padding-top:1.5rem;background:var(--cff-bg);display:none;"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Email Modal -->
-<div class="cff-modal-backdrop" id="cffEmailModal">
-  <div class="cff-modal" style="position:relative;">
-    <button type="button" class="cff-modal-close" aria-label="Close" id="cffEmailModalClose">&times;</button>
-    <div class="cff-modal-title">Send flight via Email</div>
-    <label class="cff-label" for="cffEmailInput">Email address</label>
-    <input type="email" id="cffEmailInput" class="cff-input" placeholder="you@example.com" autocomplete="email">
-    <div class="cff-ai-error" id="cffEmailError" style="display:none;margin-top:.5rem;"></div>
-    <div class="cff-modal-email-actions">
-      <button type="button" class="cff-btn cff-btn-primary" id="cffEmailSubmit">Send via Email</button>
-      <button type="button" class="cff-btn" id="cffEmailCancel" style="background:var(--cff-bg);color:var(--cff-muted);">Cancel</button>
     </div>
   </div>
 </div>
@@ -1109,11 +1116,18 @@
     doSearch();
   });
 
+  function todayStr() {
+    return new Date().toISOString().split('T')[0];
+  }
   function syncReturnDateMin() {
     var depart = document.getElementById('cffDepartDate');
     var ret = document.getElementById('cffReturnDate');
-    if (depart && ret && depart.value) ret.setAttribute('min', depart.value);
+    if (depart && ret) {
+      depart.setAttribute('min', todayStr());
+      if (depart.value) ret.setAttribute('min', depart.value);
+    }
   }
+  document.getElementById('cffDepartDate').setAttribute('min', todayStr());
   document.getElementById('cffDepartDate').addEventListener('change', syncReturnDateMin);
   document.getElementById('cffDepartDate').addEventListener('input', syncReturnDateMin);
 
@@ -1165,28 +1179,42 @@
   initAutocomplete('cffOrigin', 'cffOriginDropdown');
   initAutocomplete('cffDestination', 'cffDestinationDropdown');
 
-  document.getElementById('cffApp').addEventListener('click', function(e) {
+  document.addEventListener('click', function(e) {
     const emailBtn = e.target.closest('.cff-cta-email');
     if (emailBtn && state.selectedFlight) {
       e.preventDefault();
       if (!USER_AUTH) {
         fetch(API_STORE_CONTEXT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ flight: buildStorePayload(state.selectedFlight) }) })
-          .then(function(r) { return r.json().catch(function() { return { success: false, error: 'Request failed' }; }); })
+          .then(function(r) {
+            if (r.status === 403) return { success: false, error: 'Session expired. Please refresh the page and try again.' };
+            return r.json().catch(function() { return { success: false, error: 'Request failed' }; });
+          })
           .then(function(d) {
             if (d && d.success) window.location.href = LOGIN_URL + '?next=' + encodeURIComponent(NEXT_URL);
-            else toast((d && d.error) || 'Could not save. Try again.', 'error');
-          }).catch(function() { toast('Could not save. Try again.', 'error'); });
+            else { console.error('Store context failed:', d && d.error); toast((d && d.error) || 'Could not save. Try again.', 'error'); }
+          })
+          .catch(function(err) { console.error('Store context error:', err); toast('Could not save. Try again.', 'error'); });
       } else {
-        document.getElementById('cffEmailModal').classList.add('is-visible');
-        document.getElementById('cffEmailInput').value = '';
-        document.getElementById('cffEmailError').style.display = 'none';
+        emailBtn.disabled = true;
+        fetch(API_SEND_EMAIL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ flight: state.selectedFlight }) })
+          .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+          .then(function(res) {
+            emailBtn.disabled = false;
+            if (res.ok && res.data && res.data.success) toast('Flight details sent to your email', 'success');
+            else if (res.data && res.data.error === 'Login required') window.location.href = LOGIN_URL + '?next=' + encodeURIComponent(NEXT_URL);
+            else toast((res.data && res.data.error) || 'Unable to send. Try again.', 'error');
+          })
+          .catch(function() { emailBtn.disabled = false; toast('Unable to send. Try again.', 'error'); });
       }
     }
   });
 
   function buildStorePayload(flight) {
     var dest = flight.outbound_arrival_iata || flight.arrival_iata || flight.destination;
-    return {
+    var fn = '';
+    var segs = flight.segments || (flight.outbound && flight.outbound.segments) || [];
+    if (segs.length) { var s = segs[0]; fn = ((s.carrier_code || '') + ' ' + (s.number || '')).trim(); }
+    var payload = {
       id: flight.id,
       origin: flight.departure_iata || flight.origin,
       destination: dest,
@@ -1208,44 +1236,24 @@
       departure_time: flight.departure_time,
       arrival_date: flight.arrival_date,
       departure_iata: flight.departure_iata,
-      arrival_iata: flight.arrival_iata
+      arrival_iata: flight.arrival_iata,
+      flight_number: fn || flight.flight_number,
+      segments: segs
     };
+    if (flight.outbound) payload.outbound = flight.outbound;
+    if (flight.return_leg) payload.return_leg = flight.return_leg;
+    if (flight.trip_type) payload.trip_type = flight.trip_type;
+    return payload;
   }
 
   function closeDetailModal() {
     document.getElementById('cffDetailModal').classList.remove('is-visible');
     document.getElementById('cffDetailModalInner').classList.remove('has-city-guide');
   }
-  function closeEmailModal() { document.getElementById('cffEmailModal').classList.remove('is-visible'); }
   document.getElementById('cffDetailModalClose').addEventListener('click', closeDetailModal);
   document.getElementById('cffDetailModal').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      if (document.getElementById('cffEmailModal').classList.contains('is-visible')) closeEmailModal();
-      else closeDetailModal();
-    }
-  });
-  document.getElementById('cffEmailModalClose').addEventListener('click', closeEmailModal);
-  document.getElementById('cffEmailCancel').addEventListener('click', closeEmailModal);
-  document.getElementById('cffEmailModal').addEventListener('click', function(e) { if (e.target === this) closeEmailModal(); });
-
-  document.getElementById('cffEmailSubmit').addEventListener('click', function() {
-    const email = document.getElementById('cffEmailInput').value.trim();
-    const errEl = document.getElementById('cffEmailError');
-    if (!email) { errEl.textContent = 'Email is required'; errEl.style.display = 'block'; return; }
-    const re = /^[^@]+@[^@]+\.[^@]+$/;
-    if (!re.test(email)) { errEl.textContent = 'Invalid email address'; errEl.style.display = 'block'; return; }
-    errEl.style.display = 'none';
-    this.disabled = true;
-    fetch(API_SEND_EMAIL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ email: email, flight: state.selectedFlight }) })
-      .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-      .then(function(res) {
-        document.getElementById('cffEmailSubmit').disabled = false;
-        if (res.ok && res.data.success) { closeEmailModal(); toast('Flight details sent', 'success'); }
-        else if (res.data && res.data.error === 'Login required') { closeEmailModal(); window.location.href = LOGIN_URL + '?next=' + encodeURIComponent(NEXT_URL); }
-        else { errEl.textContent = (res.data && res.data.error) || 'Unable to send details right now'; errEl.style.display = 'block'; }
-      })
-      .catch(function() { document.getElementById('cffEmailSubmit').disabled = false; errEl.textContent = 'Unable to send. Try again.'; errEl.style.display = 'block'; });
+    if (e.key === 'Escape') closeDetailModal();
   });
 
   fetch(API_RESTORE_CONTEXT).then(function(r) { return r.json(); }).then(function(d) {
@@ -1256,8 +1264,17 @@
       document.getElementById('cffDetailModalAi').innerHTML = '';
       document.getElementById('cffDetailModal').classList.add('is-visible');
       toast('Flight restored', 'success');
+      if (USER_AUTH) {
+        fetch(API_SEND_EMAIL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') || '', 'X-Requested-With': 'XMLHttpRequest' }, body: JSON.stringify({ flight: d.flight }) })
+          .then(function(r) { return r.json().then(function(res) { return { ok: r.ok, data: res }; }); })
+          .then(function(res) {
+            if (res.ok && res.data && res.data.success) toast('Flight details sent to your email', 'success');
+            else if (res.data && res.data.error) toast(res.data.error, 'error');
+          })
+          .catch(function(err) { console.error('Restore auto-send failed:', err); toast('Could not send flight details. Try again.', 'error'); });
+      }
     }
-  }).catch(function() {});
+  }).catch(function(err) { console.error('Restore context failed:', err); toast('Could not restore flight. Please search again.', 'error'); });
 
   showSection('cffResultsPlaceholder');
 })();
