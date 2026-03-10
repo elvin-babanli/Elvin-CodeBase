@@ -1,0 +1,18 @@
+Flight Details
+{{ brand_name }}
+
+Your selected flight:
+
+Route: {{ flight.route_display|default:"Your route" }}
+Price: {{ flight.price_display|default:"" }}
+Airline: {{ flight.primary_airline|default:"" }}
+Stops: {{ flight.stop_label|default:"" }}
+Duration: {{ flight.total_duration|default:"" }}
+
+Departure: {{ flight.departure_date|default:"" }} {{ flight.departure_time|default:"" }} {{ flight.departure_iata|default:"" }}
+Arrival: {{ flight.arrival_date|default:"" }} {{ flight.arrival_time|default:"" }} {{ flight.arrival_iata|default:"" }}
+
+Prices may change until booking. Verify on your travel provider before purchase.
+
+Best regards,
+{{ brand_name }} Team
