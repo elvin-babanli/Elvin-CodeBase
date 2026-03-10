@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from main import airport_data
 from main.flight_normalizer import apply_badges, normalize_all_offers
@@ -635,10 +636,15 @@ def store_flight_context_api(request):
     flight = body.get("flight")
     if not flight or not isinstance(flight, dict):
         return JsonResponse({"success": False, "error": "Missing flight data"}, status=400)
-    # Safe payload for restore + email display (use outbound arrival for route)
+    # Temporary payload for restore + email (no DB save; session only)
     f = flight
     origin = str(f.get("origin") or f.get("departure_iata", ""))
     dest = str(f.get("destination") or f.get("outbound_arrival_iata") or f.get("arrival_iata", ""))
+    segs = f.get("segments") or (f.get("outbound") or {}).get("segments", [])
+    fn = ""
+    if segs and isinstance(segs, list) and len(segs) > 0:
+        s0 = segs[0] or {}
+        fn = f"{s0.get('carrier_code', '')} {s0.get('number', '')}".strip()
     payload = {
         "flight": {
             "id": str(f.get("id", "")),
@@ -664,6 +670,8 @@ def store_flight_context_api(request):
             "departure_iata": origin,
             "arrival_iata": dest,
             "outbound_arrival_iata": dest,
+            "flight_number": fn or str(f.get("flight_number", "")),
+            "segments": segs[:3] if segs else [],
         },
         "ts": time.time(),
     }
@@ -713,8 +721,11 @@ def send_sms_api(request):
 
 @require_POST
 def send_email_api(request):
-    """Send flight details via email. Requires auth; uses session-stored or provided flight."""
-    from main.flight_services import send_flight_email
+    """Send flight details via email. Uses same infrastructure as registration (accounts.email.service)."""
+    from accounts.email.service import send_flight_details
+    from main.flight_services import _normalize_flight_for_display
+
+    logger.info("[CFF] send_email_api called, auth=%s", request.user.is_authenticated)
 
     if not request.user.is_authenticated:
         return JsonResponse({"success": False, "error": "Login required"}, status=401)
@@ -723,15 +734,33 @@ def send_email_api(request):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
     to_email = (body.get("email") or "").strip()
+    if not to_email and request.user.is_authenticated:
+        to_email = (request.user.email or "").strip()
+        if not to_email:
+            try:
+                from allauth.account.models import EmailAddress
+                primary = EmailAddress.objects.get_primary(request.user)
+                if primary:
+                    to_email = (primary.email or "").strip()
+            except Exception:
+                pass
     flight = body.get("flight")
     if not flight:
         flight = request.session.get(CFF_SESSION_KEY, {}).get("flight")
     if not flight or not isinstance(flight, dict):
         return JsonResponse({"success": False, "error": "No flight selected"}, status=400)
-    result = send_flight_email(to_email, flight)
-    if result.get("success"):
+    if not to_email:
+        return JsonResponse(
+            {"success": False, "error": "Your account has no email. Please add an email in your profile."},
+            status=400,
+        )
+    flight_ctx = {**flight, **_normalize_flight_for_display(flight)}
+    ok = send_flight_details(to_email=to_email, flight_ctx=flight_ctx)
+    if ok:
+        logger.info("Flight email sent to %s", to_email)
         return JsonResponse({"success": True, "message": "Flight details sent"})
-    return JsonResponse({"success": False, "error": result.get("error", "Unable to send")}, status=400)
+    logger.warning("Flight email send returned False (to=%s)", to_email)
+    return JsonResponse({"success": False, "error": "Unable to send email right now"}, status=400)
 
 
 @require_GET
@@ -910,6 +939,7 @@ def place_details_api(request):
 
 
 # ---- Django VIEW (views.py-sız) ----
+@ensure_csrf_cookie
 def cheap_flight_finder_view(request):
     origin = (request.GET.get("origin") or "").upper().strip()
     destination = (request.GET.get("destination") or "").upper().strip()

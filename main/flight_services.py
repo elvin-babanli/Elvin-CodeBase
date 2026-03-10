@@ -69,6 +69,15 @@ def _normalize_flight_for_display(flight: dict[str, Any]) -> dict[str, Any]:
         if isinstance(m, (int, float)):
             h, mi = int(m) // 60, int(m) % 60
             dur = f"{h}h {mi}m" if mi else f"{h}h"
+    # Flight number from first segment
+    flight_number = f.get("flight_number", "")
+    if not flight_number:
+        segs = f.get("segments") or f.get("outbound", {}).get("segments", [])
+        if segs and isinstance(segs, list):
+            first = segs[0] if segs else {}
+            cc = first.get("carrier_code", "")
+            num = first.get("number", "")
+            flight_number = f"{cc} {num}".strip() if cc or num else ""
     return {
         "route_display": route,
         "price_display": price or "",
@@ -81,6 +90,7 @@ def _normalize_flight_for_display(flight: dict[str, Any]) -> dict[str, Any]:
         "total_duration": dur,
         "departure_iata": f.get("departure_iata") or f.get("origin", ""),
         "arrival_iata": f.get("arrival_iata") or f.get("destination", ""),
+        "flight_number": flight_number or f.get("flight_number", ""),
     }
 
 
