@@ -23,7 +23,18 @@ from main.views_extra import robots_txt, favicon_redirect
 
 from main.weather_app import weather_project_view, weather_api
 from main.stock_predictor import stock_predictor_view
-from main.cheap_flight_finder import cheap_flight_finder_view
+from main.cheap_flight_finder import (
+    cheap_flight_finder_view,
+    cheap_flight_search_api,
+    cheap_flight_locations_api,
+    store_flight_context_api,
+    restore_flight_context_api,
+    send_sms_api,
+    send_email_api,
+    city_guide_api,
+    place_photo_api,
+    place_details_api,
+)
 from main.todo import todo_page, todo_task_detail_api, todo_toggle_api
 
 from django.contrib.sitemaps.views import sitemap
@@ -60,6 +71,15 @@ urlpatterns = [
 
     path("stock-predictor/", stock_predictor_view, name="stock-predictor"),
     path("cheap-flight-finder/", cheap_flight_finder_view, name="cheap_flight_finder"),
+    path("cheap-flight-finder/api/search/", cheap_flight_search_api, name="cheap_flight_search_api"),
+    path("cheap-flight-finder/api/locations/", cheap_flight_locations_api, name="cheap_flight_locations_api"),
+    path("cheap-flight-finder/api/store-context/", store_flight_context_api, name="cff_store_context"),
+    path("cheap-flight-finder/api/restore-context/", restore_flight_context_api, name="cff_restore_context"),
+    path("cheap-flight-finder/api/send-sms/", send_sms_api, name="cff_send_sms"),
+    path("cheap-flight-finder/api/send-email/", send_email_api, name="cff_send_email"),
+    path("cheap-flight-finder/api/city-guide/", city_guide_api, name="cff_city_guide"),
+    path("cheap-flight-finder/api/place-photo/", place_photo_api, name="cff_place_photo"),
+    path("cheap-flight-finder/api/place-details/", place_details_api, name="cff_place_details"),
 
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
 
