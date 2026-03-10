@@ -5,27 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to {{ brand_name }}</title>
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:#f1f5f9;color:#0f172a;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 20px;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);color:#f8fafc;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);padding:48px 20px;min-height:100vh;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,.4);overflow:hidden;">
+          <!-- Hero -->
           <tr>
-            <td style="padding:40px 36px;">
-              <h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;color:#0f172a;">Welcome to {{ brand_name }}</h1>
-              <p style="margin:0 0 24px;font-size:0.9rem;color:#64748b;">Your account has been successfully created.</p>
+            <td style="background:linear-gradient(135deg,#2563eb 0%,#3b82f6 50%,#60a5fa 100%);padding:40px 36px 36px;text-align:center;">
+              <p style="margin:0 0 12px;font-size:3rem;line-height:1;">✨</p>
+              <h1 style="margin:0;font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:-0.02em;">Welcome aboard!</h1>
+              <p style="margin:8px 0 0;font-size:0.95rem;color:rgba(255,255,255,.9);">You're officially part of {{ brand_name }}</p>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding:36px 36px 32px;">
+              <p style="margin:0 0 20px;font-size:1.1rem;color:#0f172a;font-weight:600;">Hi {{ first_name }},</p>
+              <p style="margin:0 0 20px;font-size:0.95rem;color:#475569;line-height:1.7;">Thank you for joining {{ brand_name }}. Your account is now active and ready to explore. We're excited to have you!</p>
 
-              <p style="margin:0 0 16px;font-size:0.95rem;color:#475569;line-height:1.6;">Hi {{ first_name }},</p>
-              <p style="margin:0 0 24px;font-size:0.95rem;color:#475569;line-height:1.6;">Thank you for joining {{ brand_name }}. Your account is now active and ready to use.</p>
-
-              <div style="background:#f8fafc;border-radius:12px;padding:20px;margin:0 0 24px;border-left:4px solid #3b82f6;">
-                <p style="margin:0;font-size:0.9rem;color:#475569;line-height:1.6;"><strong>Security tip:</strong> Keep your password safe and never share it. We will never ask for your password via email.</p>
+              <div style="background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);border-radius:16px;padding:20px 24px;margin:24px 0;border-left:4px solid #0ea5e9;">
+                <p style="margin:0;font-size:0.9rem;color:#0c4a6e;line-height:1.6;">🔒 <strong>Security tip:</strong> Keep your password safe and never share it. We will never ask for your password via email.</p>
               </div>
 
-              <p style="margin:0 0 24px;font-size:0.9rem;color:#64748b;line-height:1.6;">You can sign in anytime to access your account. If you need help, feel free to reach out.</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="#" style="display:inline-block;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff!important;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:700;font-size:0.95rem;box-shadow:0 4px 14px rgba(37,99,235,.4);">Get started</a>
+                  </td>
+                </tr>
+              </table>
 
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
-              <p style="margin:0;font-size:0.9rem;color:#64748b;">Best regards,<br><strong>{{ brand_name }} Team</strong><br>elvin-babanli.com</p>
+              <p style="margin:0;font-size:0.9rem;color:#64748b;line-height:1.6;">You can sign in anytime to access your account. Need help? We're here for you.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 36px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+              <p style="margin:0;font-size:0.85rem;color:#94a3b8;">Best regards,<br><strong style="color:#0f172a;">{{ brand_name }} Team</strong></p>
+              <p style="margin:8px 0 0;font-size:0.75rem;color:#94a3b8;">elvin-babanli.com</p>
             </td>
           </tr>
         </table>
